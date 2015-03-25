@@ -1,0 +1,14 @@
+
+add_executable( network-test network-test.c )
+add_executable( common-test common-test.c )
+add_executable( mutex-test mutex-test.c )
+add_executable( semaphore-test semaphore-test.c )
+add_executable( shm-server-test shm-server-test.c )
+add_executable( shm-client-test shm-client-test.c )
+
+target_link_libraries( network-test urpc )
+target_link_libraries( common-test urpc )
+target_link_libraries( mutex-test urpc )
+target_link_libraries( semaphore-test urpc )
+target_link_libraries( shm-server-test urpc )
+target_link_libraries( shm-client-test urpc )
