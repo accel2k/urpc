@@ -27,54 +27,27 @@
 
 volatile int start = 0;
 
-uRpcMutex *mutex_start;
-uRpcMutex *mutex_stop;
+uRpcMutex *mutex;
 
 int counts = 2500000;
 
 
-void* server_thread( void *data )
+void* thread_func( void *data )
 {
 
-  int i;
+  int i = 0;
+  int id = *(int*)data;
 
   while( start == 0 );
 
-  for( i = 0; i < counts; i++ )
+  while( i < counts )
     {
-    urpc_mutex_lock( mutex_start );
-    urpc_mutex_unlock( mutex_stop );
+    urpc_mutex_lock( mutex );
+    i++;
+    urpc_mutex_unlock( mutex );
     }
 
-  printf( "server thread final timed lock\n" );
-
-  urpc_mutex_timedlock( mutex_start, 2.0 );
-
-  printf( "server thread stopped after %d iterations\n", i );
-
-  return NULL;
-
-}
-
-
-void* client_thread( void *data )
-{
-
-  int i;
-
-  while( start == 0 );
-
-  for( i = 0; i < counts; i++ )
-    {
-    urpc_mutex_unlock( mutex_start );
-    urpc_mutex_lock( mutex_stop );
-    }
-
-  printf( "client thread final timed lock\n" );
-
-  urpc_mutex_timedlock( mutex_stop, 2.0 );
-
-  printf( "client thread stopped after %d iterations\n", i );
+  printf( "thread %d stopped after %d iterations\n", id, i );
 
   return NULL;
 
@@ -84,25 +57,21 @@ void* client_thread( void *data )
 int main( int argc, char **argv )
 {
 
-  uRpcThread *server;
-  uRpcThread *client;
+  int id1 = 1;
+  int id2 = 2;
 
-  server = urpc_thread_create( server_thread, NULL );
-  client = urpc_thread_create( client_thread, NULL );
+  uRpcThread *thread1;
+  uRpcThread *thread2;
 
-  mutex_start = urpc_mutex_create();
-  mutex_stop = urpc_mutex_create();
-
-  urpc_mutex_lock( mutex_start );
-  urpc_mutex_lock( mutex_stop );
+  thread1 = urpc_thread_create( thread_func, &id1 );
+  thread2 = urpc_thread_create( thread_func, &id2 );
+  mutex = urpc_mutex_create();
 
   start = 1;
 
-  urpc_thread_destroy( server );
-  urpc_thread_destroy( client );
-
-  urpc_mutex_destroy( mutex_start );
-  urpc_mutex_destroy( mutex_stop );
+  urpc_thread_destroy( thread1 );
+  urpc_thread_destroy( thread2 );
+  urpc_mutex_destroy( mutex );
 
   return 0;
 
