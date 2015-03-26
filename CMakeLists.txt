@@ -10,26 +10,34 @@ endif( NOT CMAKE_BUILD_TYPE )
 
 #
 # Compilers options.
-if( CMAKE_COMPILER_IS_GNUCC )
+if( ${CMAKE_C_COMPILER_ID} EQUAL GNU  )
   set( CMAKE_C_FLAGS_RELEASE "-O2 -Wall" )
   set( CMAKE_C_FLAGS_DEBUG "-g -Wall" )
-else( CMAKE_COMPILER_IS_GNUCC )
+elseif( ${CMAKE_C_COMPILER_ID} EQUAL MSVC )
+  set( CMAKE_C_FLAGS_RELEASE "/O2" )
+  set( CMAKE_C_FLAGS_DEBUG "/DEBUG" )
+else( ${CMAKE_C_COMPILER_ID} EQUAL GNU  )
   message( FATAL_ERROR "Unsupported compiler" )
-endif( CMAKE_COMPILER_IS_GNUCC )
+endif( ${CMAKE_C_COMPILER_ID} EQUAL GNU  )
 
-# Additional tuning for UNIX platform
-if( CMAKE_COMPILER_IS_GNUCC AND UNIX )
+# Additional tuning for GCC on UNIX platform
+if( ${CMAKE_C_COMPILER_ID} EQUAL GNU AND UNIX )
   set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -pthread" )
   set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -pthread" )
   set( PLATFORM "posix" )
-endif( CMAKE_COMPILER_IS_GNUCC AND UNIX )
+endif( ${CMAKE_C_COMPILER_ID} EQUAL GNU AND UNIX )
 
-# Additional tuning for Windows platform
-if( CMAKE_COMPILER_IS_GNUCC AND WIN32 )
+# Additional tuning for GCC on Windows platform
+if( ${CMAKE_C_COMPILER_ID} EQUAL GNU AND WIN32 )
   set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -mthreads" )
   set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -mthreads" )
   set( PLATFORM "win32" )
-endif( CMAKE_COMPILER_IS_GNUCC AND WIN32 )
+endif( ${CMAKE_C_COMPILER_ID} EQUAL GNU AND WIN32 )
+
+# Additional tuning for MSVC on Windows platform
+if( ${CMAKE_C_COMPILER_ID} EQUAL MSVC AND WIN32 )
+  set( PLATFORM "win32" )
+endif( ${CMAKE_C_COMPILER_ID} EQUAL MSVC AND WIN32 )
 
 #
 # Output directories.
