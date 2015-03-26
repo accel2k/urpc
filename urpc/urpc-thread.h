@@ -20,8 +20,34 @@
  *
 */
 
+/*!
+ * \file urpc-thread.h
+ *
+ * \author Andrei Fadeev
+ * \date 23.03.2015
+ * \brief Заголовочный файл библиотеки работы с потоками.
+ *
+ * \defgroup uRpcThread uRpcThread - библиотека работы с потоками.
+ *
+ * Библиотека предназначена для кросплатформенной работы с потоками. В POSIX совместимых
+ * системах используется pthread_mutex, в Windows системах используется Win API Threads.
+ *
+ * Все функции библиотеки используют указатель на структуру uRpcThread.
+ *
+ * Выполнение потока осуществляется в рамках функции типа #urpc_thread_func. В функцию может быть
+ * передан указатель на внешние данные. Поток завершается после выполнения в его функции оператора
+ * return или вызова функции #urpc_thread_exit.
+ *
+ * Создание потока осуществляется функцией #urpc_thread_create. Родительский поток может узнать
+ * о завершении дочернего потока с использованием функции #urpc_thread_join. Функция #urpc_thread_destroy
+ * ожидает завершения потока и после этого освобождает память занятую управляющей структурой.
+ *
+*/
+
 #ifndef _urpc_thread_h
 #define _urpc_thread_h
+
+#include <urpc-exports.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,14 +56,61 @@ extern "C" {
 
 typedef struct uRpcThread uRpcThread;
 
+
+/*! Тип функции запускаемой в качестве потока.
+ *
+ * \param data указатель на данные передаваемые в поток.
+ *
+ * \return Результат работы потока.
+ *
+*/
 typedef void* (*urpc_thread_func)( void *data );
 
+/*! Создание потока.
+ *
+ * Функция создает новый поток и запускает выполнение в нем пользовательской функции.
+ *
+ * \param func функция выполняемая в потоке;
+ * \param data указатель на данные передаваемые в функцию потока.
+ *
+ * \return Указатель на поток или NULL.
+ *
+*/
+URPC_EXPORT uRpcThread *urpc_thread_create( urpc_thread_func func, void *data );
 
-uRpcThread *urpc_thread_create( urpc_thread_func func, void *data );
-void urpc_thread_destroy( uRpcThread *thread );
+/*! Удаление потока.
+ *
+ * функция ожидает завершения потока и освобождает память занятую управляющей структурой.
+ *
+ * \param thread указатель на структуру.
+ *
+ * \return Нет.
+ *
+*/
+URPC_EXPORT void urpc_thread_destroy( uRpcThread *thread );
 
-void *urpc_thread_join( uRpcThread *thread );
-void urpc_thread_exit( void *retval );
+/*! Ожидание завершения потока.
+ *
+ * Функция ожидает завершения потока.
+ *
+ * \param thread указатель на структуру.
+ *
+ * \return Результат работы потока.
+ *
+*/
+URPC_EXPORT void *urpc_thread_join( uRpcThread *thread );
+
+/*! Завершение работы потока.
+ *
+ * Функция может быть вызвана только в дочернем потоке и преведет к
+ * завершению его работы. Результат работы потока вернет функция #urpc_thread_join.
+ *
+ * \param retval результат работы потока.
+ *
+ * \return Нет.
+ *
+*/
+URPC_EXPORT void urpc_thread_exit( void *retval );
 
 
 #ifdef __cplusplus

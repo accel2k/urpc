@@ -20,8 +20,43 @@
  *
 */
 
+/*!
+ * \file urpc-mutex.h
+ *
+ * \author Andrei Fadeev
+ * \date 23.03.2015
+ * \brief Заголовочный файл библиотеки работы с мьютексами.
+ *
+ * \defgroup uRpcMutex uRpcMutex - библиотека работы с мьютексами.
+ *
+ * Библиотека предназначена для кросплатформенной работы с мьютексами. В POSIX совместимых
+ * системах используется pthread_mutex, в Windows системах используется CriticalSection.
+ *
+ * Работа с мьютексами возможна только в рамках одного процесса. Разблокировку мьютекса может
+ * произвести только поток который заблокировал его. Если требуется возможность разблокировки
+ * другими потоками следует использовать механизм семафоров - \link uRpcSemaphore \endlink.
+ *
+ * Все функции библиотеки используют указатель на структуру uRpcMutex.
+ *
+ * Создание мьютекса производится функцией #urpc_mutex_create, удаление #urpc_mutex_destroy.
+ *
+ * Доступно три функции блокировки мьютекса и одна разблокировки.
+ *
+ * #urpc_mutex_lock - функция безусловно пытается заблокировать мьютекс. Выход из функции возможен только
+ * в случае успешной блокировки. #urpc_mutex_trylock - функция однократно пытается заблокировать мьютекс и
+ * завершает свою работу независимо от результата. #urpc_mutex_timedlock - функция пытается заблокировать
+ * мьютекс в течение времени. Если блокировка была произведена до момента окончания интервала времени функция
+ * завершает свою работу. #urpc_mutex_unlock - функция разблокирует мьютекс.
+ *
+ * Функции #urpc_mutex_trylock и #urpc_mutex_timedlock возвращают 0 если блокировка была произведена или
+ * отрицательное значение в противном случае.
+ *
+*/
+
 #ifndef _urpc_mutex_h
 #define _urpc_mutex_h
+
+#include <urpc-exports.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,13 +66,72 @@ extern "C" {
 typedef struct uRpcMutex uRpcMutex;
 
 
-uRpcMutex *urpc_mutex_create( void );
-void urpc_mutex_destroy( uRpcMutex *mutex );
+/*! Создание мьютекса.
+ *
+ * Функция создает мьютекс и возвращает указатель на него.
+ *
+ * \return Указатель на мьютекс или NULL в случае ошибки.
+ *
+*/
+URPC_EXPORT uRpcMutex *urpc_mutex_create( void );
 
-void urpc_mutex_lock( uRpcMutex *mutex );
-int urpc_mutex_trylock( uRpcMutex *mutex );
-int urpc_mutex_timedlock( uRpcMutex *mutex, double time );
-void urpc_mutex_unlock( uRpcMutex *mutex );
+/*! Удаление мьютекса.
+ *
+ * Функция удаляет мьютекс и освобождает память занятую им.
+ *
+ * \param mutex указатель на мьютекс.
+ *
+ * \return Нет.
+ *
+*/
+URPC_EXPORT void urpc_mutex_destroy( uRpcMutex *mutex );
+
+/*! Блокировка мьютекса.
+ *
+ * Функция безусловно заблокировать мьютекс. Функция завршает свою работу
+ * только в случае успешной блокировки.
+ *
+ * \param mutex казатель на мьютекс.
+ *
+ * \return Нет.
+ *
+*/
+URPC_EXPORT void urpc_mutex_lock( uRpcMutex *mutex );
+
+/*! Блокировка мьютекса.
+ *
+ * Функция однократно пытается заблокировать мьютекс и завершает свою работу.
+ *
+ * \param mutex указатель на мьютекс.
+ *
+ * \return 0 - в случае успешной блокировки, иначе отрицательное число.
+ *
+*/
+URPC_EXPORT int urpc_mutex_trylock( uRpcMutex *mutex );
+
+/*! Блокировка мьютекса.
+ *
+ * Функция пытается заблокировать мьютекс в течение указанного интервала времени.
+ *
+ * \param mutex указатель на мьютекс;
+ * \param time интервал времени в секундах.
+ *
+ * \return 0 - в случае успешной блокировки, иначе отрицательное число.
+ *
+*/
+URPC_EXPORT int urpc_mutex_timedlock( uRpcMutex *mutex, double time );
+
+/*! Разблокировка мьютекса.
+ *
+ * Функция разблокирует мьютекс. Если мьютекс был заблокирован другим потоком
+ * поведение функции не определено.
+ *
+ * \param mutex указатель на мьютекс.
+ *
+ * \return Нет.
+ *
+*/
+URPC_EXPORT void urpc_mutex_unlock( uRpcMutex *mutex );
 
 
 #ifdef __cplusplus
