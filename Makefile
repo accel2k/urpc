@@ -11,7 +11,7 @@ doc:
 clean:
 	@echo "Cleaning build directory"
 	@-$(MAKE) -C build clean
-	@rm -rf build doc/documentation
+	@rm -rf bin build doc/documentation
 
 distclean: clean
 
