@@ -1,6 +1,7 @@
 
 add_library( urpc SHARED
              urpc-common.c
+             urpc-network.c
              urpc-${PLATFORM}-network.c
              urpc-${PLATFORM}-mutex.c
              urpc-${PLATFORM}-semaphore.c

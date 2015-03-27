@@ -28,7 +28,7 @@
 volatile int start = 0;
 volatile int server_ready = 0;
 
-int counts = 2500000;
+int counts = 250000;
 
 
 void* server_thread( void *data )
@@ -36,8 +36,8 @@ void* server_thread( void *data )
 
   int i;
 
-  uRpcSem *sem_start = urpc_sem_create( "start", 0 );
-  uRpcSem *sem_stop = urpc_sem_create( "stop", 0 );
+  uRpcSem *sem_start = urpc_sem_create( "start", 0, 1 );
+  uRpcSem *sem_stop = urpc_sem_create( "stop", 0, 1 );
 
   if( sem_start == NULL || sem_stop == NULL )
     { printf( "can't create semaphores\n" ); return NULL; }
@@ -71,10 +71,13 @@ void* client_thread( void *data )
 
   int i;
 
+  uRpcSem *sem_start;
+  uRpcSem *sem_stop;
+
   while( server_ready == 0 );
 
-  uRpcSem *sem_start = urpc_sem_open( "start" );
-  uRpcSem *sem_stop = urpc_sem_open( "stop" );
+  sem_start = urpc_sem_open( "start" );
+  sem_stop = urpc_sem_open( "stop" );
 
   if( sem_start == NULL || sem_stop == NULL )
     { printf( "can't open semaphores\n" ); return NULL; }

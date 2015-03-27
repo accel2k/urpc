@@ -31,10 +31,8 @@ int urpc_network_init( void )
 }
 
 
-int urpc_network_close( void )
+void urpc_network_close( void )
 {
-
-  return 0;
 
 }
 
@@ -51,32 +49,5 @@ const char* urpc_network_error_str( void )
 {
 
   return strerror( errno );
-
-}
-
-
-int urpc_network_set_tcp_nodelay( SOCKET socket )
-{
-
-  int flag = 1;
-  return setsockopt( socket, IPPROTO_TCP, TCP_NODELAY, (char *)&flag, sizeof( flag ) );
-
-}
-
-
-int urpc_network_set_reuse( SOCKET socket )
-{
-
-  int flag = 1;
-  return setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (char *)&flag, sizeof( flag ) );
-
-}
-
-
-int urpc_network_set_non_block( SOCKET socket )
-{
-
-  int flag = 1;
-  return ioctlsocket( socket, FIONBIO, &flag );
 
 }

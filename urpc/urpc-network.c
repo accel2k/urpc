@@ -1,7 +1,7 @@
 /*
  * uRpc - rpc (remote procedure call) library.
  *
- * Copyright 2015 Andrei Fadeev
+ * Copyright 2009, 2010, 2011, 2015 Andrei Fadeev
  *
  * This file is part of uRPC.
  *
@@ -20,30 +20,31 @@
  *
 */
 
-#ifndef _urpc_shm_h
-#define _urpc_shm_h
-
-#include <urpc-exports.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "urpc-network.h"
 
 
-typedef struct uRpcShm uRpcShm;
+int urpc_network_set_tcp_nodelay( SOCKET socket )
+{
+
+  int flag = 1;
+  return setsockopt( socket, IPPROTO_TCP, TCP_NODELAY, (void *)&flag, sizeof( flag ) );
+
+}
 
 
-URPC_EXPORT uRpcShm *urpc_shm_create( const char *name, unsigned long size );
-URPC_EXPORT uRpcShm *urpc_shm_open( const char *name, unsigned long size );
-URPC_EXPORT uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size );
-URPC_EXPORT void urpc_shm_destroy( uRpcShm *shm );
-URPC_EXPORT void urpc_shm_remove( const char *name );
+int urpc_network_set_reuse( SOCKET socket )
+{
 
-URPC_EXPORT void *urpc_shm_map( uRpcShm *shm );
+  int flag = 1;
+  return setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof( flag ) );
+
+}
 
 
-#ifdef __cplusplus
-} // extern "C"
-#endif
+int urpc_network_set_non_block( SOCKET socket )
+{
 
-#endif // _urpc_shm_h
+  int flag = 1;
+  return ioctlsocket( socket, FIONBIO, (void*)&flag );
+
+}

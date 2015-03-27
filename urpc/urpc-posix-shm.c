@@ -108,6 +108,14 @@ void urpc_shm_destroy( uRpcShm *shm )
 }
 
 
+void urpc_shm_remove( const char *name )
+{
+
+  shm_unlink( name );
+
+}
+
+
 void *urpc_shm_map( uRpcShm *shm )
 {
 
@@ -120,22 +128,5 @@ void *urpc_shm_map( uRpcShm *shm )
     { munmap( shm->maddr, shm->size ); return NULL; }
 
   return shm->maddr;
-
-}
-
-
-void urpc_shm_unmap( uRpcShm *shm )
-{
-
-  if( shm->maddr != NULL ) munmap( shm->maddr, shm->size );
-  shm->maddr = NULL;
-
-}
-
-
-void urpc_shm_remove( const char *name )
-{
-
-  shm_unlink( name );
 
 }

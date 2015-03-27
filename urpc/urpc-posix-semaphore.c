@@ -68,7 +68,7 @@ static uRpcSem *urpc_sem_create_int( const char *name, int initial_value, int cr
 }
 
 
-uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat )
+uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int queue )
 {
 
   return urpc_sem_create_int( name, stat == URPC_SEM_LOCKED ? 0 : 1, 1 );
@@ -91,6 +91,14 @@ void urpc_sem_destroy( uRpcSem *sem )
   if( sem->name != NULL ) sem_unlink( sem->name );
   free( sem->name );
   free( sem );
+
+}
+
+
+void urpc_sem_remove( const char *name )
+{
+
+  sem_unlink( name );
 
 }
 
@@ -146,13 +154,5 @@ void urpc_sem_unlock( uRpcSem *sem )
 {
 
   while( sem_post( sem->sem ) != 0 );
-
-}
-
-
-void urpc_sem_remove( const char *name )
-{
-
-  sem_unlink( name );
 
 }

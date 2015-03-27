@@ -42,8 +42,8 @@ int main( int argc, char **argv )
   urpc_sem_remove( SEM_STOP_NAME );
 
   server_shm = urpc_shm_create( SHM_NAME, 2 * sizeof( double ) );
-  server_start_sem = urpc_sem_create( SEM_START_NAME, URPC_SEM_LOCKED );
-  server_stop_sem = urpc_sem_create( SEM_STOP_NAME, URPC_SEM_LOCKED );
+  server_start_sem = urpc_sem_create( SEM_START_NAME, URPC_SEM_LOCKED, 1 );
+  server_stop_sem = urpc_sem_create( SEM_STOP_NAME, URPC_SEM_LOCKED, 1 );
 
   io = urpc_shm_map( server_shm );
 

@@ -23,6 +23,8 @@
 #ifndef _urpc_semaphore_h
 #define _urpc_semaphore_h
 
+#include <urpc-exports.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,16 +35,15 @@ typedef enum { URPC_SEM_LOCKED = 0, URPC_SEM_UNLOCKED = 1 } uRpcSemStat;
 typedef struct uRpcSem uRpcSem;
 
 
-uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat );
-uRpcSem *urpc_sem_open( const char *name );
-void urpc_sem_destroy( uRpcSem *sem );
+URPC_EXPORT uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int queue );
+URPC_EXPORT uRpcSem *urpc_sem_open( const char *name );
+URPC_EXPORT void urpc_sem_destroy( uRpcSem *sem );
+URPC_EXPORT void urpc_sem_remove( const char *name );
 
-void urpc_sem_lock( uRpcSem *sem );
-int urpc_sem_trylock( uRpcSem *sem );
-int urpc_sem_timedlock( uRpcSem *sem, double time );
-void urpc_sem_unlock( uRpcSem *sem );
-
-void urpc_sem_remove( const char *name );
+URPC_EXPORT void urpc_sem_lock( uRpcSem *sem );
+URPC_EXPORT int urpc_sem_trylock( uRpcSem *sem );
+URPC_EXPORT int urpc_sem_timedlock( uRpcSem *sem, double time );
+URPC_EXPORT void urpc_sem_unlock( uRpcSem *sem );
 
 
 #ifdef __cplusplus

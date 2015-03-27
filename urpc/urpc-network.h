@@ -23,6 +23,8 @@
 #ifndef _urpc_network_h
 #define _urpc_network_h
 
+#include <urpc-exports.h>
+
 
 #if defined( _WIN32 )
 
@@ -63,15 +65,15 @@ extern "C" {
 #endif
 
 
-int urpc_network_init( void );
-int urpc_network_close( void );
+URPC_EXPORT int urpc_network_init( void );
+URPC_EXPORT void urpc_network_close( void );
 
-int urpc_network_last_error( void );
-const char* urpc_network_last_error_str( void );
+URPC_EXPORT int urpc_network_last_error( void );
+URPC_EXPORT const char* urpc_network_last_error_str( void );
 
-int urpc_network_set_tcp_nodelay( SOCKET socket );
-int urpc_network_set_reuse( SOCKET socket );
-int urpc_network_set_non_block( SOCKET socket );
+URPC_EXPORT int urpc_network_set_tcp_nodelay( SOCKET socket );
+URPC_EXPORT int urpc_network_set_reuse( SOCKET socket );
+URPC_EXPORT int urpc_network_set_non_block( SOCKET socket );
 
 
 #ifdef __cplusplus
