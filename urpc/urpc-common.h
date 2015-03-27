@@ -23,7 +23,8 @@
 #ifndef _urpc_common_h
 #define _urpc_common_h
 
-#include "urpc-network.h"
+#include <urpc-exports.h>
+#include <urpc-network.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,15 +34,9 @@ extern "C" {
 typedef enum { URPC_TRANSPORT_UNKNOWN = 0, URPC_TRANSPORT_UDP, URPC_TRANSPORT_TCP, URPC_TRANSPORT_SHM } uRpcTransportType;
 
 
-uRpcTransportType urpc_get_transport_type( const char *uri );
+URPC_EXPORT uRpcTransportType urpc_get_transport_type( const char *uri );
 
-struct addrinfo *urpc_get_sockaddr( const char *uri );
-
-
-
-
-
-
+URPC_EXPORT struct addrinfo *urpc_get_sockaddr( const char *uri );
 
 
 #ifdef __cplusplus

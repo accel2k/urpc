@@ -30,6 +30,16 @@
 #define MAX_HOST_LEN 1024
 #define MAX_PORT_LEN 5
 
+#ifndef AI_ADDRCONFIG
+#define AI_ADDRCONFIG 0
+#endif
+
+#if defined( _WIN32 )
+#ifndef snprintf
+#define snprintf sprintf_s
+#endif
+#endif
+
 
 uRpcTransportType urpc_get_transport_type( const char *uri )
 {
@@ -64,6 +74,10 @@ struct addrinfo *urpc_get_sockaddr( const char *uri )
   struct addrinfo *addr;
   int any_address = 0;
 
+  char *host_end;
+  int host_len;
+  int gai_ret;
+
   if( transport_type == URPC_TRANSPORT_UNKNOWN || transport_type == URPC_TRANSPORT_SHM )
     return NULL;
 
@@ -72,11 +86,11 @@ struct addrinfo *urpc_get_sockaddr( const char *uri )
   else { delim = ":"; offset = 1; }
 
   // Окончание адреса или имени.
-  char *host_end = strstr( uri + 7, delim );
+  host_end = strstr( uri + 7, delim );
   if( host_end == NULL ) return NULL;
 
   // Копирование адреса или имени в host.
-  int host_len = host_end - uri - ( 4 + offset );
+  host_len = host_end - uri - ( 4 + offset );
   if( host_len > MAX_HOST_LEN ) return NULL;
   memcpy( host, uri + 5 + offset, host_len - 1 );
   host[host_len-1] = 0;
@@ -103,10 +117,9 @@ struct addrinfo *urpc_get_sockaddr( const char *uri )
   addr_hint.ai_flags = AI_ADDRCONFIG;
   if( host == NULL ) addr_hint.ai_flags |= AI_PASSIVE;
 
-  int status = getaddrinfo( any_address ? NULL : host, port, &addr_hint, &addr );
-  if( status != 0 )
+  if( ( gai_ret = getaddrinfo( any_address ? NULL : host, port, &addr_hint, &addr ) ) != 0 )
     {
-    fprintf( stderr, "urpc_get_sockaddr: getaddrinfo('%s'): %s\n", uri, gai_strerror( status ) );
+    fprintf( stderr, "urpc_get_sockaddr: getaddrinfo('%s'): %s\n", uri, gai_strerror( gai_ret ) );
     addr = NULL;
     }
 
