@@ -12,3 +12,8 @@ target_link_libraries( mutex-test urpc )
 target_link_libraries( semaphore-test urpc )
 target_link_libraries( shm-server-test urpc )
 target_link_libraries( shm-client-test urpc )
+
+if( WIN32 )
+  target_link_libraries( network-test wsock32 ws2_32 )
+  target_link_libraries( common-test wsock32 ws2_32 )
+endif()

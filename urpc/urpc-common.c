@@ -34,10 +34,8 @@
 #define AI_ADDRCONFIG 0
 #endif
 
-#if defined( _WIN32 )
-#ifndef snprintf
+#if defined _MSVC_COMPILER
 #define snprintf sprintf_s
-#endif
 #endif
 
 
