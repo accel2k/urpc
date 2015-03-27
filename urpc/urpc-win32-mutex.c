@@ -22,18 +22,15 @@
 
 #include "urpc-mutex.h"
 
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <sys/time.h>
+#include <windows.h>
 
 
 typedef struct uRpcMutex {
 
-  pthread_mutex_t mutex;
+  CRITICAL_SECTION mutex;
 
 } uRpcMutex;
+
 
 
 uRpcMutex *urpc_mutex_create( void )
@@ -42,9 +39,7 @@ uRpcMutex *urpc_mutex_create( void )
   uRpcMutex *mutex = malloc( sizeof( uRpcMutex ) );
 
   if( mutex == NULL ) return NULL;
-  if( pthread_mutex_init( &mutex->mutex, NULL ) != 0 )
-    { free( mutex ); return NULL; }
-
+  InitializeCriticalSection( (LPCRITICAL_SECTION)mutex );
   return mutex;
 
 }
@@ -53,7 +48,7 @@ uRpcMutex *urpc_mutex_create( void )
 void urpc_mutex_destroy( uRpcMutex *mutex )
 {
 
-  pthread_mutex_destroy( (pthread_mutex_t*)mutex );
+  DeleteCriticalSection( (LPCRITICAL_SECTION)mutex );
   free( mutex );
 
 }
@@ -62,7 +57,7 @@ void urpc_mutex_destroy( uRpcMutex *mutex )
 void urpc_mutex_lock( uRpcMutex *mutex )
 {
 
-  while( pthread_mutex_lock( (pthread_mutex_t*)mutex ) != 0 );
+  EnterCriticalSection( (LPCRITICAL_SECTION)mutex );
 
 }
 
@@ -70,7 +65,7 @@ void urpc_mutex_lock( uRpcMutex *mutex )
 int urpc_mutex_trylock( uRpcMutex *mutex )
 {
 
-  return pthread_mutex_trylock( (pthread_mutex_t*)mutex ) == 0 ? 0 : 1;
+  return TryEnterCriticalSection( (LPCRITICAL_SECTION)mutex ) ? 0 : -1;
 
 }
 
@@ -78,6 +73,6 @@ int urpc_mutex_trylock( uRpcMutex *mutex )
 void urpc_mutex_unlock( uRpcMutex *mutex )
 {
 
-  while( pthread_mutex_unlock( (pthread_mutex_t*)mutex ) != 0 );
+  LeaveCriticalSection( (LPCRITICAL_SECTION)mutex );
 
 }
