@@ -70,20 +70,20 @@ int main( int argc, char **argv )
   buffer = malloc( BUFFER_SIZE );
   urpc_data = urpc_data_create( BUFFER_SIZE, HEADER_SIZE, buffer, buffer, 0 );
 
-  srandom( 0 );
+  srand( 0 );
 
   // Подготавливаем набор тестовых данных.
   for( i = 0; i < MAX_PARAMS; i++ )
     {
     double random_value;
 
-    random_value = (double)random() / (double)RAND_MAX;
+    random_value = (double)rand() / (double)RAND_MAX;
     iparams[i] = 0xffffffff * random_value;
 
-    random_value = (double)random() / (double)RAND_MAX;
+    random_value = (double)rand() / (double)RAND_MAX;
     fparams[i] = 2.0 * ( random_value - 0.5 );
 
-    random_value = (double)random() / (double)RAND_MAX;
+    random_value = (double)rand() / (double)RAND_MAX;
     dparams[i] = 2.0 * ( random_value - 0.5 );
 
     sparams[i] = malloc( 128 );

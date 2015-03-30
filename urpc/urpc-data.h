@@ -106,7 +106,7 @@ typedef struct uRpcData uRpcData;
  * \return Указатель на объект GRpcData или NULL в случае ошибки.
  *
 */
-uRpcData *urpc_data_create( uint32_t buffer_size, uint32_t header_size, void *ibuffer, void *obuffer, int clean );
+URPC_EXPORT uRpcData *urpc_data_create( uint32_t buffer_size, uint32_t header_size, void *ibuffer, void *obuffer, int clean );
 
 
 /*! Удаление объекта.
@@ -118,7 +118,7 @@ uRpcData *urpc_data_create( uint32_t buffer_size, uint32_t header_size, void *ib
  * \return Нет.
  *
 */
-void urpc_data_destroy( uRpcData *urpc_data );
+URPC_EXPORT void urpc_data_destroy( uRpcData *urpc_data );
 
 
 /*! Возвращает размер заголовка в начале буфера.
@@ -128,7 +128,7 @@ void urpc_data_destroy( uRpcData *urpc_data );
  * \return Размер заголовка в байтах.
  *
 */
-uint32_t urpc_data_get_header_size( uRpcData *urpc_data );
+URPC_EXPORT uint32_t urpc_data_get_header_size( uRpcData *urpc_data );
 
 
 /*! Изменяет размер заголовка в начале буфера.
@@ -138,7 +138,7 @@ uint32_t urpc_data_get_header_size( uRpcData *urpc_data );
  *
  * \return 0 если размер заголовка изменен, отрицательное число в случае ошибки.
 */
-int urpc_data_set_header_size( uRpcData *urpc_data, uint32_t header_size );
+URPC_EXPORT int urpc_data_set_header_size( uRpcData *urpc_data, uint32_t header_size );
 
 
 /*! Получает указатель на заголовок в начале буфера.
@@ -149,7 +149,7 @@ int urpc_data_set_header_size( uRpcData *urpc_data, uint32_t header_size );
  * \return Указатель на заголовок в начале буфера.
  *
 */
-void* urpc_data_get_header( uRpcData *urpc_data, uRpcDataDirection direction );
+URPC_EXPORT void* urpc_data_get_header( uRpcData *urpc_data, uRpcDataDirection direction );
 
 
 /*! Записывает данные в заголовок в начале буфера.
@@ -162,7 +162,7 @@ void* urpc_data_get_header( uRpcData *urpc_data, uRpcDataDirection direction );
  * \return 0 если данные были записаны, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_header( uRpcData *urpc_data, uRpcDataDirection direction, void *header, uint32_t header_size );
+URPC_EXPORT int urpc_data_set_header( uRpcData *urpc_data, uRpcDataDirection direction, void *header, uint32_t header_size );
 
 
 /*! Получает размер который занимают данные в буфере.
@@ -173,7 +173,7 @@ int urpc_data_set_header( uRpcData *urpc_data, uRpcDataDirection direction, void
  * \return Размер данных в буфере в байтах.
  *
 */
-uint32_t urpc_data_get_data_size( uRpcData *urpc_data, uRpcDataDirection direction );
+URPC_EXPORT uint32_t urpc_data_get_data_size( uRpcData *urpc_data, uRpcDataDirection direction );
 
 
 /*! Изменяет размер который занимают данные в буфере.
@@ -185,7 +185,7 @@ uint32_t urpc_data_get_data_size( uRpcData *urpc_data, uRpcDataDirection directi
  * \return 0 если размер данных изменен, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_data_size( uRpcData *urpc_data, uRpcDataDirection direction, uint32_t data_size );
+URPC_EXPORT int urpc_data_set_data_size( uRpcData *urpc_data, uRpcDataDirection direction, uint32_t data_size );
 
 
 /*! Получает указатель на данные в буфере.
@@ -196,7 +196,7 @@ int urpc_data_set_data_size( uRpcData *urpc_data, uRpcDataDirection direction, u
  * \return Указатель на данные в буфере.
  *
 */
-void* urpc_data_get_data( uRpcData *urpc_data, uRpcDataDirection direction );
+URPC_EXPORT void* urpc_data_get_data( uRpcData *urpc_data, uRpcDataDirection direction );
 
 
 /*! Записывает данные в буфер.
@@ -209,7 +209,7 @@ void* urpc_data_get_data( uRpcData *urpc_data, uRpcDataDirection direction );
  * \return 0 если данные были записаны, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_data( uRpcData *urpc_data, uRpcDataDirection direction, void *data, uint32_t data_size );
+URPC_EXPORT int urpc_data_set_data( uRpcData *urpc_data, uRpcDataDirection direction, void *data, uint32_t data_size );
 
 
 /*! Проверяет границы данных в буфере.
@@ -220,7 +220,7 @@ int urpc_data_set_data( uRpcData *urpc_data, uRpcDataDirection direction, void *
  * \return 0 если смещения и границы данных не выходят за размер буфера, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_validate( uRpcData *urpc_data, uRpcDataDirection direction );
+URPC_EXPORT int urpc_data_validate( uRpcData *urpc_data, uRpcDataDirection direction );
 
 
 /*! Проверяет зарегистрирована переменная в буфере исходящих данных или нет.
@@ -231,7 +231,7 @@ int urpc_data_validate( uRpcData *urpc_data, uRpcDataDirection direction );
  * \return 1 если переменная с таким идентификатором уже была зарегистрирована, иначе 0.
  *
 */
-int urpc_data_is_set( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT int urpc_data_is_set( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Запись значения / регистрация / изменение размера переменной в буфере передачи
@@ -250,7 +250,7 @@ int urpc_data_is_set( uRpcData *urpc_data, uint32_t id );
  * \return Адрес переменной в буфере в случае успешного завершения, иначе NULL.
  *
 */
-void* urpc_data_set( uRpcData *urpc_data, uint32_t id, const void *object, uint32_t size );
+URPC_EXPORT void* urpc_data_set( uRpcData *urpc_data, uint32_t id, const void *object, uint32_t size );
 
 
 /*! Получение указателя на переменную в буфере приема по идентификатору
@@ -264,7 +264,7 @@ void* urpc_data_set( uRpcData *urpc_data, uint32_t id, const void *object, uint3
  * \return Указатель на переменную в буфере в случае успешного завершения, иначе NULL.
  *
 */
-void* urpc_data_get( uRpcData *urpc_data, uint32_t id, uint32_t *size );
+URPC_EXPORT void* urpc_data_get( uRpcData *urpc_data, uint32_t id, uint32_t *size );
 
 
 /*! Регистрация переменной типа 32-х битный знаковый целый в буфере передачи.
@@ -276,7 +276,7 @@ void* urpc_data_get( uRpcData *urpc_data, uint32_t id, uint32_t *size );
  * \return 0 в случае успешной регистрации, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_int32( uRpcData *urpc_data, uint32_t id, int32_t value );
+URPC_EXPORT int urpc_data_set_int32( uRpcData *urpc_data, uint32_t id, int32_t value );
 
 
 /*! Считывание значения переменной типа 32-х битный знаковый целый из буфера приема.
@@ -287,7 +287,7 @@ int urpc_data_set_int32( uRpcData *urpc_data, uint32_t id, int32_t value );
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
  *
 */
-int32_t urpc_data_get_int32( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT int32_t urpc_data_get_int32( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Регистрация переменной типа 32-х битный беззнаковый целый в буфере передачи.
@@ -299,7 +299,7 @@ int32_t urpc_data_get_int32( uRpcData *urpc_data, uint32_t id );
  * \return 0 в случае успешной регистрации, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_uint32( uRpcData *urpc_data, uint32_t id, uint32_t value );
+URPC_EXPORT int urpc_data_set_uint32( uRpcData *urpc_data, uint32_t id, uint32_t value );
 
 
 /*! Считывание значения переменной типа 32-х битный беззнаковый целый из буфера приема.
@@ -310,7 +310,7 @@ int urpc_data_set_uint32( uRpcData *urpc_data, uint32_t id, uint32_t value );
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
  *
 */
-uint32_t urpc_data_get_uint32( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT uint32_t urpc_data_get_uint32( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Регистрация переменной типа 64-х битный знаковый целый в буфере передачи.
@@ -322,7 +322,7 @@ uint32_t urpc_data_get_uint32( uRpcData *urpc_data, uint32_t id );
  * \return 0 в случае успешной регистрации, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_int64( uRpcData *urpc_data, uint32_t id, int64_t value );
+URPC_EXPORT int urpc_data_set_int64( uRpcData *urpc_data, uint32_t id, int64_t value );
 
 
 /*! Считывание значения переменной типа 64-х битный знаковый целый из буфера приема.
@@ -333,7 +333,7 @@ int urpc_data_set_int64( uRpcData *urpc_data, uint32_t id, int64_t value );
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
  *
 */
-int64_t urpc_data_get_int64( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT int64_t urpc_data_get_int64( uRpcData *urpc_data, uint32_t id );
 
 /*! Регистрация переменной типа 64-х битный беззнаковый целый в буфере передачи.
  *
@@ -344,7 +344,7 @@ int64_t urpc_data_get_int64( uRpcData *urpc_data, uint32_t id );
  * \return 0 в случае успешной регистрации, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_uint64( uRpcData *urpc_data, uint32_t id, uint64_t value );
+URPC_EXPORT int urpc_data_set_uint64( uRpcData *urpc_data, uint32_t id, uint64_t value );
 
 
 /*! Считывание значения переменной типа 64-х битный беззнаковый целый из буфера приема.
@@ -355,7 +355,7 @@ int urpc_data_set_uint64( uRpcData *urpc_data, uint32_t id, uint64_t value );
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
  *
 */
-uint64_t urpc_data_get_uint64( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT uint64_t urpc_data_get_uint64( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Регистрация переменной с плавающей запятой одинарной точности в буфере передачи.
@@ -367,7 +367,7 @@ uint64_t urpc_data_get_uint64( uRpcData *urpc_data, uint32_t id );
  * \return 0 в случае успешной регистрации, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_float( uRpcData *urpc_data, uint32_t id, float value );
+URPC_EXPORT int urpc_data_set_float( uRpcData *urpc_data, uint32_t id, float value );
 
 
 /*! Считывание значения переменной с плавающей запятой одинарной точности из буфера приема.
@@ -378,7 +378,7 @@ int urpc_data_set_float( uRpcData *urpc_data, uint32_t id, float value );
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
  *
 */
-float urpc_data_get_float( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT float urpc_data_get_float( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Регистрация переменной с плавающей запятой двойной точности в буфере передачи.
@@ -390,7 +390,7 @@ float urpc_data_get_float( uRpcData *urpc_data, uint32_t id );
  * \return 0 в случае успешной регистрации, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_double( uRpcData *urpc_data, uint32_t id, double value );
+URPC_EXPORT int urpc_data_set_double( uRpcData *urpc_data, uint32_t id, double value );
 
 
 /*! Считывание значения переменной с плавающей запятой двойной точности из буфера приема.
@@ -401,7 +401,7 @@ int urpc_data_set_double( uRpcData *urpc_data, uint32_t id, double value );
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
  *
 */
-double urpc_data_get_double( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT double urpc_data_get_double( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Регистрация строки с нулем на конце в буфере передачи.
@@ -413,7 +413,7 @@ double urpc_data_get_double( uRpcData *urpc_data, uint32_t id );
  * \return 0 в случае успешной регистрации, отрицательное число в случае ошибки.
  *
 */
-int urpc_data_set_string( uRpcData *urpc_data, uint32_t id, const char *string );
+URPC_EXPORT int urpc_data_set_string( uRpcData *urpc_data, uint32_t id, const char *string );
 
 
 /*! Считывание значения строки из буфера приема.
@@ -428,7 +428,7 @@ int urpc_data_set_string( uRpcData *urpc_data, uint32_t id, const char *string )
  * \return Указатель на строку из буфера или NULL если переменная не зарегистрирована.
  *
 */
-const char* urpc_data_get_string( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT const char* urpc_data_get_string( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Считывание значения строки из буфера приема.
@@ -442,7 +442,7 @@ const char* urpc_data_get_string( uRpcData *urpc_data, uint32_t id );
  * \return Указатель на новую строку или NULL если переменная не зарегистрирована.
  *
 */
-char* urpc_data_dup_string( uRpcData *urpc_data, uint32_t id );
+URPC_EXPORT char* urpc_data_dup_string( uRpcData *urpc_data, uint32_t id );
 
 
 /*! Освобождение памяти выделенной под строку.
@@ -452,7 +452,7 @@ char* urpc_data_dup_string( uRpcData *urpc_data, uint32_t id );
  * \return Нет.
  *
 */
-void urpc_data_free_string( char *string );
+URPC_EXPORT void urpc_data_free_string( char *string );
 
 
 #ifdef __cplusplus
