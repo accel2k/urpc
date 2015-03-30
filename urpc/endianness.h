@@ -54,3 +54,5 @@
 #define UINT32_FROM_BE(val)   (UINT32_SWAP_LE_BE (val))
 #define INT64_FROM_BE(val)    (UINT64_SWAP_LE_BE (val))
 #define UINT64_FROM_BE(val)   (UINT64_SWAP_LE_BE (val))
+
+#warning "Check endianness at compile time"

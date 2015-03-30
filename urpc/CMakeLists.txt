@@ -1,5 +1,6 @@
 
 add_library( urpc SHARED
+             urpc-data.c
              urpc-common.c
              urpc-network.c
              urpc-${PLATFORM}-network.c
