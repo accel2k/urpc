@@ -1,7 +1,9 @@
 
 add_library( urpc SHARED
              urpc-data.c
+             urpc-manager.c
              urpc-common.c
+             urpc-hash-table.c
              urpc-network.c
              urpc-${PLATFORM}-network.c
              urpc-${PLATFORM}-mutex.c
