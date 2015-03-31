@@ -78,10 +78,10 @@ int main( int argc, char **argv )
     double random_value;
 
     random_value = (double)rand() / (double)RAND_MAX;
-    iparams[i] = 0xffffffff * random_value;
+    iparams[i] = (uint32_t)(0xffffffff * random_value);
 
     random_value = (double)rand() / (double)RAND_MAX;
-    fparams[i] = 2.0 * ( random_value - 0.5 );
+    fparams[i] = (float)(2.0 * ( random_value - 0.5 ));
 
     random_value = (double)rand() / (double)RAND_MAX;
     dparams[i] = 2.0 * ( random_value - 0.5 );

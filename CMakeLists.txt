@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 2.6 )
 
 project( uRPC )
 
-include( FindPkgConfig )
+include( TestBigEndian )
 
 if( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )
@@ -40,7 +40,14 @@ endif()
 # Additional tuning for MSVC on Windows platform
 if( ${CMAKE_C_COMPILER_ID} STREQUAL MSVC AND WIN32 )
   add_definitions( -D_WIN32_WINNT=0x0501 )
+  add_definitions( -D_CRT_SECURE_NO_WARNINGS )
   set( PLATFORM "win32" )
+endif()
+
+# Endianness check
+test_big_endian( BIG_ENDIAN )
+if( ${BIG_ENDIAN} )
+  add_definitions( -DBIG_ENDIAN )
 endif()
 
 #
@@ -56,6 +63,9 @@ endif()
 #
 # Include directories.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/urpc )
+if( ${CMAKE_C_COMPILER_ID} STREQUAL MSVC AND WIN32 )
+  include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vs )
+endif()
 
 #
 # Target.
