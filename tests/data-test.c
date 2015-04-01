@@ -21,7 +21,6 @@ int main( int argc, char **argv )
 
   uRpcData       *urpc_data;
 
-  void           *buffer;
   void           *data;
   uint32_t        data_size;
   void           *file_data;
@@ -67,24 +66,15 @@ int main( int argc, char **argv )
     return show_help ? 0 : -1;
     }
 
-  buffer = malloc( BUFFER_SIZE );
-  urpc_data = urpc_data_create( BUFFER_SIZE, HEADER_SIZE, buffer, buffer, 0 );
-
-  srand( 0 );
+  urpc_data = urpc_data_create( BUFFER_SIZE, HEADER_SIZE, NULL, NULL, 1 );
 
   // Подготавливаем набор тестовых данных.
   for( i = 0; i < MAX_PARAMS; i++ )
     {
-    double random_value;
 
-    random_value = (double)rand() / (double)RAND_MAX;
-    iparams[i] = (uint32_t)(0xffffffff * random_value);
-
-    random_value = (double)rand() / (double)RAND_MAX;
-    fparams[i] = (float)(2.0 * ( random_value - 0.5 ));
-
-    random_value = (double)rand() / (double)RAND_MAX;
-    dparams[i] = 2.0 * ( random_value - 0.5 );
+    iparams[i] = 251.0 * i;
+    fparams[i] = (float)(2.0 * ( ( 257.0 * i ) / ( 257.0 * ( MAX_PARAMS - 1 ) ) - 0.5 ));
+    dparams[i] = 2.0 * ( ( 263.0 * i ) / ( 263.0 * ( MAX_PARAMS - 1 ) ) - 0.5 );
 
     sparams[i] = malloc( 128 );
     snprintf( sparams[i], 128, "Test string %10u, %+8.6f, %+8.6lf", iparams[i], fparams[i], dparams[i] );
@@ -117,7 +107,8 @@ int main( int argc, char **argv )
     }
 
   // Очищаем буффер с данными.
-  memset( buffer, 0, BUFFER_SIZE );
+  urpc_data_set_data_size( urpc_data, URPC_DATA_OUTPUT, 0 );
+  urpc_data_set_data_size( urpc_data, URPC_DATA_INPUT, 0 );
 
   // Считываем и проверяем тестовые данные.
   if( do_import )
@@ -159,14 +150,13 @@ int main( int argc, char **argv )
       if( dparams[i] != dparam )
         printf( "Parameter %d double mismatch\n", i );
 
-      printf( "%4u. Random int: %10u, float: %+8.6f, double: %+8.6lf, string: '%s'\n", i, iparam, fparam, dparam, sparam );
+      printf( "%4u. Pattern int: %10u, float: %+8.6f, double: %+8.6lf, string: '%s'\n", i, iparam, fparam, dparam, sparam );
 
       }
 
     }
 
   urpc_data_destroy( urpc_data );
-  free( buffer );
 
   return 0;
 

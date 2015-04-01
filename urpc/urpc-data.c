@@ -61,8 +61,11 @@ typedef struct uRpcData {
   uint8_t      *ibuffer;                    // Буфер входящих данных.
   uint8_t      *obuffer;                    // Буфер исходящих данных.
 
-  DataBuffer   input;
-  DataBuffer   output;
+  int           ibuffer_created;            // Память под буфер входящих данных была выделена объектом.
+  int           obuffer_created;            // Память под буфер исходящих данных была выделена объектом.
+
+  DataBuffer    input;
+  DataBuffer    output;
 
 } uRpcData;
 
@@ -201,10 +204,24 @@ uRpcData *urpc_data_create( uint32_t buffer_size, uint32_t header_size, void *ib
 
   uRpcData *urpc_data;
 
-  if( ibuffer == NULL || obuffer == NULL || header_size >= buffer_size ) return NULL;
+  if( header_size >= buffer_size ) return NULL;
 
   urpc_data = malloc( sizeof( uRpcData ) );
   if( urpc_data == NULL ) return NULL;
+
+  if( ibuffer == NULL ) { ibuffer = malloc( buffer_size ); urpc_data->ibuffer_created = 1; }
+  else urpc_data->ibuffer_created = 0;
+
+  if( obuffer == NULL ) { obuffer = malloc( buffer_size ); urpc_data->obuffer_created = 1; }
+  else urpc_data->obuffer_created = 0;
+
+  if( ibuffer == NULL || obuffer == NULL )
+    {
+    if( ibuffer != NULL && urpc_data->ibuffer_created ) free( ibuffer );
+    if( obuffer != NULL && urpc_data->obuffer_created ) free( obuffer );
+    free( urpc_data );
+    return NULL;
+    }
 
   urpc_data->urpc_data_type = URPC_DATA_TYPE;
   urpc_data->clean = clean == 0 ? 0 : 1;
@@ -229,8 +246,11 @@ uRpcData *urpc_data_create( uint32_t buffer_size, uint32_t header_size, void *ib
 void urpc_data_destroy( uRpcData *urpc_data )
 {
 
-  if( urpc_data->urpc_data_type == URPC_DATA_TYPE )
-    free( urpc_data );
+  if( urpc_data->urpc_data_type != URPC_DATA_TYPE ) return;
+
+  if( urpc_data->ibuffer_created ) free( urpc_data->ibuffer );
+  if( urpc_data->obuffer_created ) free( urpc_data->obuffer );
+  free( urpc_data );
 
 }
 

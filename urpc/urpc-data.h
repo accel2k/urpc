@@ -25,9 +25,9 @@
  *
  * \author Andrei Fadeev
  * \date 20.02.2014
- * \brief Заголовочный файл класса работы с RPC данными.
+ * \brief Заголовочный файл библиотеки работы с RPC данными.
  *
- * \defgroup uRpcData uRpcData - Буфер приема-передачи RPC данных.
+ * \defgroup uRpcData uRpcData - библиотека буфера приема-передачи RPC данных.
  *
  * Буфер используется для хранения данных в процессе RPC обмена. Он состоит из
  * двух буферов: приема и передачи. Данные могут быть зарегистрированы в буфере
@@ -35,7 +35,7 @@
  * буфере передачи, а считываются из буфера приема.
  *
  * Каждый буфер может хранить дополнительный заголовок, в котором система
- * GRPC размещает свои служебные данные.
+ * uRpc размещает свои служебные данные.
  *
  * При регистрации данных функцией #urpc_data_set возвращается указатель на область
  * памяти. Пользователь может записывать и считывать данные из этой области в
@@ -64,7 +64,7 @@
  * в зависимости от архитектуры.
  *
  * Создание объекта uRpcData производится функцией #urpc_data_create. Память под буферы
- * должна быть выделена заранее.
+ * может быть выделена пользователем заранее или автоматически выделится объектом.
  *
  * Удаление объекта производится функцией #urpc_data_destroy.
  *
@@ -103,7 +103,7 @@ typedef struct uRpcData uRpcData;
  * \param obuffer указатель на буфер отправляемых данных или NULL;
  * \param clean признак очистки буфера.
  *
- * \return Указатель на объект GRpcData или NULL в случае ошибки.
+ * \return Указатель на RPC буфер или NULL в случае ошибки.
  *
 */
 URPC_EXPORT uRpcData *urpc_data_create( uint32_t buffer_size, uint32_t header_size, void *ibuffer, void *obuffer, int clean );
@@ -113,7 +113,7 @@ URPC_EXPORT uRpcData *urpc_data_create( uint32_t buffer_size, uint32_t header_si
  *
  * Если память под буферы выделялась автоматически, освободится она тоже автоматически.
  *
- * \param urpc_data указатель на объект uRpcData.
+ * \param urpc_data указатель на RPC буфер.
  *
  * \return Нет.
  *
@@ -123,7 +123,7 @@ URPC_EXPORT void urpc_data_destroy( uRpcData *urpc_data );
 
 /*! Возвращает размер заголовка в начале буфера.
  *
- * \param urpc_data указатель на объект uRpcData.
+ * \param urpc_data указатель на RPC буфер.
  *
  * \return Размер заголовка в байтах.
  *
@@ -133,7 +133,7 @@ URPC_EXPORT uint32_t urpc_data_get_header_size( uRpcData *urpc_data );
 
 /*! Изменяет размер заголовка в начале буфера.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param header_size новый размер заголовка в байтах.
  *
  * \return 0 если размер заголовка изменен, отрицательное число в случае ошибки.
@@ -143,8 +143,8 @@ URPC_EXPORT int urpc_data_set_header_size( uRpcData *urpc_data, uint32_t header_
 
 /*! Получает указатель на заголовок в начале буфера.
  *
- * \param urpc_data указатель на объект uRpcData;
- * \param direction тип буфера принимаемых - GRPC_DATA_INPUT или отправляемых - GRPC_DATA_OUTPUT данных.
+ * \param urpc_data указатель на RPC буфер;
+ * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных.
  *
  * \return Указатель на заголовок в начале буфера.
  *
@@ -154,7 +154,7 @@ URPC_EXPORT void* urpc_data_get_header( uRpcData *urpc_data, uRpcDataDirection d
 
 /*! Записывает данные в заголовок в начале буфера.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных;
  * \param header указатель на данные для записи в заголовок;
  * \param header_size размер данных для записи в заголовок.
@@ -167,7 +167,7 @@ URPC_EXPORT int urpc_data_set_header( uRpcData *urpc_data, uRpcDataDirection dir
 
 /*! Получает размер который занимают данные в буфере.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных.
  *
  * \return Размер данных в буфере в байтах.
@@ -178,7 +178,7 @@ URPC_EXPORT uint32_t urpc_data_get_data_size( uRpcData *urpc_data, uRpcDataDirec
 
 /*! Изменяет размер который занимают данные в буфере.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных;
  * \param data_size новый размер данных в буфере.
  *
@@ -190,7 +190,7 @@ URPC_EXPORT int urpc_data_set_data_size( uRpcData *urpc_data, uRpcDataDirection 
 
 /*! Получает указатель на данные в буфере.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных.
  *
  * \return Указатель на данные в буфере.
@@ -201,7 +201,7 @@ URPC_EXPORT void* urpc_data_get_data( uRpcData *urpc_data, uRpcDataDirection dir
 
 /*! Записывает данные в буфер.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных;
  * \param data указатель на данные для записи в буфер;
  * \param data_size размер данных для записи в буфер.
@@ -214,7 +214,7 @@ URPC_EXPORT int urpc_data_set_data( uRpcData *urpc_data, uRpcDataDirection direc
 
 /*! Проверяет границы данных в буфере.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных.
  *
  * \return 0 если смещения и границы данных не выходят за размер буфера, отрицательное число в случае ошибки.
@@ -225,7 +225,7 @@ URPC_EXPORT int urpc_data_validate( uRpcData *urpc_data, uRpcDataDirection direc
 
 /*! Проверяет зарегистрирована переменная в буфере исходящих данных или нет.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return 1 если переменная с таким идентификатором уже была зарегистрирована, иначе 0.
@@ -242,7 +242,7 @@ URPC_EXPORT int urpc_data_is_set( uRpcData *urpc_data, uint32_t id );
  * Можно изменить размер только самой последней зарегистрированной переменной и только
  * в сторону уменьшения её размера. При этом object должен равняться NULL.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param object указатель на записываемые данные (может быть NULL);
  * \param size размер данных.
@@ -257,7 +257,7 @@ URPC_EXPORT void* urpc_data_set( uRpcData *urpc_data, uint32_t id, const void *o
  *
  * Возвращает указатель на хранимую переменную и ее размер по идентификатору
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param size указатель по которому будет сохранен размер переменной (может быть NULL).
  *
@@ -269,7 +269,7 @@ URPC_EXPORT void* urpc_data_get( uRpcData *urpc_data, uint32_t id, uint32_t *siz
 
 /*! Регистрация переменной типа 32-х битный знаковый целый в буфере передачи.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param value значение переменной.
  *
@@ -281,7 +281,7 @@ URPC_EXPORT int urpc_data_set_int32( uRpcData *urpc_data, uint32_t id, int32_t v
 
 /*! Считывание значения переменной типа 32-х битный знаковый целый из буфера приема.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
@@ -292,7 +292,7 @@ URPC_EXPORT int32_t urpc_data_get_int32( uRpcData *urpc_data, uint32_t id );
 
 /*! Регистрация переменной типа 32-х битный беззнаковый целый в буфере передачи.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param value значение переменной.
  *
@@ -304,7 +304,7 @@ URPC_EXPORT int urpc_data_set_uint32( uRpcData *urpc_data, uint32_t id, uint32_t
 
 /*! Считывание значения переменной типа 32-х битный беззнаковый целый из буфера приема.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
@@ -315,7 +315,7 @@ URPC_EXPORT uint32_t urpc_data_get_uint32( uRpcData *urpc_data, uint32_t id );
 
 /*! Регистрация переменной типа 64-х битный знаковый целый в буфере передачи.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param value значение переменной.
  *
@@ -327,7 +327,7 @@ URPC_EXPORT int urpc_data_set_int64( uRpcData *urpc_data, uint32_t id, int64_t v
 
 /*! Считывание значения переменной типа 64-х битный знаковый целый из буфера приема.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
@@ -335,9 +335,10 @@ URPC_EXPORT int urpc_data_set_int64( uRpcData *urpc_data, uint32_t id, int64_t v
 */
 URPC_EXPORT int64_t urpc_data_get_int64( uRpcData *urpc_data, uint32_t id );
 
+
 /*! Регистрация переменной типа 64-х битный беззнаковый целый в буфере передачи.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param value значение переменной.
  *
@@ -349,7 +350,7 @@ URPC_EXPORT int urpc_data_set_uint64( uRpcData *urpc_data, uint32_t id, uint64_t
 
 /*! Считывание значения переменной типа 64-х битный беззнаковый целый из буфера приема.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
@@ -360,7 +361,7 @@ URPC_EXPORT uint64_t urpc_data_get_uint64( uRpcData *urpc_data, uint32_t id );
 
 /*! Регистрация переменной с плавающей запятой одинарной точности в буфере передачи.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param value значение переменной.
  *
@@ -372,7 +373,7 @@ URPC_EXPORT int urpc_data_set_float( uRpcData *urpc_data, uint32_t id, float val
 
 /*! Считывание значения переменной с плавающей запятой одинарной точности из буфера приема.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
@@ -383,7 +384,7 @@ URPC_EXPORT float urpc_data_get_float( uRpcData *urpc_data, uint32_t id );
 
 /*! Регистрация переменной с плавающей запятой двойной точности в буфере передачи.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param value значение переменной.
  *
@@ -395,7 +396,7 @@ URPC_EXPORT int urpc_data_set_double( uRpcData *urpc_data, uint32_t id, double v
 
 /*! Считывание значения переменной с плавающей запятой двойной точности из буфера приема.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
@@ -406,7 +407,7 @@ URPC_EXPORT double urpc_data_get_double( uRpcData *urpc_data, uint32_t id );
 
 /*! Регистрация строки с нулем на конце в буфере передачи.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
  * \param string строка для регистрации.
  *
@@ -422,7 +423,7 @@ URPC_EXPORT int urpc_data_set_string( uRpcData *urpc_data, uint32_t id, const ch
  *  во время блокировки канала передачи. Его содержимое доступно только для чтения.
  *  При необходимости пользователь может получить копию этой строки функцией #urpc_data_dup_string.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Указатель на строку из буфера или NULL если переменная не зарегистрирована.
@@ -436,7 +437,7 @@ URPC_EXPORT const char* urpc_data_get_string( uRpcData *urpc_data, uint32_t id )
  *  Функция возвращает указатель на копию строки с данными из буфера.
  *  Пользователь должен самостоятельно освободить память функцией #urpc_data_free_string.
  *
- * \param urpc_data указатель на объект uRpcData;
+ * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной.
  *
  * \return Указатель на новую строку или NULL если переменная не зарегистрирована.
