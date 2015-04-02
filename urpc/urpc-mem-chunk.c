@@ -189,7 +189,7 @@ int urpc_mem_chunk_free( uRpcMemChunk *umem_chunk, void *chunk )
   uint32_t *page = data - 1;
   uint32_t *used = data - 2;
 
-  int i;
+  unsigned int i;
 
   if( umem_chunk->type != URPC_MEM_CHUNK_TYPE ) return -1;
 

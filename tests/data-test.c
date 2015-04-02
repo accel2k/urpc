@@ -94,7 +94,7 @@ int main( int argc, char **argv )
   for( i = 0; i < MAX_PARAMS; i++ )
     {
 
-    iparams[i] = 251.0 * i;
+    iparams[i] = 251 * i;
     fparams[i] = (float)(2.0 * ( ( 257.0 * i ) / ( 257.0 * ( MAX_PARAMS - 1 ) ) - 0.5 ));
     dparams[i] = 2.0 * ( ( 263.0 * i ) / ( 263.0 * ( MAX_PARAMS - 1 ) ) - 0.5 );
 
