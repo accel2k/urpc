@@ -21,6 +21,7 @@
 */
 
 #include "urpc-hash-table.h"
+#include "urpc-mem-chunk.h"
 
 #include <stdlib.h>
 
@@ -30,7 +31,6 @@
 
 
 typedef struct HashNode HashNode;
-
 struct HashNode {
 
   uint32_t          key;                    // Значение ключа.
@@ -47,6 +47,8 @@ typedef struct uRpcHashTable {
   int               nnodes;                 // Число объектов.
   HashNode        **nodes;                  // Хэш таблица.
 
+  uRpcMemChunk     *chunks;
+
 } uRpcHashTable;
 
 
@@ -62,6 +64,9 @@ URPC_EXPORT uRpcHashTable *urpc_hash_table_create( void )
   uhash->nodes = malloc( HASH_TABLE_SIZE * sizeof( HashNode* ) );
   if( uhash->nodes == NULL ) { free( uhash ); return NULL; }
 
+  uhash->chunks = urpc_mem_chunk_create( sizeof( HashNode ) );
+  if( uhash->chunks == NULL ) { free( uhash->nodes ); free( uhash ); return NULL; }
+
   uhash->nnodes = 0;
   for( i = 0; i < HASH_TABLE_SIZE; i++ )
     uhash->nodes[i] = NULL;
@@ -76,25 +81,10 @@ URPC_EXPORT uRpcHashTable *urpc_hash_table_create( void )
 URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *uhash )
 {
 
-  int i;
-  HashNode *node;
-  HashNode *next;
-
   if( uhash->type != URPC_HASH_TABLE_TYPE ) return;
 
-  for( i = 0; i < HASH_TABLE_SIZE; i++ )
-    {
-    node = uhash->nodes[i];
-    while( node != NULL )
-      {
-      next = node->next;
-      free( node );
-      node = next;
-      }
-    #warning "Rewrite memory deallocator"
-    free( uhash->nodes[i] );
-    }
-
+  urpc_mem_chunk_destroy( uhash->chunks );
+  free( uhash->nodes );
   free( uhash );
 
 }
@@ -116,8 +106,7 @@ URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *uhash, uint32_t key, void
     node = node->next;
     }
 
-  #warning "Rewrite memory allocator"
-  node = malloc( sizeof( HashNode ) );
+  node = urpc_mem_chunk_alloc( uhash->chunks );
   if( node == NULL ) return -1;
   node->key = key;
   node->value = value;
@@ -165,8 +154,7 @@ URPC_EXPORT int urpc_hash_table_remove( uRpcHashTable *uhash, uint32_t key )
       {
       if( parrent != NULL ) parrent = node->next;
       else uhash->nodes[ key % HASH_TABLE_SIZE ] = node->next;
-      #warning "Rewrite memory deallocator"
-      free( node );
+      urpc_mem_chunk_free( uhash->chunks, node );
       return 0;
       }
     parrent = node;

@@ -31,24 +31,26 @@ int main( int argc, char **argv )
   uRpcHashTable *uhash;
 
   uint32_t key;
+  int i;
 
   uhash = urpc_hash_table_create();
 
   for( key = 0; key < 100000; key++ )
-	if( urpc_hash_table_insert( uhash, key, (void*)key ) != 0 )
-	  printf( "error inserting key %d\n", key );
+    if( urpc_hash_table_insert( uhash, key, (void*)key ) != 0 )
+      printf( "error inserting key %d\n", key );
 
   for( key = 0; key < 100000; key += 10000 )
-	if( urpc_hash_table_insert( uhash, key, (void*)key ) <= 0 )
-	  printf( "error inserting duplicated key %d\n", key );
+    if( urpc_hash_table_insert( uhash, key, (void*)key ) <= 0 )
+      printf( "error inserting duplicated key %d\n", key );
+
+  for( i = 0; i < 10; i++ )
+    for( key = 0; key < 100000; key++ )
+      if( urpc_hash_table_find( uhash, key ) != (void*)key )
+        printf( "error finding key %d\n", key );
 
   for( key = 0; key < 100000; key++ )
-	if( urpc_hash_table_find( uhash, key ) != (void*)key )
-	  printf( "error finding key %d\n", key );
-
-  for( key = 0; key < 100000; key++ )
-	if( urpc_hash_table_remove( uhash, key ) != 0 )
-	  printf( "error removing key %d\n", key );
+    if( urpc_hash_table_remove( uhash, key ) != 0 )
+      printf( "error removing key %d\n", key );
 
   urpc_hash_table_destroy( uhash );
 
