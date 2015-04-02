@@ -25,10 +25,9 @@
  *
  * \author Andrei Fadeev
  * \date 29.06.2009
- *
  * \brief Заголовочный файл библиотеки совместимости с BSD socket.
  *
- * \defgroup uRpcNetwork uRpcNetwork - Библиотека совместимости с BSD socket.
+ * \defgroup uRpcNetwork uRpcNetwork - библиотека совместимости с BSD socket.
  *
  * Библиотека предназначена для кроссплатформенной работы с сетевыми функциями BSD socket.
  * Windows содержит практически все необходимые функции стека BSD socket с некоторыми
@@ -116,6 +115,7 @@ extern "C" {
  */
 URPC_EXPORT int urpc_network_init( void );
 
+
 /*! Завершение работы с сетевой подсистемой.
  *
  * Функция завершения работы с сетью, вызывается в самом конце программы. Должна быть вызвана
@@ -126,6 +126,7 @@ URPC_EXPORT int urpc_network_init( void );
 */
 URPC_EXPORT void urpc_network_close( void );
 
+
 /*! Получение кода последней ошибки.
  *
  *  В Unix возвращается значение errno, в Windows значение функции WSAGetLastError.
@@ -135,6 +136,7 @@ URPC_EXPORT void urpc_network_close( void );
 */
 URPC_EXPORT int urpc_network_last_error( void );
 
+
 /*! Получение строки с описанием последней ошибки.
  *
  * Возвращаемые строки не должны модифицироваться вызывающей програмой.
@@ -143,6 +145,7 @@ URPC_EXPORT int urpc_network_last_error( void );
  *
 */
 URPC_EXPORT const char* urpc_network_last_error_str( void );
+
 
 /*! Отключение алгоритм Нейгла для указанного сокета.
  *
@@ -156,6 +159,7 @@ URPC_EXPORT const char* urpc_network_last_error_str( void );
 */
 URPC_EXPORT int urpc_network_set_tcp_nodelay( SOCKET socket );
 
+
 /*! Разрешение использование адреса до момента полного завершения предыдуших соединений.
  *
  * Становится возможным повторный запуск программы сразу после её завершений.
@@ -166,6 +170,7 @@ URPC_EXPORT int urpc_network_set_tcp_nodelay( SOCKET socket );
  *
 */
 URPC_EXPORT int urpc_network_set_reuse( SOCKET socket );
+
 
 /*! Переводит соединение в неблокирующий режим.
  *

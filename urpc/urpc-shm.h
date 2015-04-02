@@ -74,6 +74,7 @@ typedef struct uRpcShm uRpcShm;
 */
 URPC_EXPORT uRpcShm *urpc_shm_create( const char *name, unsigned long size );
 
+
 /*! Открытие сегмента разделяемой памяти.
  *
  * Функция открывает сегмент разделяемой памяти в режиме чтения/записи и возвращает указатель на него.
@@ -85,6 +86,7 @@ URPC_EXPORT uRpcShm *urpc_shm_create( const char *name, unsigned long size );
  *
 */
 URPC_EXPORT uRpcShm *urpc_shm_open( const char *name, unsigned long size );
+
 
 /*! Открытие сегмента разделяемой памяти.
  *
@@ -98,6 +100,7 @@ URPC_EXPORT uRpcShm *urpc_shm_open( const char *name, unsigned long size );
 */
 URPC_EXPORT uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size );
 
+
 /*! Удаление сегмента разделяемой памяти.
  *
  * Функция удаляет сегмент разделяемой памяти и освобождает память занятую им.
@@ -108,6 +111,7 @@ URPC_EXPORT uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size );
  *
 */
 URPC_EXPORT void urpc_shm_destroy( uRpcShm *shm );
+
 
 /*! Удаление объекта разделяемой памяти.
  *
@@ -122,6 +126,7 @@ URPC_EXPORT void urpc_shm_destroy( uRpcShm *shm );
  *
 */
 URPC_EXPORT void urpc_shm_remove( const char *name );
+
 
 /*! Отображение сегмента разделяемой памяти в адресное пространство процесса.
  *

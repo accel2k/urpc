@@ -70,6 +70,7 @@ typedef struct uRpcMutex uRpcMutex;
 */
 URPC_EXPORT uRpcMutex *urpc_mutex_create( void );
 
+
 /*! Удаление мьютекса.
  *
  * Функция удаляет мьютекс и освобождает память занятую им.
@@ -80,6 +81,7 @@ URPC_EXPORT uRpcMutex *urpc_mutex_create( void );
  *
 */
 URPC_EXPORT void urpc_mutex_destroy( uRpcMutex *mutex );
+
 
 /*! Блокировка мьютекса.
  *
@@ -93,6 +95,7 @@ URPC_EXPORT void urpc_mutex_destroy( uRpcMutex *mutex );
 */
 URPC_EXPORT void urpc_mutex_lock( uRpcMutex *mutex );
 
+
 /*! Блокировка мьютекса.
  *
  * Функция однократно пытается заблокировать мьютекс и завершает свою работу.
@@ -103,6 +106,7 @@ URPC_EXPORT void urpc_mutex_lock( uRpcMutex *mutex );
  *
 */
 URPC_EXPORT int urpc_mutex_trylock( uRpcMutex *mutex );
+
 
 /*! Разблокировка мьютекса.
  *

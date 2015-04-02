@@ -66,6 +66,7 @@ typedef struct uRpcThread uRpcThread;
 */
 typedef void* (*urpc_thread_func)( void *data );
 
+
 /*! Создание потока.
  *
  * Функция создаёт новый поток и запускает выполнение в нём пользовательской функции.
@@ -78,6 +79,7 @@ typedef void* (*urpc_thread_func)( void *data );
 */
 URPC_EXPORT uRpcThread *urpc_thread_create( urpc_thread_func func, void *data );
 
+
 /*! Удаление потока.
  *
  * функция ожидает завершения потока и освобождает память занятую управляющей структурой.
@@ -89,6 +91,7 @@ URPC_EXPORT uRpcThread *urpc_thread_create( urpc_thread_func func, void *data );
 */
 URPC_EXPORT void urpc_thread_destroy( uRpcThread *thread );
 
+
 /*! Ожидание завершения потока.
  *
  * Функция ожидает завершения потока.
@@ -99,6 +102,7 @@ URPC_EXPORT void urpc_thread_destroy( uRpcThread *thread );
  *
 */
 URPC_EXPORT void *urpc_thread_join( uRpcThread *thread );
+
 
 /*! Завершение работы потока.
  *

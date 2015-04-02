@@ -85,6 +85,7 @@ typedef struct uRpcSem uRpcSem;
 */
 URPC_EXPORT uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int queue );
 
+
 /*! Открытие существующего семафора.
  *
  * Функция открывает уже созданный семафор и возвращает указатель на него. Функция не
@@ -97,6 +98,7 @@ URPC_EXPORT uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int qu
 */
 URPC_EXPORT uRpcSem *urpc_sem_open( const char *name );
 
+
 /*! Удаление семафора.
  *
  * Функция удаляет семафор и освобождает память занятую им.
@@ -107,6 +109,7 @@ URPC_EXPORT uRpcSem *urpc_sem_open( const char *name );
  *
 */
 URPC_EXPORT void urpc_sem_destroy( uRpcSem *sem );
+
 
 /*! Удаление объекта семафора.
  *
@@ -122,6 +125,7 @@ URPC_EXPORT void urpc_sem_destroy( uRpcSem *sem );
 */
 URPC_EXPORT void urpc_sem_remove( const char *name );
 
+
 /*! Блокировка семафора.
  *
  * Функция безусловно пытается заблокировать семафор. Функция завершает свою работу
@@ -134,6 +138,7 @@ URPC_EXPORT void urpc_sem_remove( const char *name );
 */
 URPC_EXPORT void urpc_sem_lock( uRpcSem *sem );
 
+
 /*! Блокировка семафора.
  *
  * Функция однократно пытается заблокировать семафор и завершает свою работу.
@@ -144,6 +149,7 @@ URPC_EXPORT void urpc_sem_lock( uRpcSem *sem );
  *
 */
 URPC_EXPORT int urpc_sem_trylock( uRpcSem *sem );
+
 
 /*! Блокировка семафора.
  *
@@ -157,6 +163,7 @@ URPC_EXPORT int urpc_sem_trylock( uRpcSem *sem );
  *
 */
 URPC_EXPORT int urpc_sem_timedlock( uRpcSem *sem, double time );
+
 
 /*! Разблокировка семафора.
  *
