@@ -75,7 +75,7 @@ URPC_EXPORT uRpcMemChunk *urpc_mem_chunk_create( int chunk_size );
  * \return Нет.
  *
 */
-void urpc_mem_chunk_destroy( uRpcMemChunk *umem_chunk );
+URPC_EXPORT void urpc_mem_chunk_destroy( uRpcMemChunk *umem_chunk );
 
 
 /*! Выделение памяти под новый объект.
@@ -85,7 +85,7 @@ void urpc_mem_chunk_destroy( uRpcMemChunk *umem_chunk );
  * \return Указатель на память для нового объекта или NULL в случае ошибки.
  *
 */
-void *urpc_mem_chunk_alloc( uRpcMemChunk *umem_chunk );
+URPC_EXPORT void *urpc_mem_chunk_alloc( uRpcMemChunk *umem_chunk );
 
 
 /*! Освобождение памяти используемой объектом.
@@ -96,7 +96,7 @@ void *urpc_mem_chunk_alloc( uRpcMemChunk *umem_chunk );
  * \return 0 - если память успешно особождена, -1 в случае ошибки.
  *
 */
-int urpc_mem_chunk_free( uRpcMemChunk *umem_chunk, void *chunk );
+URPC_EXPORT int urpc_mem_chunk_free( uRpcMemChunk *umem_chunk, void *chunk );
 
 
 #ifdef __cplusplus

@@ -1,7 +1,6 @@
 
 add_library( urpc SHARED
              urpc-data.c
-             urpc-manager.c
              urpc-common.c
              urpc-hash-table.c
              urpc-mem-chunk.c
