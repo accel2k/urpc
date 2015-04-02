@@ -83,9 +83,9 @@ static DataParam *urpc_data_find_param( DataBuffer *buffer, uint32_t id )
   while( 1 )
     {
 
-	uint32_t param_id;
-	uint32_t param_size;
-	uint32_t param_next;
+    uint32_t param_id;
+    uint32_t param_size;
+    uint32_t param_next;
 
     // Проверяем, что в буфере присутствуют данные как минимум размера структуры RpcParam.
     if( left_size < sizeof( DataParam ) - DATA_ALIGN_SIZE ) return NULL;
