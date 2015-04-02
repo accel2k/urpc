@@ -36,9 +36,12 @@
  * произвести только поток который заблокировал его. Если требуется возможность разблокировки
  * другими потоками следует использовать механизм семафоров - \link uRpcSemaphore \endlink.
  *
- * Все функции библиотеки используют указатель на структуру uRpcMutex.
+ * Все функции библиотеки используют указатель на структуру uRpcMutex. Структура может быть
+ * создана динамически или объявлена как статический объект.
  *
- * Создание мьютекса производится функцией #urpc_mutex_create, удаление #urpc_mutex_destroy.
+ * Динамическое создание мьютекса производится функцией #urpc_mutex_create, удаление #urpc_mutex_destroy.
+ * Статически объявленную структуру необходимо предварительно инициализирвать функцией #urpc_mutex_init.
+ * Мьютекс объявленный статически не требует удаления.
  *
  * Доступно две функции блокировки мьютекса и одна разблокировки.
  *
@@ -58,7 +61,15 @@ extern "C" {
 #endif
 
 
-typedef struct uRpcMutex uRpcMutex;
+#if defined( _WIN32 )
+#include <windows.h>
+typedef CRITICAL_SECTION uRpcMutex;
+#endif
+
+#if defined( __unix__ )
+#include <pthread.h>
+typedef pthread_mutex_t uRpcMutex;
+#endif
 
 
 /*! Создание мьютекса.
@@ -69,6 +80,18 @@ typedef struct uRpcMutex uRpcMutex;
  *
 */
 URPC_EXPORT uRpcMutex *urpc_mutex_create( void );
+
+
+/*! Инициализация мьютекса.
+ *
+ * Функция инициализирует статически объявленый мьютекс.
+ *
+ * \param mutex указатель на статический мьютекс.
+ *
+ * \return Нет.
+ *
+*/
+URPC_EXPORT void urpc_mutex_init( uRpcMutex *mutex );
 
 
 /*! Удаление мьютекса.

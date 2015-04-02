@@ -20,59 +20,58 @@
  *
 */
 
+#include <stdio.h>
 #include "urpc-mutex.h"
+#include "urpc-thread.h"
 
-#include <windows.h>
+
+volatile int start = 0;
+
+uRpcMutex mutex;
+
+int counts = 2500000;
 
 
-uRpcMutex *urpc_mutex_create( void )
+void* thread_func( void *data )
 {
 
-  uRpcMutex *mutex = malloc( sizeof( uRpcMutex ) );
+  int i = 0;
+  int id = *(int*)data;
 
-  if( mutex == NULL ) return NULL;
-  InitializeCriticalSection( (LPCRITICAL_SECTION)mutex );
-  return mutex;
+  while( start == 0 );
+
+  while( i < counts )
+    {
+    urpc_mutex_lock( &mutex );
+    i++;
+    urpc_mutex_unlock( &mutex );
+    }
+
+  printf( "thread %d stopped after %d iterations\n", id, i );
+
+  return NULL;
 
 }
 
 
-void urpc_mutex_init( uRpcMutex *mutex )
+int main( int argc, char **argv )
 {
 
-  InitializeCriticalSection( (LPCRITICAL_SECTION)mutex );
+  int id1 = 1;
+  int id2 = 2;
 
-}
+  uRpcThread *thread1;
+  uRpcThread *thread2;
 
+  thread1 = urpc_thread_create( thread_func, &id1 );
+  thread2 = urpc_thread_create( thread_func, &id2 );
+  urpc_mutex_init( &mutex );
 
-void urpc_mutex_destroy( uRpcMutex *mutex )
-{
+  start = 1;
 
-  DeleteCriticalSection( (LPCRITICAL_SECTION)mutex );
-  free( mutex );
+  urpc_thread_destroy( thread1 );
+  urpc_thread_destroy( thread2 );
 
-}
-
-
-void urpc_mutex_lock( uRpcMutex *mutex )
-{
-
-  EnterCriticalSection( (LPCRITICAL_SECTION)mutex );
-
-}
-
-
-int urpc_mutex_trylock( uRpcMutex *mutex )
-{
-
-  return TryEnterCriticalSection( (LPCRITICAL_SECTION)mutex ) ? 0 : -1;
-
-}
-
-
-void urpc_mutex_unlock( uRpcMutex *mutex )
-{
-
-  LeaveCriticalSection( (LPCRITICAL_SECTION)mutex );
+  return 0;
 
 }

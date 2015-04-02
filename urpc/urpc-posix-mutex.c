@@ -25,15 +25,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <pthread.h>
 #include <sys/time.h>
-
-
-typedef struct uRpcMutex {
-
-  pthread_mutex_t mutex;
-
-} uRpcMutex;
 
 
 uRpcMutex *urpc_mutex_create( void )
@@ -42,10 +34,18 @@ uRpcMutex *urpc_mutex_create( void )
   uRpcMutex *mutex = malloc( sizeof( uRpcMutex ) );
 
   if( mutex == NULL ) return NULL;
-  if( pthread_mutex_init( &mutex->mutex, NULL ) != 0 )
+  if( pthread_mutex_init( (pthread_mutex_t*)mutex, NULL ) != 0 )
     { free( mutex ); return NULL; }
 
   return mutex;
+
+}
+
+
+void urpc_mutex_init( uRpcMutex *mutex )
+{
+
+  pthread_mutex_init( (pthread_mutex_t*)mutex, NULL );
 
 }
 

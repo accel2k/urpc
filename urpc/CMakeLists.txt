@@ -7,6 +7,7 @@ add_library( urpc SHARED
              urpc-network.c
              urpc-${PLATFORM}-network.c
              urpc-${PLATFORM}-mutex.c
+             urpc-${PLATFORM}-rwmutex.c
              urpc-${PLATFORM}-semaphore.c
              urpc-${PLATFORM}-thread.c
              urpc-${PLATFORM}-shm.c )
