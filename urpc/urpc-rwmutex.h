@@ -60,7 +60,7 @@ extern "C" {
 
 #if defined( _WIN32 )
 #include <windows.h>
-typedef CRITICAL_SECTION uRpcRWMutex;
+typedef SRWLOCK uRpcRWMutex;
 #endif
 
 #if defined( __unix__ )

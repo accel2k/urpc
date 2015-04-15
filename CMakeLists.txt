@@ -39,7 +39,8 @@ endif()
 
 # Additional tuning for MSVC on Windows platform
 if( ${CMAKE_C_COMPILER_ID} STREQUAL MSVC AND WIN32 )
-  add_definitions( -D_WIN32_WINNT=0x0501 )
+  add_definitions( -DWINVER=0x0600 )
+  add_definitions( -D_WIN32_WINNT=0x0600 )
   add_definitions( -D_CRT_SECURE_NO_WARNINGS )
   set( PLATFORM "win32" )
 endif()
