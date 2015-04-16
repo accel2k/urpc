@@ -27,7 +27,7 @@
 
 volatile int start = 0;
 
-uRpcRWMutex *mutex;
+uRpcRWMutex mutex;
 
 int counts = 2500000;
 int cur_i, prev_i;
@@ -42,9 +42,9 @@ void* reader_thread_func( void *data )
 
   while( cur_i < counts )
     {
-    urpc_rwmutex_reader_lock( mutex );
+    urpc_rwmutex_reader_lock( &mutex );
     if( prev_i != cur_i - 1 ) printf( "index error %d <=> %d\n", prev_i, cur_i );
-    urpc_rwmutex_reader_unlock( mutex );
+    urpc_rwmutex_reader_unlock( &mutex );
     }
 
   printf( "reader thread %d stopped after %d iterations\n", id, cur_i );
@@ -63,10 +63,10 @@ void* writer_thread_func( void *data )
 
   while( cur_i < counts )
     {
-    urpc_rwmutex_writer_lock( mutex );
+    urpc_rwmutex_writer_lock( &mutex );
     prev_i = cur_i;
     cur_i += 1;
-    urpc_rwmutex_writer_unlock( mutex );
+    urpc_rwmutex_writer_unlock( &mutex );
     }
 
   printf( "writer thread %d stopped after %d iterations\n", id, cur_i );
@@ -93,14 +93,14 @@ int main( int argc, char **argv )
   rthread1 = urpc_thread_create( reader_thread_func, &id1 );
   rthread2 = urpc_thread_create( reader_thread_func, &id2 );
   wthread = urpc_thread_create( writer_thread_func, &id3 );
-  mutex = urpc_rwmutex_create();
+  urpc_rwmutex_init( &mutex );
 
   start = 1;
 
   urpc_thread_destroy( rthread1 );
   urpc_thread_destroy( rthread2 );
   urpc_thread_destroy( wthread );
-  urpc_rwmutex_destroy( mutex );
+  urpc_rwmutex_clear( &mutex );
 
   return 0;
 

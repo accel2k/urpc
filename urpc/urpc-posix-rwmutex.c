@@ -28,20 +28,6 @@
 #include <sys/time.h>
 
 
-uRpcRWMutex *urpc_rwmutex_create( void )
-{
-
-  uRpcRWMutex *rwmutex = malloc( sizeof( uRpcRWMutex ) );
-
-  if( rwmutex == NULL ) return NULL;
-  if( pthread_rwlock_init( (pthread_rwlock_t*)rwmutex, NULL ) != 0 )
-    { free( rwmutex ); return NULL; }
-
-  return rwmutex;
-
-}
-
-
 void urpc_rwmutex_init( uRpcRWMutex *rwmutex )
 {
 
@@ -50,11 +36,10 @@ void urpc_rwmutex_init( uRpcRWMutex *rwmutex )
 }
 
 
-void urpc_rwmutex_destroy( uRpcRWMutex *rwmutex )
+void urpc_rwmutex_clear( uRpcRWMutex *rwmutex )
 {
 
   pthread_rwlock_destroy( (pthread_rwlock_t*)rwmutex );
-  free( rwmutex );
 
 }
 

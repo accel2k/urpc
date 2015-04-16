@@ -25,18 +25,6 @@
 #include <windows.h>
 
 
-uRpcMutex *urpc_mutex_create( void )
-{
-
-  uRpcMutex *mutex = malloc( sizeof( uRpcMutex ) );
-
-  if( mutex == NULL ) return NULL;
-  InitializeCriticalSection( (LPCRITICAL_SECTION)mutex );
-  return mutex;
-
-}
-
-
 void urpc_mutex_init( uRpcMutex *mutex )
 {
 
@@ -45,7 +33,7 @@ void urpc_mutex_init( uRpcMutex *mutex )
 }
 
 
-void urpc_mutex_destroy( uRpcMutex *mutex )
+void urpc_mutex_clear( uRpcMutex *mutex )
 {
 
   DeleteCriticalSection( (LPCRITICAL_SECTION)mutex );

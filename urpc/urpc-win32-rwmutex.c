@@ -25,19 +25,6 @@
 #include <windows.h>
 
 
-uRpcRWMutex *urpc_rwmutex_create( void )
-{
-
-  uRpcRWMutex *rwmutex = malloc( sizeof( SRWLOCK ) );
-
-  if( rwmutex == NULL ) return NULL;
-  InitializeSRWLock( (PSRWLOCK)rwmutex );
-
-  return rwmutex;
-
-}
-
-
 void urpc_rwmutex_init( uRpcRWMutex *rwmutex )
 {
 
@@ -46,10 +33,8 @@ void urpc_rwmutex_init( uRpcRWMutex *rwmutex )
 }
 
 
-void urpc_rwmutex_destroy( uRpcRWMutex *rwmutex )
+void urpc_rwmutex_clear( uRpcRWMutex *rwmutex )
 {
-
-  free( rwmutex );
 
 }
 

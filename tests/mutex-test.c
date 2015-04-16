@@ -27,7 +27,7 @@
 
 volatile int start = 0;
 
-uRpcMutex *mutex;
+uRpcMutex mutex;
 
 int counts = 2500000;
 
@@ -42,9 +42,9 @@ void* thread_func( void *data )
 
   while( i < counts )
     {
-    urpc_mutex_lock( mutex );
+    urpc_mutex_lock( &mutex );
     i++;
-    urpc_mutex_unlock( mutex );
+    urpc_mutex_unlock( &mutex );
     }
 
   printf( "thread %d stopped after %d iterations\n", id, i );
@@ -65,13 +65,13 @@ int main( int argc, char **argv )
 
   thread1 = urpc_thread_create( thread_func, &id1 );
   thread2 = urpc_thread_create( thread_func, &id2 );
-  mutex = urpc_mutex_create();
+  urpc_mutex_init( &mutex );
 
   start = 1;
 
   urpc_thread_destroy( thread1 );
   urpc_thread_destroy( thread2 );
-  urpc_mutex_destroy( mutex );
+  urpc_mutex_clear( &mutex );
 
   return 0;
 
