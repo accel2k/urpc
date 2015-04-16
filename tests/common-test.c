@@ -30,6 +30,8 @@ int main( int argc, char **argv )
   struct addrinfo *addr;
   char *uri;
 
+  urpc_network_init();
+
   uri = "tcp://[::1234:7890]:12345/";
   addr = urpc_get_sockaddr( uri );
   freeaddrinfo( addr );
@@ -49,6 +51,8 @@ int main( int argc, char **argv )
   uri = "tcp://*:12345/";
   addr = urpc_get_sockaddr( uri );
   freeaddrinfo( addr );
+
+  urpc_network_close();
 
   return 0;
 
