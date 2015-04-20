@@ -22,7 +22,11 @@
 
 #include "urpc-semaphore.h"
 
+#include <stdint.h>
 #include <windows.h>
+
+
+#define URPC_SEM_TYPE 0x544D5375
 
 
 typedef struct uRpcSem {
