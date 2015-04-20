@@ -27,7 +27,7 @@
 #include <string.h>
 
 
-#define URPC_MEM_CHUNK_TYPE 0x54434D55
+#define URPC_MEM_CHUNK_TYPE 0x54434D75
 
 #define DATA_ALIGN          ( 2 * sizeof( void* ) )
 #define PAGE_SIZE_ALIGN     4096

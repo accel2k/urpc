@@ -172,4 +172,4 @@ URPC_EXPORT void urpc_rwmutex_writer_unlock( uRpcRWMutex *rwmutex );
 } // extern "C"
 #endif
 
-#endif // _urpc_mutex_h
+#endif // _urpc_rwmutex_h

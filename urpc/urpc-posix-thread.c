@@ -27,20 +27,13 @@
 #include <pthread.h>
 
 
-typedef struct uRpcThread {
-
-  pthread_t thread;
-
-} uRpcThread;
-
-
 uRpcThread *urpc_thread_create( urpc_thread_func func, void *data )
 {
 
   uRpcThread *thread = malloc( sizeof( uRpcThread ) );
 
   if( thread == NULL ) return NULL;
-  if( pthread_create( &thread->thread, NULL, func, data ) != 0 )
+  if( pthread_create( thread, NULL, func, data ) != 0 )
     { free( thread ); return NULL; }
 
   return thread;
@@ -51,7 +44,7 @@ uRpcThread *urpc_thread_create( urpc_thread_func func, void *data )
 void urpc_thread_destroy( uRpcThread *thread )
 {
 
-  while( pthread_join( thread->thread, NULL ) != 0 );
+  while( pthread_join( *thread, NULL ) != 0 );
 
   free( thread );
 
@@ -63,7 +56,7 @@ void *urpc_thread_join( uRpcThread *thread )
 
   void *retval;
 
-  while( pthread_join( thread->thread, &retval ) != 0 );
+  while( pthread_join( *thread, &retval ) != 0 );
 
   return retval;
 

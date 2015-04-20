@@ -25,21 +25,14 @@
 #include <windows.h>
 
 
-typedef struct uRpcThread {
-
-  HANDLE thread;
-
-} uRpcThread;
-
-
 uRpcThread *urpc_thread_create( urpc_thread_func func, void *data )
 {
 
   uRpcThread *thread = malloc( sizeof( uRpcThread ) );
 
   if( thread == NULL ) return NULL;
-  thread->thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)func, data, 0, NULL );
-  if( thread->thread == NULL )
+  *thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)func, data, 0, NULL );
+  if( *thread == NULL )
     { free( thread ); return NULL; }
 
   return thread;
@@ -50,7 +43,7 @@ uRpcThread *urpc_thread_create( urpc_thread_func func, void *data )
 void urpc_thread_destroy( uRpcThread *thread )
 {
 
-  while( WaitForSingleObject( thread->thread, INFINITE ) != WAIT_OBJECT_0 );
+  while( WaitForSingleObject( *thread, INFINITE ) != WAIT_OBJECT_0 );
 
   free( thread );
 
@@ -60,7 +53,7 @@ void urpc_thread_destroy( uRpcThread *thread )
 void *urpc_thread_join( uRpcThread *thread )
 {
 
-  while( WaitForSingleObject( thread->thread, INFINITE ) != WAIT_OBJECT_0 );
+  while( WaitForSingleObject( *thread, INFINITE ) != WAIT_OBJECT_0 );
 
   return NULL;
 

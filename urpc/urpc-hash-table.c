@@ -26,7 +26,7 @@
 #include <stdlib.h>
 
 
-#define URPC_HASH_TABLE_TYPE 0x54544855
+#define URPC_HASH_TABLE_TYPE 0x54544875
 #define HASH_TABLE_SIZE      251
 
 

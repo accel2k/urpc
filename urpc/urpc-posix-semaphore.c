@@ -28,14 +28,19 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <sys/time.h>
 #include <semaphore.h>
 
 
+#define URPC_SEM_TYPE 0x544D5375
+
+
 typedef struct uRpcSem {
 
-  sem_t *sem;
-  char *name;
+  uint32_t          type;                   // Тип объекта uRpcSem.
+  sem_t            *sem;                    // Идентификатор семафора.
+  char             *name;                   // Название семафора.
 
 } uRpcSem;
 
@@ -63,6 +68,8 @@ static uRpcSem *urpc_sem_create_int( const char *name, int initial_value, int cr
   else
     sem->name = NULL;
 
+  sem->type = URPC_SEM_TYPE;
+
   return sem;
 
 }
@@ -87,6 +94,8 @@ uRpcSem *urpc_sem_open( const char *name )
 void urpc_sem_destroy( uRpcSem *sem )
 {
 
+  if( sem->type != URPC_SEM_TYPE ) return;
+
   sem_close( sem->sem );
   if( sem->name != NULL ) sem_unlink( sem->name );
   free( sem->name );
@@ -106,6 +115,8 @@ void urpc_sem_remove( const char *name )
 void urpc_sem_lock( uRpcSem *sem )
 {
 
+  if( sem->type != URPC_SEM_TYPE ) return;
+
   while( sem_wait( sem->sem ) != 0 );
 
 }
@@ -114,7 +125,9 @@ void urpc_sem_lock( uRpcSem *sem )
 int urpc_sem_trylock( uRpcSem *sem )
 {
 
-  return sem_trywait( sem->sem ) == 0 ? 1 : 0;
+  if( sem->type != URPC_SEM_TYPE ) return -1;
+
+  return sem_trywait( sem->sem ) == 0 ? 0 : -1;
 
 }
 
@@ -124,6 +137,8 @@ int urpc_sem_timedlock( uRpcSem *sem, double time )
 
   struct timeval cur_time;
   struct timespec sem_wait_time;
+
+  if( sem->type != URPC_SEM_TYPE ) return -1;
 
   gettimeofday( &cur_time, NULL );
   sem_wait_time.tv_sec = (int)time + cur_time.tv_sec;
@@ -152,6 +167,8 @@ int urpc_sem_timedlock( uRpcSem *sem, double time )
 
 void urpc_sem_unlock( uRpcSem *sem )
 {
+
+  if( sem->type != URPC_SEM_TYPE ) return;
 
   while( sem_post( sem->sem ) != 0 );
 

@@ -23,13 +23,19 @@
 #include "urpc-shm.h"
 
 #include <windows.h>
+#include <stdint.h>
+
+
+#define URPC_SHM_TYPE 0x54485375
 
 
 typedef struct uRpcShm {
 
-  HANDLE shm;
-  int ro;
-  void *maddr;
+  uint32_t          type;                   // Тип объекта uRpcShm.
+
+  HANDLE            shm;                    // Идентификатор сегмента общей памяти.
+  int               ro;                     // Признак доступа только для чтения.
+  void             *maddr;                  // Адрес сегмента общей памяти.
 
 } uRpcShm;
 
@@ -90,6 +96,8 @@ uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size )
 void urpc_shm_destroy( uRpcShm *shm )
 {
 
+  if( shm->type != URPC_SHM_TYPE ) return;
+
   if( shm->maddr != NULL ) UnmapViewOfFile( shm->maddr );
   CloseHandle( shm->shm );
 
@@ -104,7 +112,11 @@ void urpc_shm_remove( const char *name )
 void *urpc_shm_map( uRpcShm *shm )
 {
 
-  DWORD pflags = shm->ro ? FILE_MAP_READ : FILE_MAP_WRITE;
+  DWORD pflags;
+
+  if( shm->type != URPC_SHM_TYPE ) return NULL;
+
+  pflags = shm->ro ? FILE_MAP_READ : FILE_MAP_WRITE;
 
   shm->maddr = MapViewOfFile( shm->shm, pflags, 0, 0, 0 );
   return shm->maddr;

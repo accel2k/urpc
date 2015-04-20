@@ -26,16 +26,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/mman.h>
+
+
+#define URPC_SHM_TYPE 0x54485375
 
 
 typedef struct uRpcShm {
 
-  int shm_id;
-  unsigned long size;
-  int ro;
-  char *name;
-  void *maddr;
+  uint32_t          type;                   // Тип объекта uRpcShm.
+
+  int               shm_id;                 // Идентификатор сегмента общей памяти.
+  unsigned long     size;                   // Размер сегмента общей памяти.
+  int               ro;                     // Признак доступа только для чтения.
+  char             *name;                   // Название сегмента общей памяти.
+  void             *maddr;                  // Адрес сегмента общей памяти.
 
 } uRpcShm;
 
@@ -67,6 +73,7 @@ static uRpcShm *urpc_shm_create_int( const char *name, unsigned long size, int c
   shm->ro = ro;
   shm->size = size;
   shm->maddr = NULL;
+  shm->type = URPC_SHM_TYPE;
 
   return shm;
 
@@ -100,6 +107,8 @@ uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size )
 void urpc_shm_destroy( uRpcShm *shm )
 {
 
+  if( shm->type != URPC_SHM_TYPE ) return;
+
   if( shm->maddr != NULL ) munmap( shm->maddr, shm->size );
   if( shm->name != NULL ) shm_unlink( shm->name );
   free( shm->name );
@@ -119,7 +128,11 @@ void urpc_shm_remove( const char *name )
 void *urpc_shm_map( uRpcShm *shm )
 {
 
-  int pflags = shm->ro ? PROT_READ : PROT_READ | PROT_WRITE;
+  int pflags;
+
+  if( shm->type != URPC_SHM_TYPE ) return NULL;
+
+  pflags = shm->ro ? PROT_READ : PROT_READ | PROT_WRITE;
 
   shm->maddr = mmap( NULL, shm->size, pflags, MAP_SHARED, shm->shm_id, 0 );
   if( shm->maddr == MAP_FAILED ) return NULL;

@@ -54,7 +54,15 @@ extern "C" {
 #endif
 
 
-typedef struct uRpcThread uRpcThread;
+#if defined( _WIN32 )
+#include <windows.h>
+typedef HANDLE uRpcThread;
+#endif
+
+#if defined( __unix__ )
+#include <pthread.h>
+typedef pthread_t uRpcThread;
+#endif
 
 
 /*! Тип функции запускаемой в качестве потока.
