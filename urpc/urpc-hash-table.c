@@ -55,50 +55,50 @@ typedef struct uRpcHashTable {
 URPC_EXPORT uRpcHashTable *urpc_hash_table_create( void )
 {
 
-  uRpcHashTable *uhash;
+  uRpcHashTable *hash_table;
   int i;
 
-  uhash = malloc( HASH_TABLE_SIZE );
-  if( uhash == NULL ) return NULL;
+  hash_table = malloc( HASH_TABLE_SIZE );
+  if( hash_table == NULL ) return NULL;
 
-  uhash->nodes = malloc( HASH_TABLE_SIZE * sizeof( HashNode* ) );
-  if( uhash->nodes == NULL ) { free( uhash ); return NULL; }
+  hash_table->nodes = malloc( HASH_TABLE_SIZE * sizeof( HashNode* ) );
+  if( hash_table->nodes == NULL ) { free( hash_table ); return NULL; }
 
-  uhash->chunks = urpc_mem_chunk_create( sizeof( HashNode ) );
-  if( uhash->chunks == NULL ) { free( uhash->nodes ); free( uhash ); return NULL; }
+  hash_table->chunks = urpc_mem_chunk_create( sizeof( HashNode ) );
+  if( hash_table->chunks == NULL ) { free( hash_table->nodes ); free( hash_table ); return NULL; }
 
-  uhash->nnodes = 0;
+  hash_table->nnodes = 0;
   for( i = 0; i < HASH_TABLE_SIZE; i++ )
-    uhash->nodes[i] = NULL;
+    hash_table->nodes[i] = NULL;
 
-  uhash->type = URPC_HASH_TABLE_TYPE;
+  hash_table->type = URPC_HASH_TABLE_TYPE;
 
-  return uhash;
+  return hash_table;
 
 }
 
 
-URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *uhash )
+URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *hash_table )
 {
 
-  if( uhash->type != URPC_HASH_TABLE_TYPE ) return;
+  if( hash_table->type != URPC_HASH_TABLE_TYPE ) return;
 
-  urpc_mem_chunk_destroy( uhash->chunks );
-  free( uhash->nodes );
-  free( uhash );
+  urpc_mem_chunk_destroy( hash_table->chunks );
+  free( hash_table->nodes );
+  free( hash_table );
 
 }
 
 
-URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *uhash, uint32_t key, void *value )
+URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key, void *value )
 {
 
   HashNode *parrent = NULL;
   HashNode *node;
 
-  if( uhash->type != URPC_HASH_TABLE_TYPE ) return -1;
+  if( hash_table->type != URPC_HASH_TABLE_TYPE ) return -1;
 
-  node = uhash->nodes[ key % HASH_TABLE_SIZE ];
+  node = hash_table->nodes[ key % HASH_TABLE_SIZE ];
   while( node != NULL )
     {
     if( node->key == key ) return 1;
@@ -106,13 +106,13 @@ URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *uhash, uint32_t key, void
     node = node->next;
     }
 
-  node = urpc_mem_chunk_alloc( uhash->chunks );
+  node = urpc_mem_chunk_alloc( hash_table->chunks );
   if( node == NULL ) return -1;
   node->key = key;
   node->value = value;
   node->next = NULL;
 
-  if( parrent == NULL ) uhash->nodes[ key % HASH_TABLE_SIZE ] = node;
+  if( parrent == NULL ) hash_table->nodes[ key % HASH_TABLE_SIZE ] = node;
   else parrent->next = node;
 
   return 0;
@@ -120,14 +120,14 @@ URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *uhash, uint32_t key, void
 }
 
 
-URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *uhash, uint32_t key )
+URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key )
 {
 
   HashNode *node;
 
-  if( uhash->type != URPC_HASH_TABLE_TYPE ) return NULL;
+  if( hash_table->type != URPC_HASH_TABLE_TYPE ) return NULL;
 
-  node = uhash->nodes[ key % HASH_TABLE_SIZE ];
+  node = hash_table->nodes[ key % HASH_TABLE_SIZE ];
   while( node != NULL )
     {
     if( node->key == key ) return node->value;
@@ -139,22 +139,22 @@ URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *uhash, uint32_t key )
 }
 
 
-URPC_EXPORT int urpc_hash_table_remove( uRpcHashTable *uhash, uint32_t key )
+URPC_EXPORT int urpc_hash_table_remove( uRpcHashTable *hash_table, uint32_t key )
 {
 
   HashNode *parrent = NULL;
   HashNode *node;
 
-  if( uhash->type != URPC_HASH_TABLE_TYPE ) return -1;
+  if( hash_table->type != URPC_HASH_TABLE_TYPE ) return -1;
 
-  node = uhash->nodes[ key % HASH_TABLE_SIZE ];
+  node = hash_table->nodes[ key % HASH_TABLE_SIZE ];
   while( node != NULL )
     {
     if( node->key == key )
       {
       if( parrent != NULL ) parrent = node->next;
-      else uhash->nodes[ key % HASH_TABLE_SIZE ] = node->next;
-      urpc_mem_chunk_free( uhash->chunks, node );
+      else hash_table->nodes[ key % HASH_TABLE_SIZE ] = node->next;
+      urpc_mem_chunk_free( hash_table->chunks, node );
       return 0;
       }
     parrent = node;

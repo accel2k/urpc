@@ -76,12 +76,12 @@ URPC_EXPORT uRpcHashTable *urpc_hash_table_create( void );
  *
  * Функция удаляет все указатели из таблицы, а затем удаляет саму таблицу.
  *
- * \param uhash указатель на хэш таблицу.
+ * \param hash_table указатель на хэш таблицу.
  *
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *uhash );
+URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *hash_table );
 
 
 /*! Добавление ключа в хэш таблицу.
@@ -90,39 +90,39 @@ URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *uhash );
  * Если указанный ключ уже существует, функция вернёт значение большее нуля. При этом
  * в таблице останется предыдущий указатель.
  *
- * \param uhash указатель на хэш таблицу;
+ * \param hash_table указатель на хэш таблицу;
  * \param key значение ключа;
  * \param value указатель на данные.
  *
  * \return 0 - если ключ добавлен, 1 - если ключ уже существует, -1 в случае ошибки.
  *
 */
-URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *uhash, uint32_t key, void *value );
+URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key, void *value );
 
 
 /*! Поиск указателя по ключу.
  *
  * Функция ищет в таблице ключ и возвращает указатель на данные.
  *
- * \param uhash указатель на хэш таблицу;
+ * \param hash_table указатель на хэш таблицу;
  * \param key значение ключа.
  *
  * \return Указатель на данные или NULL если такого ключа нет в таблице.
  *
  *
 */
-URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *uhash, uint32_t key );
+URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key );
 
 
 /*! Удаление ключа из таблицы.
  *
- * \param uhash указатель на хэш таблицу;
+ * \param hash_table указатель на хэш таблицу;
  * \param key значение ключа.
  *
  * \return 0 если ключ был удалён, 1 если такого ключа нет, -1 в случае ошибки.
  *
 */
-URPC_EXPORT int urpc_hash_table_remove( uRpcHashTable *uhash, uint32_t key );
+URPC_EXPORT int urpc_hash_table_remove( uRpcHashTable *hash_table, uint32_t key );
 
 
 #ifdef __cplusplus

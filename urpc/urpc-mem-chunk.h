@@ -70,33 +70,33 @@ URPC_EXPORT uRpcMemChunk *urpc_mem_chunk_create( int chunk_size );
  * Функция освобождает всю память занятую объектами. С этого момента
  * использовать указатели на объекты нельзя.
  *
- * \param umem_chunk указатель на блок объектов.
+ * \param mem_chunk указатель на блок объектов.
  *
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_mem_chunk_destroy( uRpcMemChunk *umem_chunk );
+URPC_EXPORT void urpc_mem_chunk_destroy( uRpcMemChunk *mem_chunk );
 
 
 /*! Выделение памяти под новый объект.
  *
- * \param umem_chunk указатель на блок объектов.
+ * \param mem_chunk указатель на блок объектов.
  *
  * \return Указатель на память для нового объекта или NULL в случае ошибки.
  *
 */
-URPC_EXPORT void *urpc_mem_chunk_alloc( uRpcMemChunk *umem_chunk );
+URPC_EXPORT void *urpc_mem_chunk_alloc( uRpcMemChunk *mem_chunk );
 
 
 /*! Освобождение памяти используемой объектом.
  *
- * \param umem_chunk указатель на блок объектов;
+ * \param mem_chunk указатель на блок объектов;
  * \param chunk указатель на память освобождаемого объекта.
  *
  * \return 0 - если память успешно особождена, -1 в случае ошибки.
  *
 */
-URPC_EXPORT int urpc_mem_chunk_free( uRpcMemChunk *umem_chunk, void *chunk );
+URPC_EXPORT int urpc_mem_chunk_free( uRpcMemChunk *mem_chunk, void *chunk );
 
 
 #ifdef __cplusplus
