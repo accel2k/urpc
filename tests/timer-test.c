@@ -23,12 +23,20 @@
 #include <stdio.h>
 #include "urpc-timer.h"
 
+#if defined( _WIN32 )
+#include <Windows.h>
+#endif
+
 
 int main( int argc, char **argv )
 {
 
   double elapsed;
   uRpcTimer *timer = urpc_timer_create();
+
+#if defined( _WIN32 )
+  timeBeginPeriod( 1 );
+#endif
 
   urpc_timer_sleep( 0.025 );
   elapsed = urpc_timer_elapsed( timer );
