@@ -38,9 +38,6 @@ typedef struct uRpcTimer {
 } uRpcTimer;
 
 
-static int urpc_timer_initialized = 0;
-
-
 uRpcTimer *urpc_timer_create( void )
 {
 
