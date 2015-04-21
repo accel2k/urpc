@@ -6,6 +6,7 @@ add_library( urpc SHARED
              urpc-mem-chunk.c
              urpc-network.c
              urpc-${PLATFORM}-network.c
+             urpc-${PLATFORM}-timer.c
              urpc-${PLATFORM}-mutex.c
              urpc-${PLATFORM}-rwmutex.c
              urpc-${PLATFORM}-semaphore.c
