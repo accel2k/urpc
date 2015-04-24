@@ -177,7 +177,7 @@ void *urpc_test_client_proc( void *data )
 int main( int argc, char **argv )
 {
 
-  uRpcServer *server;
+  uRpcServer *server = NULL;
   uRpcThread **clients;
   int local_running_clients;
   int i;
@@ -272,7 +272,7 @@ int main( int argc, char **argv )
     urpc_mutex_unlock( &lock );
   } while( local_running_clients != 0 );
 
-  urpc_server_destroy( server );
+  if( run_server ) urpc_server_destroy( server );
 
   return 0;
 
