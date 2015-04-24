@@ -37,7 +37,6 @@ void urpc_mutex_clear( uRpcMutex *mutex )
 {
 
   DeleteCriticalSection( (LPCRITICAL_SECTION)mutex );
-  free( mutex );
 
 }
 

@@ -63,9 +63,9 @@ int main( int argc, char **argv )
   uRpcThread *thread1;
   uRpcThread *thread2;
 
+  urpc_mutex_init( &mutex );
   thread1 = urpc_thread_create( thread_func, &id1 );
   thread2 = urpc_thread_create( thread_func, &id2 );
-  urpc_mutex_init( &mutex );
 
   start = 1;
 
