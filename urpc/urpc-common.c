@@ -39,20 +39,20 @@
 #endif
 
 
-uRpcTransportType urpc_get_transport_type( const char *uri )
+uRpcType urpc_get_type( const char *uri )
 {
 
-  uRpcTransportType transport_type;
+  uRpcType urpc_type;
   char uri_prefix[6];
   int i;
 
-  if( strlen( uri ) < sizeof( "ttt://*" ) ) return URPC_TRANSPORT_UNKNOWN;
+  if( strlen( uri ) < sizeof( "ttt://*" ) ) return URPC_UNKNOWN;
   for( i = 0; i < sizeof( uri_prefix ); i++ ) uri_prefix[i] = tolower( uri[i] );
 
-  if( memcmp( uri_prefix, "udp://", 6 ) == 0 ) transport_type = URPC_TRANSPORT_UDP;
-  if( memcmp( uri_prefix, "tcp://", 6 ) == 0 ) transport_type = URPC_TRANSPORT_TCP;
-  if( memcmp( uri_prefix, "shm://", 6 ) == 0 ) transport_type = URPC_TRANSPORT_SHM;
-  return transport_type;
+  if( memcmp( uri_prefix, "udp://", 6 ) == 0 ) urpc_type = URPC_UDP;
+  if( memcmp( uri_prefix, "tcp://", 6 ) == 0 ) urpc_type = URPC_TCP;
+  if( memcmp( uri_prefix, "shm://", 6 ) == 0 ) urpc_type = URPC_SHM;
+  return urpc_type;
 
 }
 
@@ -60,7 +60,7 @@ uRpcTransportType urpc_get_transport_type( const char *uri )
 struct addrinfo *urpc_get_sockaddr( const char *uri )
 {
 
-  uRpcTransportType transport_type = urpc_get_transport_type( uri );
+  uRpcType urpc_type = urpc_get_type( uri );
 
   char *delim = NULL;
   int offset = 0;
@@ -76,7 +76,7 @@ struct addrinfo *urpc_get_sockaddr( const char *uri )
   int host_len;
   int gai_ret;
 
-  if( transport_type == URPC_TRANSPORT_UNKNOWN || transport_type == URPC_TRANSPORT_SHM )
+  if( urpc_type == URPC_UNKNOWN || urpc_type == URPC_SHM )
     return NULL;
 
   // Для IPV6 разделитель - ']:', для IPV4 и имени - ':'.
@@ -102,7 +102,7 @@ struct addrinfo *urpc_get_sockaddr( const char *uri )
   // Перевод uri в сетевой адрес.
   memset( &addr_hint, 0, sizeof( addr_hint ) );
   addr_hint.ai_family = AF_UNSPEC;
-  if( transport_type == URPC_TRANSPORT_TCP )
+  if( urpc_type == URPC_TCP )
     {
     addr_hint.ai_socktype = SOCK_STREAM;
     addr_hint.ai_protocol = IPPROTO_TCP;

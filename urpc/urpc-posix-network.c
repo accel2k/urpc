@@ -37,7 +37,7 @@ void urpc_network_close( void )
 }
 
 
-int urpc_network_error( void )
+int urpc_network_last_error( void )
 {
 
   return errno;
@@ -45,7 +45,7 @@ int urpc_network_error( void )
 }
 
 
-const char* urpc_network_error_str( void )
+const char* urpc_network_last_error_str( void )
 {
 
   return strerror( errno );

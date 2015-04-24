@@ -60,27 +60,27 @@
 #define INT64_FROM_LE(val)    (UINT64_SWAP_LE_BE (val))
 #define UINT64_FROM_LE(val)   (UINT64_SWAP_LE_BE (val))
 
-#define INT32_TO_BE(val)      val
-#define UINT32_TO_BE(val)     val
-#define INT64_TO_BE(val)      val
-#define UINT64_TO_BE(val)     val
+#define INT32_TO_BE(val)      (val)
+#define UINT32_TO_BE(val)     (val)
+#define INT64_TO_BE(val)      (val)
+#define UINT64_TO_BE(val)     (val)
 
-#define INT32_FROM_BE(val)    val
-#define UINT32_FROM_BE(val)   val
-#define INT64_FROM_BE(val)    val
-#define UINT64_FROM_BE(val)   val
+#define INT32_FROM_BE(val)    (val)
+#define UINT32_FROM_BE(val)   (val)
+#define INT64_FROM_BE(val)    (val)
+#define UINT64_FROM_BE(val)   (val)
 
 #else
 
-#define INT32_TO_LE(val)      val
-#define UINT32_TO_LE(val)     val
-#define INT64_TO_LE(val)      val
-#define UINT64_TO_LE(val)     val
+#define INT32_TO_LE(val)      (val)
+#define UINT32_TO_LE(val)     (val)
+#define INT64_TO_LE(val)      (val)
+#define UINT64_TO_LE(val)     (val)
 
-#define INT32_FROM_LE(val)    val
-#define UINT32_FROM_LE(val)   val
-#define INT64_FROM_LE(val)    val
-#define UINT64_FROM_LE(val)   val
+#define INT32_FROM_LE(val)    (val)
+#define UINT32_FROM_LE(val)   (val)
+#define INT64_FROM_LE(val)    (val)
+#define UINT64_FROM_LE(val)   (val)
 
 #define INT32_TO_BE(val)      (UINT32_SWAP_LE_BE (val))
 #define UINT32_TO_BE(val)     (UINT32_SWAP_LE_BE (val))

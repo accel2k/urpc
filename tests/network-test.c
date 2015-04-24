@@ -38,7 +38,7 @@ void* server_thread( void *data )
   SOCKET client;
   SOCKET listener;
   struct addrinfo *addr;
-  uRpcTransportType transport_type = urpc_get_transport_type( uri );
+  uRpcType urpc_type = urpc_get_type( uri );
   int proto_style;
 
   struct sockaddr *client_addr;
@@ -46,9 +46,9 @@ void* server_thread( void *data )
 
   char buffer[128];
 
-  if( transport_type != URPC_TRANSPORT_UDP && transport_type != URPC_TRANSPORT_TCP ) return NULL;
-  if( transport_type == URPC_TRANSPORT_UDP ) proto_style = SOCK_DGRAM;
-  if( transport_type == URPC_TRANSPORT_TCP ) proto_style = SOCK_STREAM;
+  if( urpc_type != URPC_UDP && urpc_type != URPC_TCP ) return NULL;
+  if( urpc_type == URPC_UDP ) proto_style = SOCK_DGRAM;
+  if( urpc_type == URPC_TCP ) proto_style = SOCK_STREAM;
 
   if( ( addr = urpc_get_sockaddr( uri ) ) == NULL )
     {
@@ -78,7 +78,7 @@ void* server_thread( void *data )
   client_addr_len = addr->ai_addrlen;
   freeaddrinfo( addr );
 
-  if( transport_type == URPC_TRANSPORT_TCP )
+  if( urpc_type == URPC_TCP )
     if( listen( listener, 1 ) != 0 )
       {
       printf( "can't listen on socket\n" );
@@ -87,12 +87,12 @@ void* server_thread( void *data )
 
   start = 1;
 
-  if( transport_type == URPC_TRANSPORT_TCP )
+  if( urpc_type == URPC_TCP )
     while( ( client = accept( listener, client_addr, &client_addr_len ) ) < 0  );
   else
     client = listener;
 
-  if( transport_type == URPC_TRANSPORT_TCP )
+  if( urpc_type == URPC_TCP )
     if( send( client, "server say hello", 17, 0 ) < 0 )
       {
       printf( "server failed to send data\n" );
@@ -108,7 +108,7 @@ void* server_thread( void *data )
   else
     printf( "client data: %s\n", buffer );
 
-  if( transport_type == URPC_TRANSPORT_UDP )
+  if( urpc_type == URPC_UDP )
     if( sendto( client, "server say hello", 17, 0, client_addr, client_addr_len ) < 0 )
       {
       printf( "server failed to send data %d\n", errno );
@@ -130,14 +130,14 @@ void* client_thread( void *data )
 
   SOCKET client;
   struct addrinfo *addr;
-  uRpcTransportType transport_type = urpc_get_transport_type( uri );
+  uRpcType urpc_type = urpc_get_type( uri );
   int proto_style;
 
   char buffer[128];
 
-  if( transport_type != URPC_TRANSPORT_UDP && transport_type != URPC_TRANSPORT_TCP ) return NULL;
-  if( transport_type == URPC_TRANSPORT_UDP ) proto_style = SOCK_DGRAM;
-  if( transport_type == URPC_TRANSPORT_TCP ) proto_style = SOCK_STREAM;
+  if( urpc_type != URPC_UDP && urpc_type != URPC_TCP ) return NULL;
+  if( urpc_type == URPC_UDP ) proto_style = SOCK_DGRAM;
+  if( urpc_type == URPC_TCP ) proto_style = SOCK_STREAM;
 
   if( ( addr = urpc_get_sockaddr( uri ) ) == NULL )
     {

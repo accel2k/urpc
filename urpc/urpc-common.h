@@ -23,18 +23,43 @@
 #ifndef _urpc_common_h
 #define _urpc_common_h
 
+#include <urpc-types.h>
 #include <urpc-exports.h>
 #include <urpc-network.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-typedef enum { URPC_TRANSPORT_UNKNOWN = 0, URPC_TRANSPORT_UDP, URPC_TRANSPORT_TCP, URPC_TRANSPORT_SHM } uRpcTransportType;
+/*! \brief Все поля RPC заголовка представлены в сетевом (big endian) порядке следования байт. */
+#define URPC_MAGIC                         0x43505275  /*!< Идентификатор RPC пакета - строка 'uRPC'. */
+#define URPC_VERSION                       0x00030000  /*!< Версия протокола uRPC - старшие 16 бит - MAJOR, младшие 16 бит - MINOR. */
+
+/*! \brief Системные идентификаторы параметров. */
+#define URPC_PARAM_PROC                    0x00010000  /*!< Идентификатор вызываемой функции - guint32. */
+#define URPC_PARAM_STATUS                  0x00020000  /*!< Идентификатор статуса - guint32. */
+#define URPC_PARAM_CAP                     0x00030000  /*!< Идентификатор возможностей сервера. */
+
+/*! \brief Системные идентификаторы процедур. */
+#define URPC_PROC_GET_CAP                  0x00010000  /*!< Получение возможностей сервера. */
+#define URPC_PROC_LOGIN                    0x00020000  /*!< Начало сессии. */
+#define URPC_PROC_LOGOUT                   0x00030000  /*!< Окончание сессии. */
 
 
-URPC_EXPORT uRpcTransportType urpc_get_transport_type( const char *uri );
+typedef struct uRpcHeader {
+
+  uint32_t          magic;
+  uint32_t          version;
+  uint32_t          session;
+  uint32_t          size;
+
+} uRpcHeader;
+
+
+URPC_EXPORT uRpcType urpc_get_type( const char *uri );
+
 
 URPC_EXPORT struct addrinfo *urpc_get_sockaddr( const char *uri );
 
