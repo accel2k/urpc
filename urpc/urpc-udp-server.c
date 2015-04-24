@@ -91,7 +91,7 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, ui
     urpc_udp_server->urpc_data[i] = urpc_data_create( max_data_size, sizeof( uRpcHeader ), NULL, NULL, 0 );
     if( urpc_udp_server->urpc_data[i] == NULL ) goto urpc_udp_server_create_fail;
     }
-  goto urpc_udp_server_create_fail;
+
   // Адрес сервера.
   addr = urpc_get_sockaddr( uri );
   if( addr == NULL ) goto urpc_udp_server_create_fail;
