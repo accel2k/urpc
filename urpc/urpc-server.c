@@ -323,7 +323,7 @@ void urpc_server_destroy( uRpcServer *urpc_server )
 {
 
   uint32_t started_servers;
-  int i;
+  unsigned int i;
 
   if( urpc_server->urpc_server_type != URPC_SERVER_TYPE ) return;
 
@@ -387,7 +387,7 @@ int urpc_server_bind( uRpcServer *urpc_server )
 
   uint32_t started_servers = 0;
   uint32_t fail = 0;
-  int i;
+  unsigned int i;
 
   if( urpc_server->urpc_server_type != URPC_SERVER_TYPE ) return -1;
 

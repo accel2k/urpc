@@ -32,8 +32,8 @@
 #elif defined ( _MSC_VER )
 
 #include <stdlib.h>
-#define UINT32_SWAP_LE_BE( val )    _byteswap_ulong( (int32_t)val )
-#define UINT64_SWAP_LE_BE( val )    _byteswap_uint64( (int64_t)val )
+#define UINT32_SWAP_LE_BE( val )    _byteswap_ulong( (uint32_t)val )
+#define UINT64_SWAP_LE_BE( val )    _byteswap_uint64( (uint64_t)val )
 
 #else
 

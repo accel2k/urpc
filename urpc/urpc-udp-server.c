@@ -54,7 +54,7 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, ui
 
   uRpcUDPServer *urpc_udp_server = NULL;
   struct addrinfo *addr = NULL;
-  int i;
+  unsigned int i;
 
   // Инициализация сети.
   if( !urpc_server_initialized )
@@ -129,7 +129,7 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, ui
 void urpc_udp_server_destroy( uRpcUDPServer *urpc_udp_server )
 {
 
-  int i;
+  unsigned int i;
 
   if( urpc_udp_server->urpc_udp_server_type != URPC_UDP_SERVER_TYPE ) return;
 

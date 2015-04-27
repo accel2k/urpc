@@ -35,13 +35,13 @@
 
 
 char *uri = NULL;
-int payload_size = 0;
-int threads_num = 0;
-int requests_num = 0;
-int iterations_num = 0;
-int run_server = 0;
-int run_clients = 0;
-int show_help = 0;
+unsigned int payload_size = 0;
+unsigned int threads_num = 0;
+unsigned int requests_num = 0;
+unsigned int iterations_num = 0;
+unsigned int run_server = 0;
+unsigned int run_clients = 0;
+unsigned int show_help = 0;
 
 volatile int running_clients = 0;
 volatile int start = 0;
@@ -72,7 +72,7 @@ int urpc_test_proc( uint32_t session, uRpcData *urpc_data, void *proc_data, void
 
   uint8_t *array;
   uint32_t array_size;
-  int i;
+  unsigned int i;
 
   array = urpc_data_get( urpc_data, URPC_TEST_PARAM_ARRAY, &array_size );
 
@@ -103,7 +103,7 @@ void *urpc_test_client_proc( void *data )
   uint8_t *array1;
   uint8_t *array2;
   uint32_t array_size;
-  int i, j;
+  unsigned int i, j;
 
   client = urpc_client_create( uri, URPC_DEFAULT_DATA_SIZE, URPC_DEFAULT_CLIENT_TIMEOUT );
   if( client == NULL )
@@ -182,7 +182,7 @@ int main( int argc, char **argv )
   uRpcServer *server = NULL;
   uRpcThread **clients;
   int local_running_clients;
-  int i;
+  unsigned int i;
 
   { // Разбор командной строки.
 
