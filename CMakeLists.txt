@@ -45,9 +45,9 @@ if( ${CMAKE_C_COMPILER_ID} STREQUAL MSVC AND WIN32 )
 endif()
 
 # Endianness check
-test_big_endian( BIG_ENDIAN )
-if( ${BIG_ENDIAN} )
-  add_definitions( -DBIG_ENDIAN )
+test_big_endian( URPC_BIG_ENDIAN )
+if( ${URPC_BIG_ENDIAN} )
+  add_definitions( -DURPC_BIG_ENDIAN )
 endif()
 
 #
