@@ -97,6 +97,8 @@ void *urpc_test_client_proc( void *data )
   uRpcClient *client;
   uint32_t client_id;
 
+  uRpcData *urpc_data = NULL;
+
   uRpcTimer *timer;
   double elapsed = 0.0;
 
@@ -131,8 +133,6 @@ void *urpc_test_client_proc( void *data )
   for( i = 0; i < requests_num; i++ )
     {
 
-    uRpcData *urpc_data;
-
     for( j = 0; j < payload_size; j++ ) array1[j] = i + j;
 
     urpc_data = urpc_client_lock( client );
@@ -152,13 +152,14 @@ void *urpc_test_client_proc( void *data )
         { fail = 1; break; }
 
     urpc_client_unlock( client );
+    urpc_data = NULL;
 
     }
 
   elapsed = urpc_timer_elapsed( timer );
 
-  if( fail )
-    printf( "client %d failed\n", client_id );
+  if( urpc_data != NULL ) urpc_client_unlock( client );
+  if( fail ) printf( "client %d failed\n", client_id );
 
   printf( "client %d: %.0lf rpc/s\n", client_id, requests_num / elapsed );
 
