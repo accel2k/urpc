@@ -44,10 +44,11 @@
 /*! \brief Статус выполнения. */
 #define URPC_STATUS_OK                     0x00010000  /*!< Выполнено. */
 #define URPC_STATUS_FAIL                   0x00020000  /*!< Общая ошибка. */
-#define URPC_STATUS_TRANSPORT_ERROR        0x00030000  /*!< Ошибка при передаче данных. */
-#define URPC_STATUS_VERSION_MISMATCH       0x00040000  /*!< Не совпадают версии протоколов. */
-#define URPC_STATUS_TOO_MANY_CONNECTIONS   0x00050000  /*!< Число уже подключенных клиентов больше установленного сервером ограничения. */
-#define URPC_STATUS_AUTH_ERROR             0x00060000  /*!< Ошибка при проверке аутентификации. */
+#define URPC_STATUS_TIMEOUT                0x00030000  /*!< Превышено время ожидания ответа. */
+#define URPC_STATUS_TRANSPORT_ERROR        0x00040000  /*!< Ошибка при передаче данных. */
+#define URPC_STATUS_VERSION_MISMATCH       0x00050000  /*!< Не совпадают версии протоколов. */
+#define URPC_STATUS_TOO_MANY_CONNECTIONS   0x00060000  /*!< Число уже подключенных клиентов больше установленного сервером ограничения. */
+#define URPC_STATUS_AUTH_ERROR             0x00070000  /*!< Ошибка при проверке аутентификации. */
 
 
 typedef enum { URPC_UNKNOWN = 0, URPC_UDP, URPC_TCP, URPC_SHM } uRpcType;

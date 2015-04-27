@@ -174,11 +174,11 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
 
     urpc_data_set_data_size( urpc_udp_client->urpc_data, URPC_DATA_INPUT, recv_size - URPC_HEADER_SIZE );
 
-    break;
+    return URPC_STATUS_OK;
 
     }
 
-  return URPC_STATUS_OK;
+  return URPC_STATUS_TIMEOUT;
 
 }
 
