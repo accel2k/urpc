@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "urpc-hash-table.h"
 
 
@@ -33,11 +34,15 @@ int main( int argc, char **argv )
   uint32_t key;
   int i;
 
-  uhash = urpc_hash_table_create();
+  uhash = urpc_hash_table_create( free );
 
   for( key = 0; key < 100000; key++ )
-    if( urpc_hash_table_insert( uhash, key, (void*)key ) != 0 )
+    {
+    uint32_t *value = malloc( sizeof( uint32_t ) );
+    *value = key;
+    if( urpc_hash_table_insert( uhash, key, value ) != 0 )
       printf( "error inserting key %d\n", key );
+    }
 
   for( key = 0; key < 100000; key += 10000 )
     if( urpc_hash_table_insert( uhash, key, (void*)key ) <= 0 )
@@ -45,8 +50,10 @@ int main( int argc, char **argv )
 
   for( i = 0; i < 10; i++ )
     for( key = 0; key < 100000; key++ )
-      if( urpc_hash_table_find( uhash, key ) != (void*)key )
-        printf( "error finding key %d\n", key );
+      {
+      uint32_t *value = urpc_hash_table_find( uhash, key );
+      if( *value != key ) printf( "error finding key %d\n", key );
+      }
 
   for( key = 0; key < 100000; key++ )
     if( urpc_hash_table_remove( uhash, key ) != 0 )

@@ -34,8 +34,9 @@
  * таблице, но при этом возрастают накладные расходы на добавление и поиск.
  *
  * Хэш таблица сохраняет указатели на данные ассоциированные с ключами и по запросу возвращает эти
- * указатели. Удаление ключа из таблицы или удаление всей таблицы целиком не приводит к каким-либо
- * действиям над указателями.
+ * указатели. При удалении ключа или всей таблицы целиком может быть вызвана функция #urpc_hash_table_destroy_callback
+ * для выполнения действий связанных с освобождением памяти выделенной для значения. Вызываемая функция
+ * указывается при создании таблицы.
  *
  * Все функции библиотеки используют указатель на структуру uRpcHashTable.
  *
@@ -62,14 +63,28 @@ extern "C" {
 typedef struct uRpcHashTable uRpcHashTable;
 
 
+/*! Тип функции вызываемой при удалении ключа из массива.
+ *
+ * Функция используется для освобождения памяти выделенной для значения ключа.
+ *
+ * \param data указатель на значение удаляемого ключа.
+ *
+ * \return Нет.
+ *
+*/
+typedef void (*urpc_hash_table_destroy_callback)( void *data );
+
+
 /*! Создание хэш таблицы.
  *
  * Функция создаёт пустую хэш таблицу.
  *
+ * \param value_destroy_func функция особождения памяти значения или NULL.
+ *
  * \return Указатель на хэш таблицу или NULL в случае ошибки.
  *
 */
-URPC_EXPORT uRpcHashTable *urpc_hash_table_create( void );
+URPC_EXPORT uRpcHashTable *urpc_hash_table_create( urpc_hash_table_destroy_callback value_destroy_func );
 
 
 /*! Удаление хэш таблицы.
@@ -112,6 +127,18 @@ URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key,
  *
 */
 URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key );
+
+
+/*! Размер таблицы.
+ *
+ * Функция возвращает число элементов размещённых в таблице.
+ *
+ * \param hash_table указатель на хэш таблицу.
+ *
+ * \return Число элементов в таблице.
+ *
+*/
+URPC_EXPORT uint32_t urpc_hash_table_size( uRpcHashTable *hash_table );
 
 
 /*! Удаление ключа из таблицы.
