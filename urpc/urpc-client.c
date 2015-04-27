@@ -186,7 +186,7 @@ uint32_t urpc_client_exec( uRpcClient *urpc_client, uint32_t proc_id )
   oheader->magic = UINT32_TO_BE( URPC_MAGIC );
   oheader->version = UINT32_TO_BE( URPC_VERSION );
   oheader->size = UINT32_TO_BE( send_size );
-  oheader->session = urpc_client->session_id;
+  oheader->session = UINT32_TO_BE( urpc_client->session_id );
 
   urpc_data_set_uint32( urpc_client->urpc_data, URPC_PARAM_PROC, proc_id );
 
