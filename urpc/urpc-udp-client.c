@@ -32,9 +32,6 @@
 #define URPC_UDP_CLIENT_TYPE 0x43504455
 
 
-static int urpc_client_initialized = 0;
-
-
 typedef struct uRpcUDPClient {
 
   uint32_t          urpc_udp_client_type;
@@ -53,13 +50,6 @@ uRpcUDPClient *urpc_udp_client_create( const char *uri, uint32_t max_data_size, 
 
   uRpcUDPClient *urpc_udp_client = NULL;
   struct addrinfo *addr = NULL;
-
-  // Инициализация сети.
-  if( !urpc_client_initialized )
-    {
-    urpc_network_init();
-    urpc_client_initialized = 1;
-    }
 
   // Проверка ограничений.
   if( max_data_size > URPC_DEFAULT_DATA_SIZE ) return NULL;

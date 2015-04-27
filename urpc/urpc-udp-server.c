@@ -29,10 +29,7 @@
 #include <stdlib.h>
 
 
-#define URPC_UDP_SERVER_TYPE 0x43504455
-
-
-static int urpc_server_initialized = 0;
+#define URPC_UDP_SERVER_TYPE 0x53504455
 
 
 typedef struct uRpcUDPServer {
@@ -55,13 +52,6 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, ui
   uRpcUDPServer *urpc_udp_server = NULL;
   struct addrinfo *addr = NULL;
   unsigned int i;
-
-  // Инициализация сети.
-  if( !urpc_server_initialized )
-    {
-    urpc_network_init();
-    urpc_server_initialized = 1;
-    }
 
   // Проверка ограничений.
   if( max_data_size > URPC_DEFAULT_DATA_SIZE ) return NULL;

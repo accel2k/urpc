@@ -27,6 +27,7 @@
 #include "urpc-timer.h"
 #include "urpc-hash-table.h"
 #include "urpc-mem-chunk.h"
+#include "urpc-network.h"
 #include "endianness.h"
 
 #include "urpc-udp-server.h"
@@ -35,6 +36,9 @@
 
 
 #define URPC_SERVER_TYPE 0x53504455
+
+
+static int urpc_server_initialized = 0;
 
 
 typedef struct uRpcServerSession {
@@ -267,9 +271,18 @@ uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_size, double 
   uRpcServer *urpc_server = NULL;
   uRpcType urpc_type = URPC_UNKNOWN;
 
+  // Инициализация сети.
+  if( !urpc_server_initialized )
+    {
+    urpc_network_init();
+    urpc_server_initialized = 1;
+    }
+
+  // Проверка типа адреса.
   urpc_type = urpc_get_type( uri );
   if( urpc_type == URPC_UNKNOWN ) return NULL;
 
+  // Структура объекта.
   urpc_server = malloc( sizeof( uRpcServer ) );
   if( urpc_server == NULL ) return NULL;
 

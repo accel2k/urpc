@@ -33,6 +33,9 @@
 #define URPC_CLIENT_TYPE 0x4E4C4355
 
 
+static int urpc_client_initialized = 0;
+
+
 typedef struct uRpcClient {
 
   uint32_t          urpc_client_type;       // Тип объекта uRpcClient.
@@ -58,6 +61,13 @@ uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double 
 
   uRpcClient *urpc_client = NULL;
   uRpcType urpc_type = URPC_UNKNOWN;
+
+  // Инициализация сети.
+  if( !urpc_client_initialized )
+    {
+    urpc_network_init();
+    urpc_client_initialized = 1;
+    }
 
   // Проверка типа адреса.
   urpc_type = urpc_get_type( uri );
@@ -96,12 +106,14 @@ void urpc_client_destroy( uRpcClient *urpc_client )
 
   if( urpc_client->urpc_client_type != URPC_CLIENT_TYPE ) return;
 
+  // Посылаем уведомление о завершении работы.
   if( urpc_client_lock( urpc_client ) != NULL )
     {
     urpc_client_exec( urpc_client, URPC_PROC_LOGOUT );
     urpc_client_unlock( urpc_client );
     }
 
+  // Удаляем объект обмена данными.
   if( urpc_client->transport != NULL )
     {
     switch( urpc_client->type )
@@ -111,6 +123,7 @@ void urpc_client_destroy( uRpcClient *urpc_client )
       }
     }
 
+  // Удаляем объект.
   if( urpc_client->uri != NULL ) free( urpc_client->uri );
 
   urpc_mutex_clear( &urpc_client->lock );

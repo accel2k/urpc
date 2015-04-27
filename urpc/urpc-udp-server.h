@@ -60,4 +60,4 @@ int urpc_udp_server_send( uRpcUDPServer *urpc_udp_server, uint32_t thread_id );
 } // extern "C"
 #endif
 
-#endif // _urpc_udp_client_h
+#endif // _urpc_udp_server_h
