@@ -165,6 +165,8 @@ void *urpc_test_client_proc( void *data )
   urpc_timer_destroy( timer );
   free( array1 );
 
+  urpc_client_destroy( client );
+
   urpc_mutex_lock( &lock );
   running_clients -= 1;
   urpc_mutex_unlock( &lock );

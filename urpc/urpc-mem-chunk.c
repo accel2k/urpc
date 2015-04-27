@@ -57,7 +57,7 @@ typedef struct uRpcMemChunk {
 } uRpcMemChunk;
 
 
-URPC_EXPORT uRpcMemChunk *urpc_mem_chunk_create( int chunk_size )
+uRpcMemChunk *urpc_mem_chunk_create( int chunk_size )
 {
 
   uRpcMemChunk *mem_chunk;

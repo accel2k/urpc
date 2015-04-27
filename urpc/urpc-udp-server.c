@@ -160,8 +160,8 @@ uRpcData *urpc_udp_server_recv( uRpcUDPServer *urpc_udp_server, uint32_t thread_
 
   uRpcData *urpc_data;
   uRpcHeader *iheader;
+  socklen_t client_addr_len;
   int recv_size;
-  int client_addr_len;
 
   if( urpc_udp_server->urpc_udp_server_type != URPC_UDP_SERVER_TYPE ) return NULL;
   if( thread_id > urpc_udp_server->threads_num - 1 ) return NULL;

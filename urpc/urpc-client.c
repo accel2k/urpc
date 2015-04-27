@@ -47,7 +47,8 @@ typedef struct uRpcClient {
   uRpcMutex         lock;                   // Блокировка канала передачи.
   uRpcData         *urpc_data;              // Данные RPC запроса/ответа.
 
-  uint32_t          session;                // Идентификатор сессии.
+  uint32_t          state;                  // Состояние подключения.
+  uint32_t          session_id;             // Идентификатор сессии.
 
 } uRpcClient;
 
@@ -73,7 +74,7 @@ uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double 
   urpc_client->exec_timeout = exec_timeout;
   urpc_client->transport = NULL;
   urpc_client->urpc_data = NULL;
-  urpc_client->session = 0;
+  urpc_client->session_id = 0;
   urpc_mutex_init( &urpc_client->lock );
 
   urpc_client->uri = malloc( strlen( uri ) + 1 );
@@ -95,7 +96,11 @@ void urpc_client_destroy( uRpcClient *urpc_client )
 
   if( urpc_client->urpc_client_type != URPC_CLIENT_TYPE ) return;
 
-  #warning "Add logout call here!!!"
+  if( urpc_client_lock( urpc_client ) != NULL )
+    {
+    urpc_client_exec( urpc_client, URPC_PROC_LOGOUT );
+    urpc_client_unlock( urpc_client );
+    }
 
   if( urpc_client->transport != NULL )
     {
@@ -118,6 +123,8 @@ void urpc_client_destroy( uRpcClient *urpc_client )
 int urpc_client_connect( uRpcClient *urpc_client )
 {
 
+  uint32_t exec_status;
+
   if( urpc_client->urpc_client_type != URPC_CLIENT_TYPE ) return -1;
 
   switch( urpc_client->type )
@@ -128,7 +135,13 @@ int urpc_client_connect( uRpcClient *urpc_client )
 
   if( urpc_client->transport == NULL ) return -1;
 
-  return 0;
+  urpc_client->state = URPC_STATE_NOT_CONNECTED;
+
+  if( urpc_client_lock( urpc_client ) == NULL ) return - 1;
+  exec_status = urpc_client_exec( urpc_client, URPC_PROC_LOGIN );
+  urpc_client_unlock( urpc_client );
+
+  return exec_status == URPC_STATUS_OK ? 0 : -1;
 
 }
 
@@ -173,11 +186,11 @@ uint32_t urpc_client_exec( uRpcClient *urpc_client, uint32_t proc_id )
   oheader->magic = UINT32_TO_BE( URPC_MAGIC );
   oheader->version = UINT32_TO_BE( URPC_VERSION );
   oheader->size = UINT32_TO_BE( send_size );
-  oheader->session = urpc_client->session;
+  oheader->session = urpc_client->session_id;
 
   urpc_data_set_uint32( urpc_client->urpc_data, URPC_PARAM_PROC, proc_id );
 
-  #warning "Add authentication and encryption here!!!"
+  #pragma message( "Add authentication and encryption here!!!" )
 
   // Обмен данными с сервером. Перед обменом должен быть заполнен заголовок отправляемых данных!!!
   switch( urpc_client->type )
@@ -187,12 +200,22 @@ uint32_t urpc_client_exec( uRpcClient *urpc_client, uint32_t proc_id )
     }
   if( status != URPC_STATUS_OK ) return status;
 
-  // Проверка принятых данных.
+  // Проверка версии сервера.
   if( ( UINT32_FROM_BE( iheader->version ) >> 8 ) != ( URPC_VERSION >> 8 ) ) return URPC_STATUS_VERSION_MISMATCH;
-  if( UINT32_FROM_BE( iheader->session ) != urpc_client->session ) return URPC_STATUS_AUTH_ERROR;
 
-  #warning "Add authentication and decryption here!!!"
+  // Проверка выполнения функции LOGIN.
+  if( urpc_client->state == URPC_STATE_NOT_CONNECTED && proc_id == URPC_PROC_LOGIN )
+    {
+    if( urpc_data_get_uint32( urpc_client->urpc_data, URPC_PARAM_STATUS ) != URPC_STATUS_OK ) return URPC_STATUS_AUTH_ERROR;
+    urpc_client->session_id = UINT32_FROM_BE( iheader->session );
+    urpc_client->state = URPC_STATE_CONNECTED;
+    }
 
+  #pragma message( "Add authentication and decryption here!!!" )
+
+  if( UINT32_FROM_BE( iheader->session ) != urpc_client->session_id ) return URPC_STATUS_AUTH_ERROR;
+
+  // Проверка принятых данных.
   if( urpc_data_validate( urpc_client->urpc_data, URPC_DATA_INPUT ) < 0 ) return URPC_STATUS_TRANSPORT_ERROR;
 
   return URPC_STATUS_OK;

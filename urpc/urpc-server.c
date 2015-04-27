@@ -23,14 +23,14 @@
 #include "urpc-server.h"
 #include "urpc-common.h"
 #include "urpc-thread.h"
-#include "urpc-hash-table.h"
 #include "urpc-mutex.h"
 #include "urpc-timer.h"
+#include "urpc-hash-table.h"
+#include "urpc-mem-chunk.h"
 #include "endianness.h"
 
 #include "urpc-udp-server.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
 
@@ -39,7 +39,10 @@
 
 typedef struct uRpcServerSession {
 
+  uint32_t          state;                  // Состояние подключения.
   uRpcTimer        *activity;               // Время последней активности.
+
+  uRpcMemChunk     *sessions_chunks;        // Аллокатор данных сессий.
 
 } uRpcServerSession;
 
@@ -54,7 +57,12 @@ typedef struct uRpcServer {
   uRpcHashTable    *procs;                  // Пользовательские функции.
   uRpcHashTable    *pdata;                  // Данные для пользовательских функций.
 
+  uRpcHashTable    *sessions;               // Пользовательские сессии.
+  uRpcMemChunk     *sessions_chunks;        // Аллокатор данных сессий.
+  uint32_t          last_session_id;        // Идентификатор последней созданной сессии.
+
   uint32_t          threads_num;            // Число рабочих потоков.
+  uint32_t          max_clients;            // Максимальное число подключенных клиентов.
   uint32_t          max_data_size;          // Максимальный размер данных в RPC запросе/ответе.
   double            data_timeout;           // Таймаут ожидания передачи данных.
   void             *transport;              // Указатель на один из объектов: uRpcUDPServer, uRpcTCPServer, uRpcSHMServer.
@@ -65,6 +73,16 @@ typedef struct uRpcServer {
   uRpcMutex         lock;                   // Блокировка доступа к критическим данным структуры.
 
 } uRpcServer;
+
+
+// Функция удаления данных сессии.
+static void urpc_server_session_remove_func( uRpcServerSession *session )
+{
+
+  if( session->activity != NULL ) urpc_timer_destroy( session->activity );
+  urpc_mem_chunk_free( session->sessions_chunks, session );
+
+}
 
 
 // Функция обмена данными в потоке.
@@ -81,7 +99,9 @@ static void *urpc_server_func( void *data )
   uRpcHeader *oheader;
   uint32_t send_size;
 
-  uint32_t session;
+  uint32_t session_id;
+  uRpcServerSession *session;
+
   uint32_t proc_id;
   urpc_server_callback proc;
   void *proc_data;
@@ -107,7 +127,7 @@ static void *urpc_server_func( void *data )
 
     iheader = urpc_data_get_header( urpc_data, URPC_DATA_INPUT );
     oheader = urpc_data_get_header( urpc_data, URPC_DATA_OUTPUT );
-    session = UINT32_FROM_BE( iheader->session );
+    session_id = UINT32_FROM_BE( iheader->session );
 
     status = URPC_STATUS_FAIL;
     urpc_data_set_uint32( urpc_data, URPC_PARAM_STATUS, status );
@@ -120,10 +140,11 @@ static void *urpc_server_func( void *data )
       }
 
     // Запрашиваемая функция.
-    proc_id = urpc_data_get_uint32( urpc_data, URPC_PARAM_PROC );
-/*
+    if( session_id == 0 )
+      proc_id = urpc_data_get_uint32( urpc_data, URPC_PARAM_PROC );
+
     // Запрос возможностей сервера.
-    if( session == 0 && proc_id == URPC_PROC_GET_CAP )
+    if( session_id == 0 && proc_id == URPC_PROC_GET_CAP )
       {
       urpc_data_set_uint32( urpc_data, URPC_PARAM_CAP, 0 );
       status = URPC_STATUS_OK;
@@ -131,28 +152,83 @@ static void *urpc_server_func( void *data )
       }
 
     // Начало сессии.
-    if( session == 0 && proc_id == URPC_PROC_LOGIN )
+    if( session_id == 0 && proc_id == URPC_PROC_LOGIN )
       {
+
+      // Проверка числа уже подключенных клиентов.
+      if( urpc_hash_table_size( urpc_server->sessions ) >= urpc_server->max_clients )
+        {
+        status = URPC_STATUS_TOO_MANY_CONNECTIONS;
+        goto urpc_server_send_reply;
+        }
+
+      // Структура с новой сессией.
+      session = urpc_mem_chunk_alloc( urpc_server->sessions_chunks );
+      if( session == NULL )
+        {
+        status = URPC_STATUS_FAIL;
+        goto urpc_server_send_reply;
+        }
+
+      session->state = URPC_STATE_GOT_SESSION_ID;
+      session->sessions_chunks = urpc_server->sessions_chunks;
+
+      // Запоминаем время подключения.
+      session->activity = urpc_timer_create();
+      if( session->activity == NULL )
+        {
+        urpc_server_session_remove_func( session );
+        status = URPC_STATUS_FAIL;
+        goto urpc_server_send_reply;
+        }
+
+      // Генерируем новый идентификатор.
+      session_id = urpc_server->last_session_id;
+      do {
+        session_id += 1;
+      } while( session_id == 0 || urpc_hash_table_find( urpc_server->sessions, session_id ) != NULL );
+
+      // Запоминаем сессию.
+      if( urpc_hash_table_insert( urpc_server->sessions, session_id, session ) != 0 )
+        {
+        urpc_server_session_remove_func( session );
+        status = URPC_STATUS_FAIL;
+        goto urpc_server_send_reply;
+        }
+
       status = URPC_STATUS_OK;
       goto urpc_server_send_reply;
+
       }
 
     // Проверка наличия сессии.
-    if( session == 0 )
+    session = urpc_hash_table_find( urpc_server->sessions, session_id );
+    if( session == NULL )
       {
       status = URPC_STATUS_AUTH_ERROR;
       goto urpc_server_send_reply;
       }
-*/
-    #warning "Add authentication and decryption here!!!"
+
+    #pragma message( "Add authentication and decryption here!!!" )
+    if( session->state == URPC_STATE_GOT_SESSION_ID ) session->state = URPC_STATE_CONNECTED;
+
+    // Запрашиваемая функция.
+    proc_id = urpc_data_get_uint32( urpc_data, URPC_PARAM_PROC );
+
+    if( proc_id == URPC_PROC_LOGOUT && session->state == URPC_STATE_CONNECTED )
+      {
+      urpc_hash_table_remove( urpc_server->sessions, session_id );
+      status = URPC_STATUS_OK;
+      goto urpc_server_send_reply;
+      }
 
     // Вызов пользовательской функциии.
     proc = urpc_hash_table_find( urpc_server->procs, proc_id );
     proc_data = urpc_hash_table_find( urpc_server->pdata, proc_id );
     if( proc != NULL )
-      if( proc( session, urpc_data, proc_data, NULL ) == 0 ) status = URPC_STATUS_OK;
+      if( proc( session_id, urpc_data, proc_data, NULL ) == 0 ) status = URPC_STATUS_OK;
 
-    #warning "Add authentication and encryption here!!!"
+    #pragma message( "Add authentication and encryption here!!!" )
 
     // Отправка ответа.
     urpc_server_send_reply:
@@ -164,7 +240,7 @@ static void *urpc_server_func( void *data )
       oheader->magic = UINT32_TO_BE( URPC_MAGIC );
       oheader->version = UINT32_TO_BE( URPC_VERSION );
       oheader->size = UINT32_TO_BE( send_size );
-      oheader->session = iheader->session;
+      oheader->session = UINT32_TO_BE( session_id );
 
       // Отправка ответа.
       switch( urpc_server->type )
@@ -185,7 +261,7 @@ static void *urpc_server_func( void *data )
 }
 
 
-URPC_EXPORT uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_size, double data_timeout, uint32_t threads_num, uint32_t max_clients )
+uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_size, double data_timeout, uint32_t threads_num, uint32_t max_clients )
 {
 
   uRpcServer *urpc_server = NULL;
@@ -201,9 +277,13 @@ URPC_EXPORT uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_s
   urpc_server->urpc_server_type = URPC_SERVER_TYPE;
   urpc_server->uri = NULL;
   urpc_server->procs = NULL;
+  urpc_server->sessions = NULL;
+  urpc_server->sessions_chunks = NULL;
+  urpc_server->last_session_id = 0;
   urpc_server->transport = NULL;
   urpc_server->servers = NULL;
   urpc_server->threads_num = threads_num;
+  urpc_server->max_clients = max_clients;
   urpc_server->max_data_size = max_data_size;
   urpc_server->data_timeout = data_timeout;
   urpc_server->started_servers = 0;
@@ -214,11 +294,17 @@ URPC_EXPORT uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_s
   if( urpc_server->uri == NULL ) goto urpc_server_create_fail;
   memcpy( urpc_server->uri, uri, strlen( uri ) + 1 );
 
-  urpc_server->procs = urpc_hash_table_create();
+  urpc_server->procs = urpc_hash_table_create( NULL );
   if( urpc_server->procs == NULL ) goto urpc_server_create_fail;
 
-  urpc_server->pdata = urpc_hash_table_create();
+  urpc_server->pdata = urpc_hash_table_create( NULL );
   if( urpc_server->pdata == NULL ) goto urpc_server_create_fail;
+
+  urpc_server->sessions = urpc_hash_table_create( (urpc_hash_table_destroy_callback)urpc_server_session_remove_func );
+  if( urpc_server->sessions == NULL ) goto urpc_server_create_fail;
+
+  urpc_server->sessions_chunks = urpc_mem_chunk_create( sizeof( uRpcServerSession ) );
+  if( urpc_server->sessions_chunks == NULL ) goto urpc_server_create_fail;
 
   urpc_server->servers = malloc( threads_num * sizeof( uRpcThread* ) );
   if( urpc_server->servers == NULL ) goto urpc_server_create_fail;
@@ -271,6 +357,8 @@ void urpc_server_destroy( uRpcServer *urpc_server )
   if( urpc_server->servers != NULL ) free( urpc_server->servers );
   if( urpc_server->pdata != NULL ) urpc_hash_table_destroy( urpc_server->pdata );
   if( urpc_server->procs != NULL ) urpc_hash_table_destroy( urpc_server->procs );
+  if( urpc_server->sessions != NULL ) urpc_hash_table_destroy( urpc_server->sessions );
+  if( urpc_server->sessions_chunks != NULL ) urpc_mem_chunk_destroy( urpc_server->sessions_chunks );
   if( urpc_server->uri != NULL ) free( urpc_server->uri );
 
   urpc_mutex_clear( &urpc_server->lock );
