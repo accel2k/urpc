@@ -271,6 +271,8 @@ uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_size, double 
   uRpcServer *urpc_server = NULL;
   uRpcType urpc_type = URPC_UNKNOWN;
 
+  unsigned int i;
+
   // Инициализация сети.
   if( !urpc_server_initialized )
     {
@@ -321,6 +323,7 @@ uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_size, double 
 
   urpc_server->servers = malloc( threads_num * sizeof( uRpcThread* ) );
   if( urpc_server->servers == NULL ) goto urpc_server_create_fail;
+  for( i = 0; i < threads_num; i++ ) urpc_server->servers[i] = NULL;
 
   return urpc_server;
 
@@ -349,12 +352,15 @@ void urpc_server_destroy( uRpcServer *urpc_server )
     urpc_mutex_lock( &urpc_server->lock );
     started_servers = urpc_server->started_servers;
     urpc_mutex_unlock( &urpc_server->lock );
+    urpc_timer_sleep( 0.1 );
 
   } while( started_servers != 0 );
 
   // Удаляем объекты потоков.
-  for( i = 0; i < urpc_server->threads_num; i++ )
-    urpc_thread_destroy( urpc_server->servers[i] );
+  if( urpc_server->servers != NULL )
+    for( i = 0; i < urpc_server->threads_num; i++ )
+      if( urpc_server->servers[i] != NULL )
+        urpc_thread_destroy( urpc_server->servers[i] );
 
   // Удаляем объект обмена данными.
   if( urpc_server->transport != NULL )
@@ -385,8 +391,9 @@ int urpc_server_add_proc( uRpcServer *urpc_server, uint32_t proc_id, urpc_server
 {
 
   if( urpc_server->urpc_server_type != URPC_SERVER_TYPE ) return -1;
-  if( urpc_hash_table_find( urpc_server->procs, proc_id ) != NULL ) return -1;
+  if( urpc_server->transport != NULL ) return -1;
 
+  if( urpc_hash_table_find( urpc_server->procs, proc_id ) != NULL ) return -1;
   if( urpc_hash_table_insert( urpc_server->procs, proc_id, proc ) != 0 ) return -1;
   if( urpc_hash_table_insert( urpc_server->pdata, proc_id, proc_data ) != 0 ) return -1;
 
@@ -399,35 +406,38 @@ int urpc_server_bind( uRpcServer *urpc_server )
 {
 
   uint32_t started_servers = 0;
-  uint32_t fail = 0;
   unsigned int i;
 
   if( urpc_server->urpc_server_type != URPC_SERVER_TYPE ) return -1;
 
+  // Создаём транспортный объект.
   switch( urpc_server->type )
     {
     case URPC_UDP: urpc_server->transport = urpc_udp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->max_data_size, urpc_server->data_timeout ); break;
     default: return -1;
     }
-
   if( urpc_server->transport == NULL ) return -1;
 
+  // Запускаем потоки обработки запросов.
   for( i = 0; i < urpc_server->threads_num; i++ )
+    {
     urpc_server->servers[i] = urpc_thread_create( urpc_server_func, urpc_server );
+    if( urpc_server->servers[i] == NULL )
+      {
+      urpc_server->shutdown = 1;
+      return -1;
+      }
+    }
 
+  // Ожидаем начала работы всех потоков.
   do {
 
     urpc_mutex_lock( &urpc_server->lock );
     started_servers = urpc_server->started_servers;
     urpc_mutex_unlock( &urpc_server->lock );
+    urpc_timer_sleep( 0.1 );
 
   } while( started_servers != urpc_server->threads_num );
-
-  if( fail )
-    {
-    urpc_server->shutdown = 1;
-    return -1;
-    }
 
   return 0;
 
