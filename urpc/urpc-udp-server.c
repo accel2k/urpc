@@ -34,14 +34,14 @@
 
 typedef struct uRpcUDPServer {
 
-  uint32_t          urpc_udp_server_type;
+  uint32_t          urpc_udp_server_type;   // Тип объекта uRpcUDPServer.
 
-  SOCKET            socket;
-  struct sockaddr **client_addr;
-  int               client_addr_len;
+  SOCKET            socket;                 // Рабочий сокет.
+  struct sockaddr **client_addr;            // Массив структур с адресами клиентов.
+  int               client_addr_len;        // Размер адреса клиента.
 
-  uRpcData        **urpc_data;
-  uint32_t          threads_num;
+  uRpcData        **urpc_data;              // Указатель на объекты RPC данных.
+  uint32_t          threads_num;            // Число рабочих потоков.
 
 } uRpcUDPServer;
 

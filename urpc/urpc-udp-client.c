@@ -34,13 +34,13 @@
 
 typedef struct uRpcUDPClient {
 
-  uint32_t          urpc_udp_client_type;
+  uint32_t          urpc_udp_client_type;   // Тип объекта uRpcUDPClient.
 
-  SOCKET            socket;
+  SOCKET            socket;                 // Рабочий сокет.
 
-  uRpcData         *urpc_data;
-  uRpcTimer        *timer;
-  double            timeout;
+  uRpcData         *urpc_data;              // Указатель на объект RPC данных.
+  uRpcTimer        *timer;                  // Таймаут таймер.
+  double            timeout;                // Интервал таймаута.
 
 } uRpcUDPClient;
 
