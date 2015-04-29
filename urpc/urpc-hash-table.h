@@ -44,7 +44,9 @@
  *
  * Основные операции с хэш таблицей:
  * - #urpc_hash_table_insert - добавление ключа/указателя в таблицу;
+ * - #urpc_hash_table_insert_uint32 - добавление ключа/значения в таблицу;
  * - #urpc_hash_table_find - поиск указателя по ключу;
+ * - #urpc_hash_table_find_uint32 - поиск значения по ключу;
  * - #urpc_hash_table_remove - удаление указателя по ключу.
  *
 */
@@ -115,6 +117,22 @@ URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *hash_table );
 URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key, void *value );
 
 
+/*! Добавление ключа в хэш таблицу.
+ *
+ * Функция добавляет ключ и ассоциированное с этим ключом значение типа uint32 в хэш таблицу.
+ * Если указанный ключ уже существует, функция вернёт значение большее нуля. При этом
+ * в таблице останется предыдущее значение.
+ *
+ * \param hash_table указатель на хэш таблицу;
+ * \param key значение ключа;
+ * \param value указатель на данные.
+ *
+ * \return 0 - если ключ добавлен, 1 - если ключ уже существует, -1 в случае ошибки.
+ *
+*/
+URPC_EXPORT int urpc_hash_table_insert_uint32( uRpcHashTable *hash_table, uint32_t key, uint32_t value );
+
+
 /*! Поиск указателя по ключу.
  *
  * Функция ищет в таблице ключ и возвращает указатель на данные.
@@ -127,6 +145,22 @@ URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key,
  *
 */
 URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key );
+
+
+/*! Поиск значения по ключу.
+ *
+ * Функция ищет в таблице ключ и возвращает значение типа uint32. По результату
+ * возвращаемому этой функцией нельзя дать однозначный ответ о присутствии ключа
+ * в таблице. Для этого рекомендуется воспользоваться функцией #urpc_hash_table_find.
+ *
+ * \param hash_table указатель на хэш таблицу;
+ * \param key значение ключа.
+ *
+ * \return значение ассоциированное с ключом или 0 если такого ключа нет в таблице.
+ *
+ *
+*/
+URPC_EXPORT uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uint32_t key );
 
 
 /*! Размер таблицы.

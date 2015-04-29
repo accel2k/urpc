@@ -47,7 +47,7 @@ typedef struct uRpcHashTable {
   uint32_t          nnodes;                 // Число объектов.
   HashNode        **nodes;                  // Хэш таблица.
 
-  uRpcMemChunk     *chunks;
+  uRpcMemChunk     *chunks;                 // Аллокатор ключей.
 
   urpc_hash_table_destroy_callback value_destroy_func;
 
@@ -140,6 +140,14 @@ int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key, void *value
 }
 
 
+int urpc_hash_table_insert_uint32( uRpcHashTable *hash_table, uint32_t key, uint32_t value )
+{
+
+  return urpc_hash_table_insert( hash_table, key, (void*)value );
+
+}
+
+
 void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key )
 {
 
@@ -155,6 +163,14 @@ void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key )
     }
 
   return NULL;
+
+}
+
+
+uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uint32_t key )
+{
+
+  return (uint32_t)urpc_hash_table_find( hash_table, key );
 
 }
 
