@@ -124,6 +124,7 @@ void *urpc_test_client_proc( void *data )
 
   urpc_mutex_lock( &lock );
   client_id = running_clients += 1;
+  printf( "client %d connects to ...\n", client_id );
   urpc_mutex_unlock( &lock );
 
   while( !start );
@@ -240,7 +241,7 @@ int main( int argc, char **argv )
   if( run_server )
     {
 
-    server = urpc_server_create( uri, payload_size + 128, URPC_DEFAULT_SERVER_TIMEOUT, threads_num, threads_num );
+    server = urpc_server_create( uri, threads_num, threads_num, payload_size + 128, URPC_DEFAULT_SERVER_TIMEOUT );
     if( server == NULL )
       { printf( "error creating uRPC server\n" ); return -1; }
 
@@ -248,6 +249,9 @@ int main( int argc, char **argv )
 
     if( urpc_server_bind( server ) < 0 )
       { printf( "error starting uRPC server\n" ); return -1; }
+
+    printf( "server started at ...\n" );
+    fflush( stdout );
 
     }
 
@@ -261,18 +265,24 @@ int main( int argc, char **argv )
     }
 
   do {
+
     urpc_mutex_lock( &lock );
     local_running_clients = running_clients;
     urpc_mutex_unlock( &lock );
     urpc_timer_sleep( 0.1 );
+
   } while( local_running_clients != threads_num && !fail );
 
+  urpc_timer_sleep( 0.5 );
   if( !fail ) start = 1;
 
   do {
+
     urpc_mutex_lock( &lock );
     local_running_clients = running_clients;
     urpc_mutex_unlock( &lock );
+    urpc_timer_sleep( 0.1 );
+
   } while( local_running_clients != 0 );
 
   if( run_server ) urpc_server_destroy( server );

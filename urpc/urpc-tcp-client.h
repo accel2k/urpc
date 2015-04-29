@@ -21,7 +21,7 @@
 */
 
 /*!
- * \file urpc-udp-client.h
+ * \file urpc-tcp-client.h
  *
  * \author Andrei Fadeev
  * \date 20.03.2009
@@ -30,8 +30,8 @@
  *
 */
 
-#ifndef _urpc_udp_client_h
-#define _urpc_udp_client_h
+#ifndef _urpc_tcp_client_h
+#define _urpc_tcp_client_h
 
 #include <urpc-types.h>
 #include <urpc-data.h>
@@ -41,29 +41,29 @@ extern "C" {
 #endif
 
 
-typedef struct uRpcUDPClient uRpcUDPClient;
+typedef struct uRpcTCPClient uRpcTCPClient;
 
 
-uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout );
+uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, double exec_timeout );
 
 
-void urpc_udp_client_destroy( uRpcUDPClient *urpc_udp_client );
+void urpc_tcp_client_destroy( uRpcTCPClient *urpc_tcp_client );
 
 
-int urpc_udp_client_connect( uRpcUDPClient *urpc_udp_client );
+int urpc_tcp_client_connect( uRpcTCPClient *urpc_tcp_client );
 
 
-uRpcData *urpc_udp_client_lock( uRpcUDPClient *urpc_udp_client );
+uRpcData *urpc_tcp_client_lock( uRpcTCPClient *urpc_tcp_client );
 
 
-uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client );
+uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client );
 
 
-void urpc_udp_client_unlock( uRpcUDPClient *urpc_udp_client );
+void urpc_tcp_client_unlock( uRpcTCPClient *urpc_tcp_client );
 
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif // _urpc_udp_client_h
+#endif // _urpc_tcp_client_h

@@ -31,6 +31,7 @@
 #include "endianness.h"
 
 #include "urpc-udp-server.h"
+#include "urpc-tcp-server.h"
 
 #include <stdlib.h>
 
@@ -45,6 +46,7 @@ typedef struct uRpcServerSession {
 
   uint32_t          state;                  // Состояние подключения.
   uRpcTimer        *activity;               // Время последней активности.
+  SOCKET            socket;                 // Для TCP/IP соединения сокет подключения клиекнта.
 
   uRpcMemChunk     *sessions_chunks;        // Аллокатор данных сессий.
 
@@ -68,7 +70,7 @@ typedef struct uRpcServer {
   uint32_t          threads_num;            // Число рабочих потоков.
   uint32_t          max_clients;            // Максимальное число подключенных клиентов.
   uint32_t          max_data_size;          // Максимальный размер данных в RPC запросе/ответе.
-  double            data_timeout;           // Таймаут ожидания передачи данных.
+  double            timeout;                // Таймаут обмена данными.
   void             *transport;              // Указатель на один из объектов: uRpcUDPServer, uRpcTCPServer, uRpcSHMServer.
 
   uRpcThread      **servers;                // Рабочие потоки.
@@ -105,6 +107,7 @@ static void *urpc_server_func( void *data )
 
   uint32_t session_id;
   uRpcServerSession *session;
+  SOCKET csocket = INVALID_SOCKET;
 
   uint32_t proc_id;
   urpc_server_callback proc;
@@ -122,12 +125,16 @@ static void *urpc_server_func( void *data )
     switch( urpc_server->type )
       {
       case URPC_UDP: urpc_data = urpc_udp_server_recv( urpc_server->transport, thread_id ); break;
+      case URPC_TCP: urpc_data = urpc_tcp_server_recv( urpc_server->transport, thread_id ); break;
       default: urpc_data = NULL; break;
       }
 
     // Если в течение периода ожидания запроса не поступило, проверяем флаг завершения
     // потока и возвращаемся к ожиданию запросов.
     if( urpc_data == NULL ) continue;
+
+    // Сокет клиента для TCP/IP.
+    if( urpc_server->type == URPC_TCP ) csocket = urpc_tcp_server_get_client_socket( urpc_server->transport, thread_id );
 
     iheader = urpc_data_get_header( urpc_data, URPC_DATA_INPUT );
     oheader = urpc_data_get_header( urpc_data, URPC_DATA_OUTPUT );
@@ -176,6 +183,7 @@ static void *urpc_server_func( void *data )
 
       session->state = URPC_STATE_GOT_SESSION_ID;
       session->sessions_chunks = urpc_server->sessions_chunks;
+      session->socket = csocket;
 
       // Запоминаем время подключения.
       session->activity = urpc_timer_create();
@@ -250,8 +258,22 @@ static void *urpc_server_func( void *data )
       switch( urpc_server->type )
         {
         case URPC_UDP: urpc_udp_server_send( urpc_server->transport, thread_id ); break;
+        case URPC_TCP: urpc_tcp_server_send( urpc_server->transport, thread_id ); break;
         default: break;
         }
+
+      // Отключаем клиента в случае ошибки.
+      if( urpc_server->type == URPC_TCP )
+        if( status != URPC_STATUS_OK )
+          urpc_tcp_server_disconnect_client( urpc_server->transport, csocket );
+
+      if( proc_id == URPC_PROC_LOGOUT && session->state == URPC_STATE_CONNECTED )
+        if( urpc_server->type == URPC_TCP )
+          urpc_tcp_server_disconnect_client( urpc_server->transport, csocket );
+
+      // Очищаем буферы приёма-передачи.
+      urpc_data_set_data_size( urpc_data, URPC_DATA_INPUT, 0 );
+      urpc_data_set_data_size( urpc_data, URPC_DATA_OUTPUT, 0 );
 
     }
 
@@ -265,7 +287,7 @@ static void *urpc_server_func( void *data )
 }
 
 
-uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_size, double data_timeout, uint32_t threads_num, uint32_t max_clients )
+uRpcServer *urpc_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, uint32_t max_data_size, double timeout )
 {
 
   uRpcServer *urpc_server = NULL;
@@ -300,7 +322,7 @@ uRpcServer *urpc_server_create( const char *uri, uint32_t max_data_size, double 
   urpc_server->threads_num = threads_num;
   urpc_server->max_clients = max_clients;
   urpc_server->max_data_size = max_data_size;
-  urpc_server->data_timeout = data_timeout;
+  urpc_server->timeout = timeout;
   urpc_server->started_servers = 0;
   urpc_server->shutdown = 0;
   urpc_mutex_init( &urpc_server->lock );
@@ -368,6 +390,7 @@ void urpc_server_destroy( uRpcServer *urpc_server )
     switch( urpc_server->type )
       {
       case URPC_UDP: urpc_udp_server_destroy( urpc_server->transport ); break;
+      case URPC_TCP: urpc_tcp_server_destroy( urpc_server->transport ); break;
       default: break;
       }
     }
@@ -413,7 +436,8 @@ int urpc_server_bind( uRpcServer *urpc_server )
   // Создаём транспортный объект.
   switch( urpc_server->type )
     {
-    case URPC_UDP: urpc_server->transport = urpc_udp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->max_data_size, urpc_server->data_timeout ); break;
+    case URPC_UDP: urpc_server->transport = urpc_udp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->timeout ); break;
+    case URPC_TCP: urpc_server->transport = urpc_tcp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->max_clients, urpc_server->max_data_size, urpc_server->timeout ); break;
     default: return -1;
     }
   if( urpc_server->transport == NULL ) return -1;

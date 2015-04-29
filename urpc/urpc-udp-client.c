@@ -40,21 +40,21 @@ typedef struct uRpcUDPClient {
 
   uRpcData         *urpc_data;              // Указатель на объект RPC данных.
   uRpcTimer        *timer;                  // Таймаут таймер.
-  double            timeout;                // Интервал таймаута.
+  double            timeout;                // Таймаут обмена данными.
+
+  volatile uint32_t fail;                   // Признак ошибки.
 
 } uRpcUDPClient;
 
 
-uRpcUDPClient *urpc_udp_client_create( const char *uri, uint32_t max_data_size, double exec_timeout )
+uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout )
 {
 
   uRpcUDPClient *urpc_udp_client = NULL;
   struct addrinfo *addr = NULL;
 
   // Проверка ограничений.
-  if( max_data_size > URPC_DEFAULT_DATA_SIZE ) return NULL;
-  if( exec_timeout < URPC_MIN_TIMEOUT ) exec_timeout = URPC_MIN_TIMEOUT;
-  max_data_size += URPC_HEADER_SIZE;
+  if( timeout < URPC_MIN_TIMEOUT ) timeout = URPC_MIN_TIMEOUT;
 
   // Проверяем тип адреса.
   if( urpc_get_type( uri ) != URPC_UDP ) return NULL;
@@ -67,9 +67,11 @@ uRpcUDPClient *urpc_udp_client_create( const char *uri, uint32_t max_data_size, 
   urpc_udp_client->socket = INVALID_SOCKET;
   urpc_udp_client->urpc_data = NULL;
   urpc_udp_client->timer = NULL;
+  urpc_udp_client->timeout = timeout;
+  urpc_udp_client->fail = 0;
 
   // Буферы приёма-передачи.
-  urpc_udp_client->urpc_data = urpc_data_create( max_data_size, sizeof( uRpcHeader ), NULL, NULL, 0 );
+  urpc_udp_client->urpc_data = urpc_data_create( URPC_DEFAULT_BUFFER_SIZE, sizeof( uRpcHeader ), NULL, NULL, 0 );
   if( urpc_udp_client->urpc_data == NULL ) goto urpc_udp_client_create_fail;
 
   // Адрес сервера.
@@ -85,8 +87,6 @@ uRpcUDPClient *urpc_udp_client_create( const char *uri, uint32_t max_data_size, 
   // Таймер передачи.
   urpc_udp_client->timer = urpc_timer_create();
   if( urpc_udp_client->timer == NULL ) goto urpc_udp_client_create_fail;
-
-  urpc_udp_client->timeout = URPC_DEFAULT_CLIENT_TIMEOUT;
 
   return urpc_udp_client;
 
@@ -117,6 +117,7 @@ uRpcData *urpc_udp_client_lock( uRpcUDPClient *urpc_udp_client )
 {
 
   if( urpc_udp_client->urpc_udp_client_type != URPC_UDP_CLIENT_TYPE ) return NULL;
+  if( urpc_udp_client->fail ) return NULL;
 
   return urpc_udp_client->urpc_data;
 
@@ -129,17 +130,27 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
   fd_set sock_set;
   struct timeval sock_tv;
 
-  uRpcHeader *iheader = urpc_data_get_header( urpc_udp_client->urpc_data, URPC_DATA_INPUT );
-  uRpcHeader *oheader = urpc_data_get_header( urpc_udp_client->urpc_data, URPC_DATA_OUTPUT );
+  uRpcHeader *iheader;
+  uRpcHeader *oheader;
 
-  int send_size = UINT32_FROM_BE( oheader->size );
-  int recv_size = 0;
+  int recv_size;
+
+  if( urpc_udp_client->urpc_udp_client_type != URPC_UDP_CLIENT_TYPE ) return URPC_STATUS_FAIL;
+  if( urpc_udp_client->fail ) return URPC_STATUS_TRANSPORT_ERROR;
+
+  iheader = urpc_data_get_header( urpc_udp_client->urpc_data, URPC_DATA_INPUT );
+  oheader = urpc_data_get_header( urpc_udp_client->urpc_data, URPC_DATA_OUTPUT );
+  recv_size = UINT32_FROM_BE( oheader->size );
 
   // Время начала передачи.
   urpc_timer_start( urpc_udp_client->timer );
 
   // Отправка запроса.
-  if( send( urpc_udp_client->socket, (void*)oheader, send_size, 0 ) < 0 ) return URPC_STATUS_TRANSPORT_ERROR;
+  if( send( urpc_udp_client->socket, (void*)oheader, recv_size, 0 ) < 0 )
+    {
+    urpc_udp_client->fail = 1;
+    return URPC_STATUS_TRANSPORT_ERROR;
+    }
 
   // Ожидание ответа в течение времени urpc_udp_client->timeout.
   while( urpc_timer_elapsed( urpc_udp_client->timer ) <  urpc_udp_client->timeout )
@@ -154,7 +165,8 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
     if( select( urpc_udp_client->socket + 1, &sock_set, NULL, NULL, &sock_tv ) < 0 )
       {
       if( urpc_network_last_error() == EINTR ) continue;
-      else return URPC_STATUS_TRANSPORT_ERROR;
+      urpc_udp_client->fail = 1;
+      return URPC_STATUS_TRANSPORT_ERROR;
       }
 
     // Если данных нет - ждём.
@@ -165,7 +177,8 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
     if( recv_size < 0 )
       {
       if( urpc_network_last_error() == EINTR ) continue;
-      else return URPC_STATUS_TRANSPORT_ERROR;
+      urpc_udp_client->fail = 1;
+      return URPC_STATUS_TRANSPORT_ERROR;
       }
 
     // Проверяем заголовок ответа.
@@ -185,9 +198,5 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
 
 void urpc_udp_client_unlock( uRpcUDPClient *urpc_udp_client )
 {
-
-  // Очищаем буферы приёма-передачи.
-  urpc_data_set_data_size( urpc_udp_client->urpc_data, URPC_DATA_INPUT, 0 );
-  urpc_data_set_data_size( urpc_udp_client->urpc_data, URPC_DATA_OUTPUT, 0 );
 
 }

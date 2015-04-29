@@ -46,7 +46,7 @@ typedef struct uRpcUDPServer {
 } uRpcUDPServer;
 
 
-uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, uint32_t max_data_size, double data_timeout )
+uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, double timeout )
 {
 
   uRpcUDPServer *urpc_udp_server = NULL;
@@ -54,9 +54,7 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, ui
   unsigned int i;
 
   // Проверка ограничений.
-  if( max_data_size > URPC_DEFAULT_DATA_SIZE ) return NULL;
   if( threads_num > URPC_MAX_THREADS_NUM ) threads_num = URPC_MAX_THREADS_NUM;
-  max_data_size += URPC_HEADER_SIZE;
 
   // Проверяем тип адреса.
   if( urpc_get_type( uri ) != URPC_UDP ) return NULL;
@@ -78,7 +76,7 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, ui
 
   for( i = 0; i < threads_num; i++ )
     {
-    urpc_udp_server->urpc_data[i] = urpc_data_create( max_data_size, sizeof( uRpcHeader ), NULL, NULL, 0 );
+    urpc_udp_server->urpc_data[i] = urpc_data_create( URPC_DEFAULT_BUFFER_SIZE, sizeof( uRpcHeader ), NULL, NULL, 0 );
     if( urpc_udp_server->urpc_data[i] == NULL ) goto urpc_udp_server_create_fail;
     }
 
@@ -89,8 +87,9 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, ui
   // Рабочий сокет.
   urpc_udp_server->socket = socket( addr->ai_family, SOCK_DGRAM, addr->ai_protocol );
   if( urpc_udp_server->socket == INVALID_SOCKET ) goto urpc_udp_server_create_fail;
-  if( bind( urpc_udp_server->socket, addr->ai_addr, addr->ai_addrlen ) < 0 ) goto urpc_udp_server_create_fail;
   urpc_network_set_non_block( urpc_udp_server->socket );
+  urpc_network_set_reuse( urpc_udp_server->socket );
+  if( bind( urpc_udp_server->socket, addr->ai_addr, addr->ai_addrlen ) < 0 ) goto urpc_udp_server_create_fail;
 
   // Структуры для сохранения адресов клиентов.
   urpc_udp_server->client_addr = malloc( threads_num * sizeof( struct sockaddr * ) );
@@ -123,13 +122,17 @@ void urpc_udp_server_destroy( uRpcUDPServer *urpc_udp_server )
 
   if( urpc_udp_server->urpc_udp_server_type != URPC_UDP_SERVER_TYPE ) return;
 
+  // Закрываем рабочий сокет.
   if( urpc_udp_server->socket != INVALID_SOCKET ) closesocket( urpc_udp_server->socket );
+
   if( urpc_udp_server->client_addr != NULL )
     {
     for( i = 0; i < urpc_udp_server->threads_num; i++ )
       if( urpc_udp_server->client_addr[i] != NULL ) free( urpc_udp_server->client_addr[i] );
     free( urpc_udp_server->client_addr );
     }
+
+  // Освобождаем память буферов приёма-передачи.
   if( urpc_udp_server->urpc_data != NULL )
     {
     for( i = 0; i < urpc_udp_server->threads_num; i++ )
@@ -203,9 +206,6 @@ int urpc_udp_server_send( uRpcUDPServer *urpc_udp_server, uint32_t thread_id )
 
   // Отправка ответа.
   if( sendto( urpc_udp_server->socket, (void*)oheader, send_size, 0, urpc_udp_server->client_addr[ thread_id ], urpc_udp_server->client_addr_len ) < 0 ) return -1;
-
-  urpc_data_set_data_size( urpc_data, URPC_DATA_INPUT, 0 );
-  urpc_data_set_data_size( urpc_data, URPC_DATA_OUTPUT, 0 );
 
   return 0;
 

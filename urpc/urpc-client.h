@@ -45,7 +45,7 @@ extern "C" {
 typedef struct uRpcClient uRpcClient;
 
 
-URPC_EXPORT uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double exec_timeout );
+URPC_EXPORT uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double timeout );
 
 
 URPC_EXPORT void urpc_client_destroy( uRpcClient *urpc_client );

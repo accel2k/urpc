@@ -5,7 +5,9 @@ add_library( urpc SHARED
              urpc-client.c
              urpc-server.c
              urpc-udp-client.c
+             urpc-tcp-client.c
              urpc-udp-server.c
+             urpc-tcp-server.c
              urpc-hash-table.c
              urpc-mem-chunk.c
              urpc-network.c

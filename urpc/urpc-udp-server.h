@@ -44,7 +44,7 @@ extern "C" {
 typedef struct uRpcUDPServer uRpcUDPServer;
 
 
-uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, uint32_t max_data_size, double data_timeout );
+uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, double timeout );
 
 
 void urpc_udp_server_destroy( uRpcUDPServer *urpc_udp_server );

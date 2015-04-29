@@ -28,6 +28,7 @@
 #define URPC_DEFAULT_SERVER_TIMEOUT        2.0
 #define URPC_DEFAULT_CLIENT_TIMEOUT        5.0
 
+#define URPC_MAX_DATA_SIZE                 16*1024*1024
 #define URPC_DEFAULT_DATA_SIZE             65000
 #define URPC_HEADER_SIZE                   sizeof( uRpcHeader )
 #define URPC_DEFAULT_BUFFER_SIZE           ( URPC_DEFAULT_DATA_SIZE + URPC_HEADER_SIZE )

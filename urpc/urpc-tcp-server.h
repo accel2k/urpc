@@ -1,7 +1,7 @@
 /*
  * uRpc - rpc (remote procedure call) library.
  *
- * Copyright 2009, 2010, 2014, 2015 Andrei Fadeev
+ * Copyright 2014, 2015 Andrei Fadeev
  *
  * This file is part of uRPC.
  *
@@ -21,18 +21,19 @@
 */
 
 /*!
- * \file urpc-udp-client.h
+ * \file urpc-tcp-server.h
  *
  * \author Andrei Fadeev
- * \date 20.03.2009
+ * \date 12.02.2014
  * \brief
  *
  *
 */
 
-#ifndef _urpc_udp_client_h
-#define _urpc_udp_client_h
+#ifndef _urpc_tcp_server_h
+#define _urpc_tcp_server_h
 
+#include <urpc-network.h>
 #include <urpc-types.h>
 #include <urpc-data.h>
 
@@ -41,29 +42,29 @@ extern "C" {
 #endif
 
 
-typedef struct uRpcUDPClient uRpcUDPClient;
+typedef struct uRpcTCPServer uRpcTCPServer;
 
 
-uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout );
+uRpcTCPServer *urpc_tcp_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, uint32_t max_data_size, double timeout );
 
 
-void urpc_udp_client_destroy( uRpcUDPClient *urpc_udp_client );
+void urpc_tcp_server_destroy( uRpcTCPServer *urpc_tcp_server );
 
 
-int urpc_udp_client_connect( uRpcUDPClient *urpc_udp_client );
+uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id );
 
 
-uRpcData *urpc_udp_client_lock( uRpcUDPClient *urpc_udp_client );
+int urpc_tcp_server_send( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id );
 
 
-uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client );
+SOCKET urpc_tcp_server_get_client_socket( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id );
 
 
-void urpc_udp_client_unlock( uRpcUDPClient *urpc_udp_client );
+int urpc_tcp_server_disconnect_client( uRpcTCPServer *urpc_tcp_server, SOCKET wsocket );
 
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif // _urpc_udp_client_h
+#endif // _urpc_tcp_server_h

@@ -26,6 +26,7 @@
 #include "endianness.h"
 
 #include "urpc-udp-client.h"
+#include "urpc-tcp-client.h"
 
 #include <stdlib.h>
 
@@ -44,7 +45,7 @@ typedef struct uRpcClient {
   uRpcType          type;                   // Тип протокола RPC.
 
   uint32_t          max_data_size;          // Максимальный размер данных в RPC запросе/ответе.
-  double            exec_timeout;           // Таймаут ожидания ответа сервера.
+  double            timeout;                // Таймаут обмена данными.
   void             *transport;              // Указатель на один из объектов: uRpcUDPClient, uRpcTCPClient, uRpcSHMClient.
 
   uRpcMutex         lock;                   // Блокировка канала передачи.
@@ -56,7 +57,7 @@ typedef struct uRpcClient {
 } uRpcClient;
 
 
-uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double exec_timeout )
+uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double timeout )
 {
 
   uRpcClient *urpc_client = NULL;
@@ -81,7 +82,7 @@ uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double 
   urpc_client->urpc_client_type = URPC_CLIENT_TYPE;
   urpc_client->uri = NULL;
   urpc_client->max_data_size = max_data_size;
-  urpc_client->exec_timeout = exec_timeout;
+  urpc_client->timeout = timeout;
   urpc_client->transport = NULL;
   urpc_client->urpc_data = NULL;
   urpc_client->session_id = 0;
@@ -119,6 +120,7 @@ void urpc_client_destroy( uRpcClient *urpc_client )
     switch( urpc_client->type )
       {
       case URPC_UDP: urpc_udp_client_destroy( urpc_client->transport ); break;
+      case URPC_TCP: urpc_tcp_client_destroy( urpc_client->transport ); break;
       default: break;
       }
     }
@@ -142,7 +144,8 @@ int urpc_client_connect( uRpcClient *urpc_client )
 
   switch( urpc_client->type )
     {
-    case URPC_UDP: urpc_client->transport = urpc_udp_client_create( urpc_client->uri, urpc_client->max_data_size, urpc_client->exec_timeout ); break;
+    case URPC_UDP: urpc_client->transport = urpc_udp_client_create( urpc_client->uri, urpc_client->timeout ); break;
+    case URPC_TCP: urpc_client->transport = urpc_tcp_client_create( urpc_client->uri, urpc_client->max_data_size, urpc_client->timeout ); break;
     default: return -1;
     }
 
@@ -170,6 +173,7 @@ uRpcData *urpc_client_lock( uRpcClient *urpc_client )
   switch( urpc_client->type )
     {
     case URPC_UDP: urpc_client->urpc_data = urpc_udp_client_lock( urpc_client->transport ); break;
+    case URPC_TCP: urpc_client->urpc_data = urpc_tcp_client_lock( urpc_client->transport ); break;
     default: break;
     }
 
@@ -209,6 +213,7 @@ uint32_t urpc_client_exec( uRpcClient *urpc_client, uint32_t proc_id )
   switch( urpc_client->type )
     {
     case URPC_UDP: status = urpc_udp_client_exchange( urpc_client->transport ); break;
+    case URPC_TCP: status = urpc_tcp_client_exchange( urpc_client->transport ); break;
     default: return URPC_STATUS_FAIL;
     }
   if( status != URPC_STATUS_OK ) return status;
@@ -245,8 +250,13 @@ void urpc_client_unlock( uRpcClient *urpc_client )
   switch( urpc_client->type )
     {
     case URPC_UDP: urpc_udp_client_unlock( urpc_client->transport ); break;
+    case URPC_TCP: urpc_tcp_client_unlock( urpc_client->transport ); break;
     default: break;
     }
+
+  // Очищаем буферы приёма-передачи.
+  urpc_data_set_data_size( urpc_client->urpc_data, URPC_DATA_INPUT, 0 );
+  urpc_data_set_data_size( urpc_client->urpc_data, URPC_DATA_OUTPUT, 0 );
 
   urpc_client->urpc_data = NULL;
   urpc_mutex_unlock( &urpc_client->lock );
