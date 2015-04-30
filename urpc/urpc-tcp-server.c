@@ -423,7 +423,7 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
     return NULL;
     }
 
-
+  // Принимаем данные запроса.
   while( received != recv_size )
     {
 

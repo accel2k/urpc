@@ -86,6 +86,7 @@ uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, 
   urpc_tcp_client->socket = socket( addr->ai_family, SOCK_STREAM, addr->ai_protocol );
   if( urpc_tcp_client->socket == INVALID_SOCKET ) goto urpc_tcp_client_create_fail;
   if( connect( urpc_tcp_client->socket, addr->ai_addr, addr->ai_addrlen ) < 0 ) goto urpc_tcp_client_create_fail;
+  urpc_network_set_tcp_nodelay( urpc_tcp_client->socket );
   urpc_network_set_non_block( urpc_tcp_client->socket );
 
   // Таймер передачи.

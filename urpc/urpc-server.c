@@ -107,7 +107,7 @@ static void *urpc_server_func( void *data )
 
   uint32_t session_id;
   uRpcServerSession *session;
-  SOCKET csocket = INVALID_SOCKET;
+  SOCKET csocket;
 
   uint32_t proc_id;
   urpc_server_callback proc;
@@ -120,6 +120,10 @@ static void *urpc_server_func( void *data )
 
   while( !urpc_server->shutdown )
     {
+
+    csocket = INVALID_SOCKET;
+    session = NULL;
+    proc_id = 0;
 
     // Ожидание запроса от клиента.
     switch( urpc_server->type )
@@ -189,8 +193,9 @@ static void *urpc_server_func( void *data )
       session->activity = urpc_timer_create();
       if( session->activity == NULL )
         {
-        urpc_server_session_remove_func( session );
         status = URPC_STATUS_FAIL;
+        urpc_server_session_remove_func( session );
+        session = NULL;
         goto urpc_server_send_reply;
         }
 
@@ -203,8 +208,9 @@ static void *urpc_server_func( void *data )
       // Запоминаем сессию.
       if( urpc_hash_table_insert( urpc_server->sessions, session_id, session ) != 0 )
         {
-        urpc_server_session_remove_func( session );
         status = URPC_STATUS_FAIL;
+        urpc_server_session_remove_func( session );
+        session = NULL;
         goto urpc_server_send_reply;
         }
 
@@ -245,35 +251,36 @@ static void *urpc_server_func( void *data )
     // Отправка ответа.
     urpc_server_send_reply:
 
-      urpc_data_set_uint32( urpc_data, URPC_PARAM_STATUS, status );
+    urpc_data_set_uint32( urpc_data, URPC_PARAM_STATUS, status );
 
-      // Заголовок отправляемого пакета.
-      send_size = URPC_HEADER_SIZE + urpc_data_get_data_size( urpc_data, URPC_DATA_OUTPUT );
-      oheader->magic = UINT32_TO_BE( URPC_MAGIC );
-      oheader->version = UINT32_TO_BE( URPC_VERSION );
-      oheader->size = UINT32_TO_BE( send_size );
-      oheader->session = UINT32_TO_BE( session_id );
+    // Заголовок отправляемого пакета.
+    send_size = URPC_HEADER_SIZE + urpc_data_get_data_size( urpc_data, URPC_DATA_OUTPUT );
+    oheader->magic = UINT32_TO_BE( URPC_MAGIC );
+    oheader->version = UINT32_TO_BE( URPC_VERSION );
+    oheader->size = UINT32_TO_BE( send_size );
+    oheader->session = UINT32_TO_BE( session_id );
 
-      // Отправка ответа.
-      switch( urpc_server->type )
-        {
-        case URPC_UDP: urpc_udp_server_send( urpc_server->transport, thread_id ); break;
-        case URPC_TCP: urpc_tcp_server_send( urpc_server->transport, thread_id ); break;
-        default: break;
-        }
+    // Отправка ответа.
+    switch( urpc_server->type )
+      {
+      case URPC_UDP: urpc_udp_server_send( urpc_server->transport, thread_id ); break;
+      case URPC_TCP: urpc_tcp_server_send( urpc_server->transport, thread_id ); break;
+      default: break;
+      }
 
-      // Отключаем клиента в случае ошибки.
-      if( urpc_server->type == URPC_TCP )
-        if( status != URPC_STATUS_OK )
-          urpc_tcp_server_disconnect_client( urpc_server->transport, csocket );
+    // Отключаем TCP/IP клиента в случае ошибки.
+    if( urpc_server->type == URPC_TCP )
+      if( status != URPC_STATUS_OK )
+        urpc_tcp_server_disconnect_client( urpc_server->transport, csocket );
 
-      if( proc_id == URPC_PROC_LOGOUT && session->state == URPC_STATE_CONNECTED )
-        if( urpc_server->type == URPC_TCP )
-          urpc_tcp_server_disconnect_client( urpc_server->transport, csocket );
+    // Отключаем TCP/IP клиента после выполнения функции LOGOUT.
+    if( urpc_server->type == URPC_TCP )
+      if( proc_id == URPC_PROC_LOGOUT && status == URPC_STATUS_OK )
+        urpc_tcp_server_disconnect_client( urpc_server->transport, csocket );
 
-      // Очищаем буферы приёма-передачи.
-      urpc_data_set_data_size( urpc_data, URPC_DATA_INPUT, 0 );
-      urpc_data_set_data_size( urpc_data, URPC_DATA_OUTPUT, 0 );
+    // Очищаем буферы приёма-передачи.
+    urpc_data_set_data_size( urpc_data, URPC_DATA_INPUT, 0 );
+    urpc_data_set_data_size( urpc_data, URPC_DATA_OUTPUT, 0 );
 
     }
 
