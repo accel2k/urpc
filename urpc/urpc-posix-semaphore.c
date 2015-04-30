@@ -78,7 +78,7 @@ static uRpcSem *urpc_sem_create_int( const char *name, int initial_value, int cr
 uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int queue )
 {
 
-  return urpc_sem_create_int( name, stat == URPC_SEM_LOCKED ? 0 : 1, 1 );
+  return urpc_sem_create_int( name, stat == URPC_SEM_LOCKED ? 0 : queue, 1 );
 
 }
 
