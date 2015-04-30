@@ -19,11 +19,12 @@
  * along with this library. If not, see <http://www.gnu.org/licenses/>.
  *
 */
-
+#include <stdio.h>
 #include "urpc-server.h"
 #include "urpc-common.h"
 #include "urpc-thread.h"
 #include "urpc-mutex.h"
+#include "urpc-rwmutex.h"
 #include "urpc-timer.h"
 #include "urpc-hash-table.h"
 #include "urpc-mem-chunk.h"
@@ -66,11 +67,14 @@ typedef struct uRpcServer {
   uRpcHashTable    *sessions;               // Пользовательские сессии.
   uRpcMemChunk     *sessions_chunks;        // Аллокатор данных сессий.
   uint32_t          last_session_id;        // Идентификатор последней созданной сессии.
+  double            session_timeout;        // Таймаут сессии.
+  uRpcRWMutex       sessions_lock;          // Блокировка доступа к пользовательским сессиям.
+  uRpcThread       *session_check;          // Поток проверки пользовательских сессий.
 
   uint32_t          threads_num;            // Число рабочих потоков.
   uint32_t          max_clients;            // Максимальное число подключенных клиентов.
   uint32_t          max_data_size;          // Максимальный размер данных в RPC запросе/ответе.
-  double            timeout;                // Таймаут обмена данными.
+  double            data_timeout;           // Таймаут обмена данными.
   void             *transport;              // Указатель на один из объектов: uRpcUDPServer, uRpcTCPServer, uRpcSHMServer.
 
   uRpcThread      **servers;                // Рабочие потоки.
@@ -87,6 +91,61 @@ static void urpc_server_session_remove_func( uRpcServerSession *session )
 
   if( session->activity != NULL ) urpc_timer_destroy( session->activity );
   urpc_mem_chunk_free( session->sessions_chunks, session );
+
+}
+
+
+// Функция проверки и отключения сессии.
+static void urpc_server_check_session( uint32_t session_id, uRpcServerSession *session, uRpcServer *urpc_server )
+{
+
+  if( urpc_timer_elapsed( session->activity ) > urpc_server->session_timeout )
+    {
+    urpc_hash_table_remove( urpc_server->sessions, session_id );
+    if( urpc_server->type == URPC_TCP )
+      urpc_tcp_server_disconnect_client( urpc_server->transport, session->socket );
+    urpc_server_session_remove_func( session );
+    }
+
+}
+
+
+// Функция отключения клиентов по таймауту при неактивности.
+static void *urpc_server_session_timeout_check( void *data )
+{
+
+  uRpcServer *urpc_server = data;
+
+  int step = 0;
+
+  // Сигнализация о запуске потока.
+  urpc_mutex_lock( &urpc_server->lock );
+  urpc_server->started_servers++;
+  urpc_mutex_unlock( &urpc_server->lock );
+
+  while( !urpc_server->shutdown )
+    {
+
+    // Поток раз в секунду проверяет необходимость завершения работы.
+    step += 1;
+    urpc_timer_sleep( 1.0 );
+
+    // Раз в десять секунд проверяются сессии.
+    if( step < 3 ) continue;
+    step = 0;
+
+    urpc_rwmutex_writer_lock( &urpc_server->sessions_lock );
+    urpc_hash_table_foreach( urpc_server->sessions, (urpc_hash_table_foreach_callback)urpc_server_check_session, urpc_server );
+    urpc_rwmutex_writer_unlock( &urpc_server->sessions_lock );
+
+    }
+
+  // Сигнализация о завершении потока.
+  urpc_mutex_lock( &urpc_server->lock );
+  urpc_server->started_servers--;
+  urpc_mutex_unlock( &urpc_server->lock );
+
+  return NULL;
 
 }
 
@@ -170,9 +229,12 @@ static void *urpc_server_func( void *data )
     if( session_id == 0 && proc_id == URPC_PROC_LOGIN )
       {
 
+      urpc_rwmutex_writer_lock( &urpc_server->sessions_lock );
+
       // Проверка числа уже подключенных клиентов.
       if( urpc_hash_table_size( urpc_server->sessions ) >= urpc_server->max_clients )
         {
+        urpc_rwmutex_writer_unlock( &urpc_server->sessions_lock );
         status = URPC_STATUS_TOO_MANY_CONNECTIONS;
         goto urpc_server_send_reply;
         }
@@ -181,6 +243,7 @@ static void *urpc_server_func( void *data )
       session = urpc_mem_chunk_alloc( urpc_server->sessions_chunks );
       if( session == NULL )
         {
+        urpc_rwmutex_writer_unlock( &urpc_server->sessions_lock );
         status = URPC_STATUS_FAIL;
         goto urpc_server_send_reply;
         }
@@ -193,6 +256,7 @@ static void *urpc_server_func( void *data )
       session->activity = urpc_timer_create();
       if( session->activity == NULL )
         {
+        urpc_rwmutex_writer_unlock( &urpc_server->sessions_lock );
         status = URPC_STATUS_FAIL;
         urpc_server_session_remove_func( session );
         session = NULL;
@@ -208,11 +272,13 @@ static void *urpc_server_func( void *data )
       // Запоминаем сессию.
       if( urpc_hash_table_insert( urpc_server->sessions, session_id, session ) != 0 )
         {
+        urpc_rwmutex_writer_unlock( &urpc_server->sessions_lock );
         status = URPC_STATUS_FAIL;
         urpc_server_session_remove_func( session );
         session = NULL;
         goto urpc_server_send_reply;
         }
+      urpc_rwmutex_writer_unlock( &urpc_server->sessions_lock );
 
       status = URPC_STATUS_OK;
       goto urpc_server_send_reply;
@@ -220,12 +286,16 @@ static void *urpc_server_func( void *data )
       }
 
     // Проверка наличия сессии.
+    urpc_rwmutex_reader_lock( &urpc_server->sessions_lock );
     session = urpc_hash_table_find( urpc_server->sessions, session_id );
     if( session == NULL )
       {
+      urpc_rwmutex_reader_unlock( &urpc_server->sessions_lock );
       status = URPC_STATUS_AUTH_ERROR;
       goto urpc_server_send_reply;
       }
+    urpc_timer_start( session->activity );
+    urpc_rwmutex_reader_unlock( &urpc_server->sessions_lock );
 
     #pragma message( "Add authentication and decryption here!!!" )
     if( session->state == URPC_STATE_GOT_SESSION_ID ) session->state = URPC_STATE_CONNECTED;
@@ -294,7 +364,7 @@ static void *urpc_server_func( void *data )
 }
 
 
-uRpcServer *urpc_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, uint32_t max_data_size, double timeout )
+uRpcServer *urpc_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, double session_timeout, uint32_t max_data_size, double data_timeout )
 {
 
   uRpcServer *urpc_server = NULL;
@@ -324,14 +394,16 @@ uRpcServer *urpc_server_create( const char *uri, uint32_t threads_num, uint32_t 
   urpc_server->sessions = NULL;
   urpc_server->sessions_chunks = NULL;
   urpc_server->last_session_id = 0;
+  urpc_server->session_timeout = session_timeout;
   urpc_server->transport = NULL;
   urpc_server->servers = NULL;
   urpc_server->threads_num = threads_num;
   urpc_server->max_clients = max_clients;
   urpc_server->max_data_size = max_data_size;
-  urpc_server->timeout = timeout;
+  urpc_server->data_timeout = data_timeout;
   urpc_server->started_servers = 0;
   urpc_server->shutdown = 0;
+  urpc_rwmutex_init( &urpc_server->sessions_lock );
   urpc_mutex_init( &urpc_server->lock );
 
   urpc_server->uri = malloc( strlen( uri ) + 1 );
@@ -411,6 +483,7 @@ void urpc_server_destroy( uRpcServer *urpc_server )
   if( urpc_server->uri != NULL ) free( urpc_server->uri );
 
   urpc_mutex_clear( &urpc_server->lock );
+  urpc_rwmutex_clear( &urpc_server->sessions_lock );
 
   free( urpc_server );
 
@@ -443,8 +516,8 @@ int urpc_server_bind( uRpcServer *urpc_server )
   // Создаём транспортный объект.
   switch( urpc_server->type )
     {
-    case URPC_UDP: urpc_server->transport = urpc_udp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->timeout ); break;
-    case URPC_TCP: urpc_server->transport = urpc_tcp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->max_clients, urpc_server->max_data_size, urpc_server->timeout ); break;
+    case URPC_UDP: urpc_server->transport = urpc_udp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->data_timeout ); break;
+    case URPC_TCP: urpc_server->transport = urpc_tcp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->max_clients, urpc_server->max_data_size, urpc_server->data_timeout ); break;
     default: return -1;
     }
   if( urpc_server->transport == NULL ) return -1;
@@ -460,6 +533,14 @@ int urpc_server_bind( uRpcServer *urpc_server )
       }
     }
 
+  // Запуск потока проверки сессий.
+  urpc_server->session_check = urpc_thread_create( urpc_server_session_timeout_check, urpc_server );
+  if( urpc_server->session_check == NULL )
+    {
+    urpc_server->shutdown = 1;
+    return -1;
+    }
+
   // Ожидаем начала работы всех потоков.
   do {
 
@@ -468,7 +549,7 @@ int urpc_server_bind( uRpcServer *urpc_server )
     urpc_mutex_unlock( &urpc_server->lock );
     urpc_timer_sleep( 0.1 );
 
-  } while( started_servers != urpc_server->threads_num );
+  } while( started_servers != urpc_server->threads_num + 1 );
 
   return 0;
 

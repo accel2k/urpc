@@ -107,7 +107,7 @@ void *urpc_test_client_proc( void *data )
   uint32_t array_size;
   unsigned int i, j;
 
-  client = urpc_client_create( uri, URPC_DEFAULT_DATA_SIZE, URPC_DEFAULT_CLIENT_TIMEOUT );
+  client = urpc_client_create( uri, URPC_DEFAULT_DATA_SIZE, URPC_DEFAULT_DATA_TIMEOUT );
   if( client == NULL )
     { printf( "error creating uRPC client\n" ); fail = 1; return NULL; }
 
@@ -126,7 +126,7 @@ void *urpc_test_client_proc( void *data )
   client_id = running_clients += 1;
   printf( "client %d connects to ...\n", client_id );
   urpc_mutex_unlock( &lock );
-
+  if( client_id == 1 ) return NULL;
   while( !start );
 
   urpc_timer_start( timer );
@@ -241,7 +241,7 @@ int main( int argc, char **argv )
   if( run_server )
     {
 
-    server = urpc_server_create( uri, threads_num, threads_num, payload_size + 128, URPC_DEFAULT_SERVER_TIMEOUT );
+    server = urpc_server_create( uri, threads_num, threads_num, URPC_DEFAULT_SESSION_TIMEOUT, payload_size + 128, URPC_DEFAULT_DATA_TIMEOUT );
     if( server == NULL )
       { printf( "error creating uRPC server\n" ); return -1; }
 
@@ -273,7 +273,7 @@ int main( int argc, char **argv )
 
   } while( local_running_clients != threads_num && !fail );
 
-  urpc_timer_sleep( 0.5 );
+  urpc_timer_sleep( 2.0 );
   if( !fail ) start = 1;
 
   do {

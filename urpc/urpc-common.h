@@ -33,32 +33,45 @@ extern "C" {
 #endif
 
 
-/*! \brief Все поля RPC заголовка представлены в сетевом (big endian) порядке следования байт. */
-#define URPC_MAGIC                         0x75525043  /*!< Идентификатор RPC пакета - строка 'uRPC'. */
-#define URPC_VERSION                       0x00030000  /*!< Версия протокола uRPC - старшие 16 бит - MAJOR, младшие 16 бит - MINOR. */
+/* Значения по умолчанию. */
 
-/*! \brief Системные идентификаторы параметров. */
-#define URPC_PARAM_PROC                    0x00010000  /*!< Идентификатор вызываемой функции - uint32_t. */
-#define URPC_PARAM_STATUS                  0x00020000  /*!< Идентификатор статуса - uint32_t. */
-#define URPC_PARAM_CAP                     0x00030000  /*!< Идентификатор возможностей сервера - uint32_t. */
+#define URPC_HEADER_SIZE                   sizeof( uRpcHeader )
 
-/*! \brief Системные идентификаторы процедур. */
-#define URPC_PROC_GET_CAP                  0x00010000  /*!< Получение возможностей сервера. */
-#define URPC_PROC_LOGIN                    0x00020000  /*!< Начало сессии. */
-#define URPC_PROC_LOGOUT                   0x00030000  /*!< Окончание сессии. */
+#define URPC_DEFAULT_BUFFER_SIZE           ( URPC_DEFAULT_DATA_SIZE + URPC_HEADER_SIZE )
 
-/*! \brief Системные идентификаторы состояния подключения клиента. */
-#define URPC_STATE_CONNECTED               0x00010000  /*!< Подключено. */
-#define URPC_STATE_NOT_CONNECTED           0x00020000  /*!< Не подключено. */
-#define URPC_STATE_GOT_SESSION_ID          0x00030000  /*!< Получен идентификатор сессии. */
+/* Минимально возможный таймаут процедуры обмена данными. */
+#define URPC_MIN_TIMEOUT                   0.1
+
+
+/* Все поля RPC заголовка представлены в сетевом (big endian) порядке следования байт. */
+#define URPC_MAGIC                         0x75525043  /* Идентификатор RPC пакета - строка 'uRPC'. */
+#define URPC_VERSION                       0x00030000  /* Версия протокола uRPC - старшие 16 бит - MAJOR, младшие 16 бит - MINOR. */
+
+
+/* Системные идентификаторы параметров. */
+#define URPC_PARAM_PROC                    0x00010000  /* Идентификатор вызываемой функции - uint32_t. */
+#define URPC_PARAM_STATUS                  0x00020000  /* Идентификатор статуса - uint32_t. */
+#define URPC_PARAM_CAP                     0x00030000  /* Идентификатор возможностей сервера - uint32_t. */
+
+
+/* Системные идентификаторы процедур. */
+#define URPC_PROC_GET_CAP                  0x00010000  /* Получение возможностей сервера. */
+#define URPC_PROC_LOGIN                    0x00020000  /* Начало сессии. */
+#define URPC_PROC_LOGOUT                   0x00030000  /* Окончание сессии. */
+
+
+/* Системные идентификаторы состояния подключения клиента. */
+#define URPC_STATE_CONNECTED               0x00010000  /* Подключено. */
+#define URPC_STATE_NOT_CONNECTED           0x00020000  /* Не подключено. */
+#define URPC_STATE_GOT_SESSION_ID          0x00030000  /* Получен идентификатор сессии. */
 
 
 typedef struct uRpcHeader {
 
-  uint32_t          magic;
-  uint32_t          version;
-  uint32_t          session;
-  uint32_t          size;
+  uint32_t          magic;                             /* Идентификатор пакета uRPC. */
+  uint32_t          version;                           /* Версия протокола uRPC. */
+  uint32_t          session;                           /* Идентификатор сессии клиента. */
+  uint32_t          size;                              /* Размер пакета. */
 
 } uRpcHeader;
 

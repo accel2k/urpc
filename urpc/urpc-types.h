@@ -20,29 +20,43 @@
  *
 */
 
+/*!
+ * \file urpc-types.h
+ *
+ * \author Andrei Fadeev
+ * \date 24.04.2015
+ * \brief Заголовочный файл констант системы uRPC.
+ *
+*/
+
 #ifndef _urpc_types_h
 #define _urpc_types_h
 
 
-/*! \brief Значения по умолчанию. */
-#define URPC_DEFAULT_SERVER_TIMEOUT        2.0
-#define URPC_DEFAULT_CLIENT_TIMEOUT        5.0
+/* Значения по умолчанию. */
 
+/*! Интервал времени в течение которого должна завершиться процедура обмена данными. */
+#define URPC_DEFAULT_DATA_TIMEOUT          5.0
+
+/*! Интервал времени при привышении которого происходит отключение клиента. */
+#define URPC_DEFAULT_SESSION_TIMEOUT       600.0
+
+/*! Максимально возможный объём данных передаваемых по RPC для протоколов TCP и SHM. */
 #define URPC_MAX_DATA_SIZE                 16*1024*1024
+
+/*! Размер данных передаваемых по RPC по умолчанию. Является максимально возможным для протокола UDP.*/
 #define URPC_DEFAULT_DATA_SIZE             65000
-#define URPC_HEADER_SIZE                   sizeof( uRpcHeader )
-#define URPC_DEFAULT_BUFFER_SIZE           ( URPC_DEFAULT_DATA_SIZE + URPC_HEADER_SIZE )
 
+/*! Максимально возможное число потоков сервера. */
 #define URPC_MAX_THREADS_NUM               32
-#define URPC_MIN_TIMEOUT                   0.1
 
 
-/*! \brief Пользовательские идентификаторы. */
+/* Пользовательские идентификаторы. */
 #define URPC_PARAM_USER                    0x20000000  /*!< Идентификатор начала пользовательских параметров. */
 #define URPC_PROC_USER                     0x20000000  /*!< Идентификатор начала пользовательских функций. */
 
 
-/*! \brief Статус выполнения. */
+/* Статус выполнения. */
 #define URPC_STATUS_OK                     0x00010000  /*!< Выполнено. */
 #define URPC_STATUS_FAIL                   0x00020000  /*!< Общая ошибка. */
 #define URPC_STATUS_TIMEOUT                0x00030000  /*!< Превышено время ожидания ответа. */

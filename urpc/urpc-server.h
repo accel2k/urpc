@@ -48,7 +48,7 @@ typedef struct uRpcServer uRpcServer;
 typedef int (*urpc_server_callback)( uint32_t session, uRpcData *urpc_data, void *proc_data, void *key_data );
 
 
-URPC_EXPORT uRpcServer *urpc_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, uint32_t max_data_size, double timeout );
+URPC_EXPORT uRpcServer *urpc_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, double session_timeout, uint32_t max_data_size, double data_timeout );
 
 
 URPC_EXPORT void urpc_server_destroy( uRpcServer *urpc_server );
