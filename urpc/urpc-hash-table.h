@@ -77,6 +77,23 @@ typedef struct uRpcHashTable uRpcHashTable;
 typedef void (*urpc_hash_table_destroy_callback)( void *data );
 
 
+/*! Тип функции вызываемой при обходе всех ключей массива.
+ *
+ * Функция используется для выполнения определённых действий над всеми ключами массива.
+ * В этой функции нельзя удалять элементы массива отличные от текущего обрабатываемого.
+ * Если пользователь добавил новые элементы массива, нет гарантии, что они будут обработаны
+ * в текущем цикле функции #urpc_hash_table_foreach.
+ *
+ * \param key значение ключа;
+ * \param value указатель на данные;
+ * \param user_data указатель на пользовательские данные.
+ *
+ * \return Нет.
+ *
+*/
+typedef void (*urpc_hash_table_foreach_callback)( uint32_t key, void *value, void *user_data );
+
+
 /*! Создание хэш таблицы.
  *
  * Функция создаёт пустую хэш таблицу.
@@ -161,6 +178,20 @@ URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key 
  *
 */
 URPC_EXPORT uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uint32_t key );
+
+
+/*! Обработка всех элементов массива.
+ *
+ * Функция вызывает для каждого ключа в массиве пользовательскую функцию #urpc_hash_table_foreach_callback.
+ *
+ * \param hash_table указатель на хэш таблицу;
+ * \param callback пользовательская функция;
+ * \param user_data пользовательские данные.
+ *
+ * \return Нет.
+ *
+*/
+URPC_EXPORT void urpc_hash_table_foreach( uRpcHashTable *hash_table, urpc_hash_table_foreach_callback callback, void *user_data );
 
 
 /*! Размер таблицы.

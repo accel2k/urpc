@@ -26,6 +26,15 @@
 #include "urpc-hash-table.h"
 
 
+void remove_callback( uint32_t key, void *value, void *data )
+{
+
+  if( key % 10000 == 0 )
+    if( urpc_hash_table_remove( data, key ) != 0 )
+      printf( "error removing key %d\n", key );
+
+}
+
 int main( int argc, char **argv )
 {
 
@@ -48,16 +57,20 @@ int main( int argc, char **argv )
     if( urpc_hash_table_insert( uhash, key, (void*)key ) <= 0 )
       printf( "error inserting duplicated key %d\n", key );
 
+  urpc_hash_table_foreach( uhash, remove_callback, uhash );
+
   for( i = 0; i < 10; i++ )
     for( key = 0; key < 100000; key++ )
       {
       uint32_t *value = urpc_hash_table_find( uhash, key );
-      if( *value != key ) printf( "error finding key %d\n", key );
+      if( ( value == NULL || *value != key ) && ( key % 10000 != 0 ) ) printf( "error finding key %d\n", key );
+      else if( value != NULL && key % 10000 == 0 ) printf( "error finding key %d\n", key );
       }
 
   for( key = 0; key < 100000; key++ )
     if( urpc_hash_table_remove( uhash, key ) != 0 )
-      printf( "error removing key %d\n", key );
+      if( key % 10000 != 0 )
+        printf( "error removing key %d\n", key );
 
   urpc_hash_table_destroy( uhash );
 

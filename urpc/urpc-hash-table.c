@@ -175,6 +175,29 @@ uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uint32_t key )
 }
 
 
+void urpc_hash_table_foreach( uRpcHashTable *hash_table, urpc_hash_table_foreach_callback callback, void *user_data )
+{
+
+  HashNode *node, *next;
+  uint32_t i;
+
+  if( hash_table->type != URPC_HASH_TABLE_TYPE ) return;
+
+  for( i = 0; i < HASH_TABLE_SIZE; i++ )
+    {
+    node = hash_table->nodes[i];
+    if( node == NULL ) continue;
+    while( node != NULL )
+      {
+      next = node->next;
+      callback( node->key, node->value, user_data );
+      node = next;
+      }
+    }
+
+}
+
+
 uint32_t urpc_hash_table_size( uRpcHashTable *hash_table )
 {
 
@@ -198,7 +221,7 @@ int urpc_hash_table_remove( uRpcHashTable *hash_table, uint32_t key )
     {
     if( node->key == key )
       {
-      if( parrent != NULL ) parrent = node->next;
+      if( parrent != NULL ) parrent->next = node->next;
       else hash_table->nodes[ key % HASH_TABLE_SIZE ] = node->next;
       if( hash_table->value_destroy_func != NULL ) hash_table->value_destroy_func( node->value );
       urpc_mem_chunk_free( hash_table->chunks, node );
