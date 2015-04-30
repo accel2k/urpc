@@ -65,6 +65,12 @@ static uRpcShm *urpc_shm_create_int( const char *name, unsigned long size, int c
     {
     int name_size = strlen( name ) + 1;
     shm->name = malloc( name_size );
+    if( shm->name == NULL )
+      {
+      close( shm->shm_id );
+      free( shm );
+      return NULL;
+      }
     memcpy( shm->name, name, name_size );
     }
   else
@@ -109,6 +115,7 @@ void urpc_shm_destroy( uRpcShm *shm )
 
   if( shm->type != URPC_SHM_TYPE ) return;
 
+  if( shm->shm_id >=0 ) close( shm->shm_id );
   if( shm->maddr != NULL ) munmap( shm->maddr, shm->size );
   if( shm->name != NULL ) shm_unlink( shm->name );
   free( shm->name );
@@ -137,8 +144,11 @@ void *urpc_shm_map( uRpcShm *shm )
   shm->maddr = mmap( NULL, shm->size, pflags, MAP_SHARED, shm->shm_id, 0 );
   if( shm->maddr == MAP_FAILED ) return NULL;
 
-  if( ftruncate( shm->shm_id, shm->size ) < 0 )
+  if( shm->name != NULL && ftruncate( shm->shm_id, shm->size ) < 0 )
     { munmap( shm->maddr, shm->size ); return NULL; }
+
+  close( shm->shm_id );
+  shm->shm_id = -1;
 
   return shm->maddr;
 
