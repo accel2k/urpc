@@ -47,8 +47,8 @@
  *
 */
 
-#ifndef _urpc_mutex_h
-#define _urpc_mutex_h
+#ifndef _urpc_rwmutex_h
+#define _urpc_rwmutex_h
 
 #include <urpc-exports.h>
 
