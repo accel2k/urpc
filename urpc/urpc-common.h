@@ -33,10 +33,16 @@ extern "C" {
 #endif
 
 
-/* Значения по умолчанию. */
+/*  Максимальная длина адреса RPC сервера/клиента. */
+#define MAX_HOST_LEN                       1024
 
+/*  Максимальная длина строки с номером TCP/UDP порта. */
+#define MAX_PORT_LEN                       5
+
+/* Размер заголовка uRPC пакета. */
 #define URPC_HEADER_SIZE                   sizeof( uRpcHeader )
 
+/* Размер буфера данных по умолчанию (максимальный для UDP). */
 #define URPC_DEFAULT_BUFFER_SIZE           ( URPC_DEFAULT_DATA_SIZE + URPC_HEADER_SIZE )
 
 /* Минимально возможный таймаут процедуры обмена данными. */
@@ -66,6 +72,7 @@ extern "C" {
 #define URPC_STATE_GOT_SESSION_ID          0x00030000  /* Получен идентификатор сессии. */
 
 
+/* Структура заголовка uRPC пакета. */
 typedef struct uRpcHeader {
 
   uint32_t          magic;                             /* Идентификатор пакета uRPC. */
@@ -74,6 +81,16 @@ typedef struct uRpcHeader {
   uint32_t          size;                              /* Размер пакета. */
 
 } uRpcHeader;
+
+
+/* Структура управляющего сегмента общей области памяти. */
+typedef struct uRpcSHMControl {
+
+  uint32_t          pid;                               /* Идентификатор процесса сервера. */
+  uint32_t          size;                              /* Размер буфера RPC данных. */
+  uint32_t          threads_num;                       /* Число потоков сервера (буферов RPC данных). */
+
+} uRpcSHMControl;
 
 
 URPC_EXPORT uRpcType urpc_get_type( const char *uri );

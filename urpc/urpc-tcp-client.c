@@ -312,9 +312,3 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
   return URPC_STATUS_OK;
 
 }
-
-
-void urpc_tcp_client_unlock( uRpcTCPClient *urpc_tcp_client )
-{
-
-}

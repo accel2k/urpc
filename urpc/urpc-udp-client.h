@@ -59,9 +59,6 @@ uRpcData *urpc_udp_client_lock( uRpcUDPClient *urpc_udp_client );
 uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client );
 
 
-void urpc_udp_client_unlock( uRpcUDPClient *urpc_udp_client );
-
-
 #ifdef __cplusplus
 } // extern "C"
 #endif

@@ -21,7 +21,7 @@
 */
 
 /*!
- * \file urpc-tcp-client.h
+ * \file urpc-shm-client.h
  *
  * \author Andrei Fadeev
  * \date 20.03.2009
@@ -30,8 +30,8 @@
  *
 */
 
-#ifndef _urpc_tcp_client_h
-#define _urpc_tcp_client_h
+#ifndef _urpc_shm_client_h
+#define _urpc_shm_client_h
 
 #include <urpc-types.h>
 #include <urpc-data.h>
@@ -41,26 +41,29 @@ extern "C" {
 #endif
 
 
-typedef struct uRpcTCPClient uRpcTCPClient;
+typedef struct uRpcSHMClient uRpcSHMClient;
 
 
-uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, double exec_timeout );
+uRpcSHMClient *urpc_shm_client_create( const char *uri );
 
 
-void urpc_tcp_client_destroy( uRpcTCPClient *urpc_tcp_client );
+void urpc_shm_client_destroy( uRpcSHMClient *urpc_udp_client );
 
 
-int urpc_tcp_client_connect( uRpcTCPClient *urpc_tcp_client );
+int urpc_shm_client_connect( uRpcSHMClient *urpc_udp_client );
 
 
-uRpcData *urpc_tcp_client_lock( uRpcTCPClient *urpc_tcp_client );
+uRpcData *urpc_shm_client_lock( uRpcSHMClient *urpc_udp_client );
 
 
-uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client );
+uint32_t urpc_shm_client_exchange( uRpcSHMClient *urpc_udp_client );
+
+
+void urpc_shm_client_unlock( uRpcSHMClient *urpc_udp_client );
 
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif // _urpc_tcp_client_h
+#endif // _urpc_shm_client_h

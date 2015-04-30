@@ -194,9 +194,3 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
   return URPC_STATUS_TIMEOUT;
 
 }
-
-
-void urpc_udp_client_unlock( uRpcUDPClient *urpc_udp_client )
-{
-
-}

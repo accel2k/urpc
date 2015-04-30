@@ -27,9 +27,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_HOST_LEN 1024
-#define MAX_PORT_LEN 5
-
 #ifndef AI_ADDRCONFIG
 #define AI_ADDRCONFIG 0
 #endif

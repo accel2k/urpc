@@ -1,7 +1,7 @@
 /*
  * uRpc - rpc (remote procedure call) library.
  *
- * Copyright 2009, 2010, 2014, 2015 Andrei Fadeev
+ * Copyright 2014, 2015 Andrei Fadeev
  *
  * This file is part of uRPC.
  *
@@ -21,17 +21,18 @@
 */
 
 /*!
- * \file urpc-tcp-client.h
+ * \file urpc-shm-server.h
  *
  * \author Andrei Fadeev
- * \date 20.03.2009
+ * \date 12.02.2014
  * \brief
  *
  *
 */
 
-#ifndef _urpc_tcp_client_h
-#define _urpc_tcp_client_h
+
+#ifndef _urpc_shm_server_h
+#define _urpc_shm_server_h
 
 #include <urpc-types.h>
 #include <urpc-data.h>
@@ -41,26 +42,24 @@ extern "C" {
 #endif
 
 
-typedef struct uRpcTCPClient uRpcTCPClient;
+typedef struct uRpcSHMServer uRpcSHMServer;
 
 
-uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, double exec_timeout );
+uRpcSHMServer *urpc_shm_server_create( const char *uri, uint32_t threads_num, uint32_t max_data_size );
 
 
-void urpc_tcp_client_destroy( uRpcTCPClient *urpc_tcp_client );
+void urpc_shm_server_destroy( uRpcSHMServer *urpc_shm_server );
 
 
-int urpc_tcp_client_connect( uRpcTCPClient *urpc_tcp_client );
+uRpcData *urpc_shm_server_recv( uRpcSHMServer *urpc_shm_server, uint32_t thread_id );
 
 
-uRpcData *urpc_tcp_client_lock( uRpcTCPClient *urpc_tcp_client );
-
-
-uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client );
+int urpc_shm_server_send( uRpcSHMServer *urpc_shm_server, uint32_t thread_id );
 
 
 #ifdef __cplusplus
+
 } // extern "C"
 #endif
 
-#endif // _urpc_tcp_client_h
+#endif // _urpc_shm_server_h

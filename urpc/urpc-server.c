@@ -33,6 +33,7 @@
 
 #include "urpc-udp-server.h"
 #include "urpc-tcp-server.h"
+#include "urpc-shm-server.h"
 
 #include <stdlib.h>
 
@@ -189,6 +190,7 @@ static void *urpc_server_func( void *data )
       {
       case URPC_UDP: urpc_data = urpc_udp_server_recv( urpc_server->transport, thread_id ); break;
       case URPC_TCP: urpc_data = urpc_tcp_server_recv( urpc_server->transport, thread_id ); break;
+      case URPC_SHM: urpc_data = urpc_shm_server_recv( urpc_server->transport, thread_id ); break;
       default: urpc_data = NULL; break;
       }
 
@@ -470,6 +472,7 @@ void urpc_server_destroy( uRpcServer *urpc_server )
       {
       case URPC_UDP: urpc_udp_server_destroy( urpc_server->transport ); break;
       case URPC_TCP: urpc_tcp_server_destroy( urpc_server->transport ); break;
+      case URPC_SHM: urpc_shm_server_destroy( urpc_server->transport ); break;
       default: break;
       }
     }
@@ -518,6 +521,7 @@ int urpc_server_bind( uRpcServer *urpc_server )
     {
     case URPC_UDP: urpc_server->transport = urpc_udp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->data_timeout ); break;
     case URPC_TCP: urpc_server->transport = urpc_tcp_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->max_clients, urpc_server->max_data_size, urpc_server->data_timeout ); break;
+    case URPC_SHM: urpc_server->transport = urpc_shm_server_create( urpc_server->uri, urpc_server->threads_num, urpc_server->max_data_size ); break;
     default: return -1;
     }
   if( urpc_server->transport == NULL ) return -1;
