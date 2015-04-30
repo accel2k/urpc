@@ -70,21 +70,19 @@ void help( char *prog_name )
 int urpc_test_proc( uint32_t session, uRpcData *urpc_data, void *proc_data, void *key_data )
 {
 
-  uint8_t *array;
+  uint8_t *array1;
+  uint8_t *array2;
   uint32_t array_size;
   unsigned int i;
 
-  array = urpc_data_get( urpc_data, URPC_TEST_PARAM_ARRAY, &array_size );
+  array1 = urpc_data_get( urpc_data, URPC_TEST_PARAM_ARRAY, &array_size );
+  array2 = urpc_data_set( urpc_data, URPC_TEST_PARAM_ARRAY, NULL, array_size );
 
   for( i = 0; i < array_size / 2; i++ )
     {
-    uint8_t swp;
-    swp = array[i];
-    array[i] = array[array_size-1-i];
-    array[array_size-1-i] = swp;
+    array2[i] = array1[array_size-1-i];
+    array2[array_size-1-i] = array1[i];
     }
-
-  urpc_data_set( urpc_data, URPC_TEST_PARAM_ARRAY, array, array_size );
 
   return 0;
 
@@ -126,7 +124,7 @@ void *urpc_test_client_proc( void *data )
   client_id = running_clients += 1;
   printf( "client %d connects to ...\n", client_id );
   urpc_mutex_unlock( &lock );
-  if( client_id == 1 ) return NULL;
+
   while( !start );
 
   urpc_timer_start( timer );
