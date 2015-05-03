@@ -208,8 +208,6 @@ uRpcData *urpc_shm_client_lock( uRpcSHMClient *urpc_shm_client )
   // Нет свободных буферов !!??
   if( i == urpc_shm_client->threads_num ) return NULL;
 
-  printf( "selected transport %d\n", i );
-
   urpc_shm_client->transport = urpc_shm_client->transports[i];
 
   return urpc_shm_client->transport->urpc_data;
@@ -226,8 +224,12 @@ uint32_t urpc_shm_client_exchange( uRpcSHMClient *urpc_shm_client )
 
   iheader = urpc_data_get_header( urpc_shm_client->transport->urpc_data, URPC_DATA_INPUT );
 
+//  printf( "unlock start semaphore\n" );
+
   // Сигнализируем о начале выполнения запроса.
   urpc_sem_unlock( urpc_shm_client->transport->start );
+
+//  printf( "unlocked\n" );
 
   // Ожидаем завершения выполнения.
   urpc_sem_lock( urpc_shm_client->transport->stop );

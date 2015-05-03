@@ -337,6 +337,7 @@ static void *urpc_server_func( void *data )
       {
       case URPC_UDP: urpc_udp_server_send( urpc_server->transport, thread_id ); break;
       case URPC_TCP: urpc_tcp_server_send( urpc_server->transport, thread_id ); break;
+      case URPC_SHM: urpc_shm_server_send( urpc_server->transport, thread_id ); break;
       default: break;
       }
 
@@ -537,6 +538,16 @@ int urpc_server_bind( uRpcServer *urpc_server )
       }
     }
 
+  // Ожидаем начала работы всех потоков транспортных объектов.
+  do {
+
+    urpc_mutex_lock( &urpc_server->lock );
+    started_servers = urpc_server->started_servers;
+    urpc_mutex_unlock( &urpc_server->lock );
+    urpc_timer_sleep( 0.1 );
+
+  } while( started_servers != urpc_server->threads_num );
+
   // Запуск потока проверки сессий.
   urpc_server->session_check = urpc_thread_create( urpc_server_session_timeout_check, urpc_server );
   if( urpc_server->session_check == NULL )
@@ -545,7 +556,7 @@ int urpc_server_bind( uRpcServer *urpc_server )
     return -1;
     }
 
-  // Ожидаем начала работы всех потоков.
+  // Ожидаем начала работы потока проверки сессий.
   do {
 
     urpc_mutex_lock( &urpc_server->lock );

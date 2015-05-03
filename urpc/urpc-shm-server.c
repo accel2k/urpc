@@ -234,8 +234,6 @@ uRpcData *urpc_shm_server_recv( uRpcSHMServer *urpc_shm_server, uint32_t thread_
   if( urpc_shm_server->urpc_shm_server_type != URPC_SHM_SERVER_TYPE ) return NULL;
   if( thread_id > urpc_shm_server->threads_num - 1 ) return NULL;
 
-  printf( "thread id %d check start\n", thread_id );
-
   // Ждём 500мс сигнала о начале выполнения запроса.
   if( urpc_sem_timedlock( urpc_shm_server->transports[thread_id]->start, 0.5 ) != 0 ) return NULL;
 
