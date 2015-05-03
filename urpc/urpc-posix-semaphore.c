@@ -55,7 +55,8 @@ static uRpcSem *urpc_sem_create_int( const char *name, int initial_value, int cr
   else oflags = O_RDWR;
 
   if( sem == NULL )return NULL;
-  sem->sem = sem_open( name, oflags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, initial_value );
+  if( create ) sem->sem = sem_open( name, oflags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, initial_value );
+  else sem->sem = sem_open( name, oflags );
   if( sem->sem == SEM_FAILED )
     { free( sem ); return NULL; }
 
