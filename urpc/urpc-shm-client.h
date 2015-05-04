@@ -23,9 +23,10 @@
 /*!
  * \file urpc-shm-client.h
  *
- * \author Andrei Fadeev
- * \date 20.03.2009
  * \brief
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2009, 2010, 2014, 2015
+ * \copyright GNU General Public License version 3 or later
  *
  *
 */

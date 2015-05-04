@@ -23,9 +23,10 @@
 /*!
  * \file urpc-shm.h
  *
- * \author Andrei Fadeev
- * \date 23.03.2015
- * \brief Заголовочный файл библиотеки работы с разделяемой памятью.
+ * \brief Заголовочный файл библиотеки работы с разделяемой памятью
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcShm uRpcShm - библиотека работы с разделяемой памятью.
  *

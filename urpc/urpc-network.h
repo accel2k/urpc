@@ -23,9 +23,10 @@
 /*!
  * \file urpc-network.h
  *
- * \author Andrei Fadeev
- * \date 29.06.2009
- * \brief Заголовочный файл библиотеки совместимости с BSD socket.
+ * \brief Заголовочный файл библиотеки совместимости с BSD socket
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2009, 2010, 2011, 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcNetwork uRpcNetwork - библиотека совместимости с BSD socket.
  *

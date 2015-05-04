@@ -23,9 +23,10 @@
 /*!
  * \file urpc-hash-table.h
  *
- * \author Andrei Fadeev
- * \date 31.03.2015
- * \brief Заголовочный файл библиотеки работы с хэш таблицей.
+ * \brief Заголовочный файл библиотеки работы с хэш таблицей
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcHashTable uRpcHashTable - библиотека работы с хэш таблицей.
  *

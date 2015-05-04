@@ -23,9 +23,10 @@
 /*!
  * \file urpc-semaphore.h
  *
- * \author Andrei Fadeev
- * \date 23.03.2015
- * \brief Заголовочный файл библиотеки работы с семафорами.
+ * \brief Заголовочный файл библиотеки работы с семафорами
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcSemaphore uRpcSemaphore - библиотека работы с семафорами.
  *

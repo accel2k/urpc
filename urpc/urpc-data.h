@@ -23,9 +23,10 @@
 /*!
  * \file urpc-data.h
  *
- * \author Andrei Fadeev
- * \date 20.02.2014
- * \brief Заголовочный файл библиотеки работы с RPC данными.
+ * \brief Заголовочный файл библиотеки работы с RPC данными
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2014, 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcData uRpcData - библиотека буфера приема-передачи RPC данных.
  *

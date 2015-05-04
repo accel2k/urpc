@@ -23,9 +23,10 @@
 /*!
  * \file urpc-mem-chunk.h
  *
- * \author Andrei Fadeev
- * \date 1.04.2015
- * \brief Заголовочный файл библиотеки хранения множества объектов.
+ * \brief Заголовочный файл библиотеки хранения множества объектов
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcMemChunk uRpcMemChunk - библиотека хранения множества объектов.
  *

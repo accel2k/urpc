@@ -23,9 +23,10 @@
 /*!
  * \file urpc-rwmutex.h
  *
- * \author Andrei Fadeev
- * \date 2.04.2015
- * \brief Заголовочный файл библиотеки работы с разделяемыми мьютексами.
+ * \brief Заголовочный файл библиотеки работы с разделяемыми мьютексами
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcRWMutex uRpcRWMutex - библиотека работы с разделяемыми мьютексами.
  *

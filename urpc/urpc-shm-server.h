@@ -1,7 +1,7 @@
 /*
  * uRpc - rpc (remote procedure call) library.
  *
- * Copyright 2014, 2015 Andrei Fadeev
+ * Copyright 2009, 2010, 2014, 2015 Andrei Fadeev
  *
  * This file is part of uRPC.
  *
@@ -23,9 +23,10 @@
 /*!
  * \file urpc-shm-server.h
  *
- * \author Andrei Fadeev
- * \date 12.02.2014
  * \brief
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2009, 2010, 2014, 2015
+ * \copyright GNU General Public License version 3 or later
  *
  *
 */

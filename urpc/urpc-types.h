@@ -23,9 +23,10 @@
 /*!
  * \file urpc-types.h
  *
- * \author Andrei Fadeev
- * \date 24.04.2015
- * \brief Заголовочный файл констант системы uRPC.
+ * \brief Заголовочный файл констант системы uRPC
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
 */
 

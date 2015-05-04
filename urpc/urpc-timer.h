@@ -23,9 +23,10 @@
 /*!
  * \file urpc-timer.h
  *
- * \author Andrei Fadeev
- * \date 20.04.2015
- * \brief Заголовочный файл библиотеки работы с таймерами.
+ * \brief Заголовочный файл библиотеки работы с таймерами
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcTimer uRpcTimer - библиотека работы с таймерами.
  *

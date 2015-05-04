@@ -1,7 +1,7 @@
 /*
  * uRpc - rpc (remote procedure call) library.
  *
- * Copyright 2014, 2015 Andrei Fadeev
+ * Copyright 2009, 2010, 2014, 2015 Andrei Fadeev
  *
  * This file is part of uRPC.
  *

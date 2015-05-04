@@ -23,9 +23,10 @@
 /*!
  * \file urpc-thread.h
  *
- * \author Andrei Fadeev
- * \date 23.03.2015
- * \brief Заголовочный файл библиотеки работы с потоками.
+ * \brief Заголовочный файл библиотеки работы с потоками
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcThread uRpcThread - библиотека работы с потоками.
  *

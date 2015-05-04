@@ -23,9 +23,10 @@
 /*!
  * \file urpc-mutex.h
  *
- * \author Andrei Fadeev
- * \date 23.03.2015
- * \brief Заголовочный файл библиотеки работы с мьютексами.
+ * \brief Заголовочный файл библиотеки работы с мьютексами
+ * \author Andrei Fadeev (andrei@webcontrol.ru)
+ * \date 2009, 2010, 2014, 2015
+ * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcMutex uRpcMutex - библиотека работы с мьютексами.
  *
