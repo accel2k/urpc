@@ -20,16 +20,8 @@
  *
 */
 
-/*!
- * \file urpc-udp-server.h
- *
- * \brief
- * \author Andrei Fadeev (andrei@webcontrol.ru)
- * \date 2009, 2010, 2014, 2015
- * \copyright GNU General Public License version 3 or later
- *
- *
-*/
+/* Заголовочный файл сервера удалённых вызовов процедур по протоколу UDP.
+ * Функции UDP сервера используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
 
 #ifndef _urpc_udp_server_h
 #define _urpc_udp_server_h
@@ -45,15 +37,23 @@ extern "C" {
 typedef struct uRpcUDPServer uRpcUDPServer;
 
 
+/* Функция создаёт RPC сервер обслуживающий клиентов по протоколу UDP.
+ * При запуске сервера создаётся threads_num объектов каждый из которых может
+ * использоваться в своём потоке. Сами потоки создаются функцией urpc_server_create.
+ * В дальнейшем при вызове функций каждый поток передаёт свой идентификатор.
+ * Параметры функции аналогичны urpc_server_create. */
 uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, double timeout );
 
 
+/* Функция удаляет сервер. */
 void urpc_udp_server_destroy( uRpcUDPServer *urpc_udp_server );
 
 
+/* Функция принимает один запрос в потоке thread_id. */
 uRpcData *urpc_udp_server_recv( uRpcUDPServer *urpc_udp_server, uint32_t thread_id );
 
 
+/* Функция отправляет ответ в потоке thread_id. */
 int urpc_udp_server_send( uRpcUDPServer *urpc_udp_server, uint32_t thread_id );
 
 

@@ -224,12 +224,8 @@ uint32_t urpc_shm_client_exchange( uRpcSHMClient *urpc_shm_client )
 
   iheader = urpc_data_get_header( urpc_shm_client->transport->urpc_data, URPC_DATA_INPUT );
 
-//  printf( "unlock start semaphore\n" );
-
   // Сигнализируем о начале выполнения запроса.
   urpc_sem_unlock( urpc_shm_client->transport->start );
-
-//  printf( "unlocked\n" );
 
   // Ожидаем завершения выполнения.
   urpc_sem_lock( urpc_shm_client->transport->stop );

@@ -20,16 +20,8 @@
  *
 */
 
-/*!
- * \file urpc-udp-client.h
- *
- * \brief
- * \author Andrei Fadeev (andrei@webcontrol.ru)
- * \date 2009, 2010, 2014, 2015
- * \copyright GNU General Public License version 3 or later
- *
- *
-*/
+/* Заголовочный файл клиента удалённых вызовов процедур по протоколу UDP.
+ * Функции UDP клиента используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
 
 #ifndef _urpc_udp_client_h
 #define _urpc_udp_client_h
@@ -45,18 +37,20 @@ extern "C" {
 typedef struct uRpcUDPClient uRpcUDPClient;
 
 
+/* Функция создаёт RPC клиента и подключается к серверу по протоколу UDP.
+ * Параметры функции аналогичны urpc_server_create. */
 uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout );
 
 
+/* Функция удаляет клиента. */
 void urpc_udp_client_destroy( uRpcUDPClient *urpc_udp_client );
 
 
-int urpc_udp_client_connect( uRpcUDPClient *urpc_udp_client );
-
-
+/* Функция блокирует канал связи. */
 uRpcData *urpc_udp_client_lock( uRpcUDPClient *urpc_udp_client );
 
 
+/* Функция производит отправку запроса серверу и приём от него ответа. */
 uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client );
 
 

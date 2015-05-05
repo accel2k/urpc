@@ -93,9 +93,12 @@ typedef struct uRpcSHMControl {
 } uRpcSHMControl;
 
 
+/* Функция возвращает тип протокола передачи данных для указанного RPC адреса. */
 URPC_EXPORT uRpcType urpc_get_type( const char *uri );
 
 
+/* Функция возвращает указатель на структуру addrinfo с информацией о сетевых адресах.
+ * Формат сетевого адреса аналогичен возвращаемому функцией getaddrinfo. */
 URPC_EXPORT struct addrinfo *urpc_get_sockaddr( const char *uri );
 
 

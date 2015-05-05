@@ -20,16 +20,8 @@
  *
 */
 
-/*!
- * \file urpc-tcp-client.h
- *
- * \brief
- * \author Andrei Fadeev (andrei@webcontrol.ru)
- * \date 2009, 2010, 2014, 2015
- * \copyright GNU General Public License version 3 or later
- *
- *
-*/
+/* Заголовочный файл клиента удалённых вызовов процедур по протоколу TCP.
+ * Функции TCP клиента используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
 
 #ifndef _urpc_tcp_client_h
 #define _urpc_tcp_client_h
@@ -45,18 +37,20 @@ extern "C" {
 typedef struct uRpcTCPClient uRpcTCPClient;
 
 
+/* Функция создаёт RPC клиента и подключается к серверу по протоколу TCP.
+ * Параметры функции аналогичны urpc_server_create. */
 uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, double exec_timeout );
 
 
+/* Функция удаляет клиента. */
 void urpc_tcp_client_destroy( uRpcTCPClient *urpc_tcp_client );
 
 
-int urpc_tcp_client_connect( uRpcTCPClient *urpc_tcp_client );
-
-
+/* Функция блокирует канал связи. */
 uRpcData *urpc_tcp_client_lock( uRpcTCPClient *urpc_tcp_client );
 
 
+/* Функция производит отправку запроса серверу и приём от него ответа. */
 uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client );
 
 
