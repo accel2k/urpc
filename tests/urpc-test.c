@@ -28,6 +28,7 @@
 #include "urpc-thread.h"
 #include "urpc-server.h"
 #include "urpc-client.h"
+#include "urpc-common.h"
 
 
 #define URPC_TEST_PROC                     URPC_PROC_USER + 1
@@ -39,8 +40,10 @@ unsigned int payload_size = 0;
 unsigned int threads_num = 0;
 unsigned int requests_num = 0;
 unsigned int iterations_num = 0;
+unsigned int servers_num = 0;
 unsigned int run_server = 0;
 unsigned int run_clients = 0;
+unsigned int dry_run = 0;
 unsigned int show_help = 0;
 
 volatile int running_clients = 0;
@@ -56,9 +59,11 @@ void help( char *prog_name )
   printf( "  %s: [OPTION...] URI\n\n", prog_name );
   printf( "Options:\n" );
   printf( "  -s, --size        RPC payload size (default: 1024)\n" );
-  printf( "  -t, --threads     Number of working threads (default: 1)\n" );
+  printf( "  -t, --threads     Number of working client threads (default: 1)\n" );
   printf( "  -r, --requests    Number of RPC requests per thread (default: 1000)\n" );
   printf( "  -i, --iterations  Number of test iterations per threads (default: 1)\n" );
+  printf( "  -n, --dry-run     Don't perform received data verification\n" );
+  printf( "  --servers         Number of working server threads (default: same as clients)\n" );
   printf( "  --server-only     Run only server (default: server and clients)\n" );
   printf( "  --clients-only    Run only clients (default: server and clients)\n" );
   printf( "\n\n" );
@@ -78,11 +83,12 @@ int urpc_test_proc( uint32_t session, uRpcData *urpc_data, void *proc_data, void
   array1 = urpc_data_get( urpc_data, URPC_TEST_PARAM_ARRAY, &array_size );
   array2 = urpc_data_set( urpc_data, URPC_TEST_PARAM_ARRAY, NULL, array_size );
 
-  for( i = 0; i < array_size / 2; i++ )
-    {
-    array2[i] = array1[array_size-1-i];
-    array2[array_size-1-i] = array1[i];
-    }
+  if( !dry_run )
+    for( i = 0; i < array_size / 2; i++ )
+      {
+      array2[i] = array1[array_size-1-i];
+      array2[array_size-1-i] = array1[i];
+      }
 
   return 0;
 
@@ -105,7 +111,7 @@ void *urpc_test_client_proc( void *data )
   uint32_t array_size;
   unsigned int i, j;
 
-  client = urpc_client_create( uri, URPC_DEFAULT_DATA_SIZE, URPC_DEFAULT_DATA_TIMEOUT );
+  client = urpc_client_create( uri, payload_size + 128, URPC_DEFAULT_DATA_TIMEOUT );
   if( client == NULL )
     { printf( "error creating uRPC client\n" ); fail = 1; return NULL; }
 
@@ -122,7 +128,7 @@ void *urpc_test_client_proc( void *data )
 
   urpc_mutex_lock( &lock );
   client_id = running_clients += 1;
-  printf( "client %d connects to ...\n", client_id );
+  printf( "uRPC client %d is connected to server\n", client_id );
   urpc_mutex_unlock( &lock );
 
   while( !start );
@@ -146,9 +152,10 @@ void *urpc_test_client_proc( void *data )
     if( array_size != payload_size )
       { fail = 1; break; }
 
-    for( j = 0; j < array_size; j++ )
-      if( array1[j] != array2[array_size-1-j] )
-        { fail = 1; break; }
+    if( !dry_run )
+      for( j = 0; j < array_size; j++ )
+        if( array1[j] != array2[array_size-1-j] )
+          { fail = 1; break; }
 
     urpc_client_unlock( client );
     urpc_data = NULL;
@@ -160,7 +167,7 @@ void *urpc_test_client_proc( void *data )
   if( urpc_data != NULL ) urpc_client_unlock( client );
   if( fail ) printf( "client %d failed\n", client_id );
 
-  printf( "client %d: %.0lf rpc/s\n", client_id, requests_num / elapsed );
+  printf( "uRPC client %d: %.0lf RPC/s, %.2lf Mb/s\n", client_id, requests_num / elapsed, 2.0 * ( requests_num / elapsed * payload_size ) / ( 1024.0 * 1024.0 ) );
 
   urpc_timer_destroy( timer );
   free( array1 );
@@ -199,6 +206,9 @@ int main( int argc, char **argv )
     if( strcmp( argv[i], "--clients-only" ) == 0 )
       { run_clients = 1; continue; }
 
+    if( ( strcmp( argv[i], "-n" ) == 0 ) || strcmp( argv[i], "--dry-run" ) == 0 )
+      { dry_run = 1; continue; }
+
     if( ( strcmp( argv[i], "-h" ) == 0 ) || strcmp( argv[i], "--help" ) == 0 )
       { show_help = 1; continue; }
 
@@ -207,6 +217,9 @@ int main( int argc, char **argv )
 
     if( ( strcmp( argv[i], "-t" ) == 0 ) || strcmp( argv[i], "--threads" ) == 0 )
       { i += 1; threads_num = atoi( argv[i] ); continue; }
+
+    if( strcmp( argv[i], "--servers" ) == 0 )
+      { i += 1; servers_num = atoi( argv[i] ); continue; }
 
     if( ( strcmp( argv[i], "-r" ) == 0 ) || strcmp( argv[i], "--requests" ) == 0 )
       { i += 1; requests_num = atoi( argv[i] ); continue; }
@@ -229,17 +242,24 @@ int main( int argc, char **argv )
   if( threads_num == 0 ) threads_num = 1;
   if( requests_num == 0 ) requests_num = 1000;
   if( iterations_num == 0 ) iterations_num = 1;
+  if( servers_num == 0 ) servers_num = threads_num;
 
   }
 
+  if( urpc_get_type( uri ) == URPC_UDP && payload_size > URPC_DEFAULT_DATA_SIZE - 128 )
+    { printf( "uRPC: truncating payload size to %d bytes due to UDP transport.\n", URPC_DEFAULT_DATA_SIZE - 128 ); payload_size = URPC_DEFAULT_DATA_SIZE - 128; }
+
+  if( ( urpc_get_type( uri ) == URPC_TCP || urpc_get_type( uri ) == URPC_TCP ) && payload_size > URPC_MAX_DATA_SIZE - 128 )
+    { printf( "uRPC: truncating payload size to %d bytes (maximum allowable).\n", URPC_MAX_DATA_SIZE - 128 ); payload_size = URPC_MAX_DATA_SIZE - 128; }
+
   clients = malloc( threads_num * sizeof( uRpcThread* ) );
   if( clients == NULL )
-  { printf( "error allocating memory for clients\n" ); return -1; }
+    { printf( "error allocating memory for clients\n" ); return -1; }
 
   if( run_server )
     {
 
-    server = urpc_server_create( uri, threads_num, threads_num, URPC_DEFAULT_SESSION_TIMEOUT, payload_size + 128, URPC_DEFAULT_DATA_TIMEOUT );
+    server = urpc_server_create( uri, servers_num, FD_SETSIZE, URPC_DEFAULT_SESSION_TIMEOUT, payload_size + 128, URPC_DEFAULT_DATA_TIMEOUT );
     if( server == NULL )
       { printf( "error creating uRPC server\n" ); return -1; }
 
@@ -248,7 +268,7 @@ int main( int argc, char **argv )
     if( urpc_server_bind( server ) < 0 )
       { printf( "error starting uRPC server\n" ); return -1; }
 
-    printf( "server started at ...\n" );
+    printf( "uRPC server started with %d threads\n", servers_num );
     fflush( stdout );
 
     }
@@ -282,6 +302,10 @@ int main( int argc, char **argv )
     urpc_timer_sleep( 0.1 );
 
   } while( local_running_clients != 0 );
+
+  for( i = 0; i < threads_num; i++ )
+    urpc_thread_destroy( clients[i] );
+  free( clients );
 
   if( run_server ) urpc_server_destroy( server );
 
