@@ -52,6 +52,7 @@ uRpcShm *urpc_shm_create( const char *name, unsigned long size )
 
   shm->ro = 0;
   shm->maddr = NULL;
+  shm->type = URPC_SHM_TYPE;
 
   return shm;
 
@@ -70,6 +71,7 @@ uRpcShm *urpc_shm_open( const char *name, unsigned long size )
 
   shm->ro = 0;
   shm->maddr = NULL;
+  shm->type = URPC_SHM_TYPE;
 
   return shm;
 
@@ -87,6 +89,7 @@ uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size )
 
   shm->ro = 1;
   shm->maddr = NULL;
+  shm->type = URPC_SHM_TYPE;
 
   return shm;
 
