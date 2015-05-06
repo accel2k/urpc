@@ -291,7 +291,7 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
   int sr_size;
 
   SOCKET max_fd = 0;
-  SOCKET wsocket;
+  SOCKET wsocket = INVALID_SOCKET;
 
   unsigned int i, j;
 
