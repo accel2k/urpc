@@ -138,12 +138,12 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
   uRpcHeader *iheader;
   uRpcHeader *oheader;
 
-  int send_size;
-  int recv_size;
+  unsigned int send_size;
+  unsigned int recv_size;
 
   int selected;
-  int sended = 0;
-  int received = 0;
+  unsigned int sended = 0;
+  unsigned int received = 0;
 
   int sr_size;
 

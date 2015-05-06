@@ -188,7 +188,7 @@ uRpcTCPServer *urpc_tcp_server_create( const char *uri, uint32_t threads_num, ui
   // Массив рабочих сокетов обслуживаемых потоками.
   urpc_tcp_server->wsockets = malloc( max_clients * sizeof( SOCKET ) );
   if( urpc_tcp_server->wsockets == NULL ) goto urpc_tcp_server_create_fail;
-  for( i = 0; i < threads_num; i++ ) urpc_tcp_server->wsockets[i] = INVALID_SOCKET;
+  for( i = 0; i < max_clients; i++ ) urpc_tcp_server->wsockets[i] = INVALID_SOCKET;
 
   // Массив сокетов подключенных клиентов.
   urpc_tcp_server->wsockets_per_threads = malloc( threads_num * sizeof( int32_t ) );
@@ -286,8 +286,8 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
   uRpcHeader *iheader;
 
   int selected;
-  int recv_size;
-  int received = 0;
+  unsigned int recv_size;
+  unsigned int received = 0;
   int sr_size;
 
   SOCKET max_fd = 0;
@@ -321,7 +321,6 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
         }
       }
     }
-
   urpc_rwmutex_reader_unlock( &urpc_tcp_server->lock );
 
   // Ожидаем запрос.
@@ -487,8 +486,8 @@ int urpc_tcp_server_send( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id )
   SOCKET wsocket;
 
   int selected;
-  int send_size;
-  int sended = 0;
+  unsigned int send_size;
+  unsigned int sended = 0;
   int sr_size;
 
   if( urpc_tcp_server->urpc_tcp_server_type != URPC_TCP_SERVER_TYPE ) return -1;
