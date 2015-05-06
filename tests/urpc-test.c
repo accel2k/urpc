@@ -23,12 +23,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "urpc-common.h"
 #include "urpc-timer.h"
 #include "urpc-mutex.h"
 #include "urpc-thread.h"
 #include "urpc-server.h"
 #include "urpc-client.h"
-#include "urpc-common.h"
 
 
 #define URPC_TEST_PROC                     URPC_PROC_USER + 1
