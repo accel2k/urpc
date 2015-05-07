@@ -29,12 +29,12 @@
 #define URPC_SEM_TYPE 0x544D5375
 
 
-typedef struct uRpcSem {
+struct uRpcSem {
 
   uint32_t          type;                   // Тип объекта uRpcSem.
   HANDLE            sem;                    // Идентификатор семафора.
 
-} uRpcSem;
+};
 
 
 uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int queue )

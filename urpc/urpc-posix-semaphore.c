@@ -30,19 +30,20 @@
 #include <string.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <semaphore.h>
 
 
 #define URPC_SEM_TYPE 0x544D5375
 
 
-typedef struct uRpcSem {
+struct uRpcSem {
 
   uint32_t          type;                   // Тип объекта uRpcSem.
   sem_t            *sem;                    // Идентификатор семафора.
   char             *name;                   // Название семафора.
 
-} uRpcSem;
+};
 
 
 static uRpcSem *urpc_sem_create_int( const char *name, int initial_value, int create )

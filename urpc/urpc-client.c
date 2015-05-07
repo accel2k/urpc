@@ -38,7 +38,7 @@
 static int urpc_client_initialized = 0;
 
 
-typedef struct uRpcClient {
+struct uRpcClient {
 
   uint32_t          urpc_client_type;       // Тип объекта uRpcClient.
 
@@ -55,7 +55,7 @@ typedef struct uRpcClient {
   uint32_t          state;                  // Состояние подключения.
   uint32_t          session_id;             // Идентификатор сессии.
 
-} uRpcClient;
+};
 
 
 uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double timeout )

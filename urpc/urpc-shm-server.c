@@ -53,7 +53,7 @@ typedef struct uRpcSHMTransport {
 } uRpcSHMTransport;
 
 
-typedef struct uRpcSHMServer {
+struct uRpcSHMServer {
 
   uint32_t          urpc_shm_server_type;   // Тип объекта uRpcSHMServer.
 
@@ -65,7 +65,7 @@ typedef struct uRpcSHMServer {
   uRpcSHMTransport **transports;            // Сегменты обмена данными.
   uint32_t          threads_num;            // Число рабочих потоков.
 
-} uRpcSHMServer;
+};
 
 
 uRpcSHMServer *urpc_shm_server_create( const char *uri, uint32_t threads_num, uint32_t max_data_size )

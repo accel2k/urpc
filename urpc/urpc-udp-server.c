@@ -32,7 +32,7 @@
 #define URPC_UDP_SERVER_TYPE 0x53504455
 
 
-typedef struct uRpcUDPServer {
+struct uRpcUDPServer {
 
   uint32_t          urpc_udp_server_type;   // Тип объекта uRpcUDPServer.
 
@@ -43,7 +43,7 @@ typedef struct uRpcUDPServer {
   uRpcData        **urpc_data;              // Указатель на объекты RPC данных.
   uint32_t          threads_num;            // Число рабочих потоков.
 
-} uRpcUDPServer;
+};
 
 
 uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, double timeout )

@@ -31,12 +31,12 @@
 #define URPC_TIMER_TYPE 0x54525475
 
 
-typedef struct uRpcTimer {
+struct uRpcTimer {
 
   uint32_t          type;                   // Тип объекта uRpcTimer.
   struct timespec   start;                  // Начальный момент времени.
 
-} uRpcTimer;
+};
 
 
 uRpcTimer *urpc_timer_create( void )

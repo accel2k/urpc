@@ -32,7 +32,7 @@
 #define URPC_UDP_CLIENT_TYPE 0x43504455
 
 
-typedef struct uRpcUDPClient {
+struct uRpcUDPClient {
 
   uint32_t          urpc_udp_client_type;   // Тип объекта uRpcUDPClient.
 
@@ -44,7 +44,7 @@ typedef struct uRpcUDPClient {
 
   volatile uint32_t fail;                   // Признак ошибки.
 
-} uRpcUDPClient;
+};
 
 
 uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout )

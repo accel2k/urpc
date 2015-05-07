@@ -32,7 +32,7 @@
 #define URPC_TCP_CLIENT_TYPE 0x43504354
 
 
-typedef struct uRpcTCPClient {
+struct uRpcTCPClient {
 
   uint32_t          urpc_tcp_client_type;   // Тип объекта uRpcTCPClient.
 
@@ -45,7 +45,7 @@ typedef struct uRpcTCPClient {
 
   volatile uint32_t fail;                   // Признак ошибки.
 
-} uRpcTCPClient;
+};
 
 
 uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, double timeout )
@@ -282,8 +282,7 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     selected = select( urpc_tcp_client->socket + 1, &sock_set, NULL, NULL, &sock_tv );
     if( selected < 0 )
       {
-      int recv_error = urpc_network_last_error();
-      if( sr_size == 0 || recv_error == EINTR || recv_error == EAGAIN ) continue;
+      if( urpc_network_last_error() == EINTR ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }
@@ -294,8 +293,8 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     sr_size = recv( urpc_tcp_client->socket, (char*)iheader + received, recv_size - received, MSG_NOSIGNAL );
     if( sr_size <= 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
-      if( urpc_network_last_error() == EAGAIN ) continue;
+      int recv_error = urpc_network_last_error();
+      if( sr_size == 0 || recv_error == EINTR || recv_error == EAGAIN ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }

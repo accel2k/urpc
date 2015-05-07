@@ -28,12 +28,13 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 
 #define URPC_SHM_TYPE 0x54485375
 
 
-typedef struct uRpcShm {
+struct uRpcShm {
 
   uint32_t          type;                   // Тип объекта uRpcShm.
 
@@ -43,7 +44,7 @@ typedef struct uRpcShm {
   char             *name;                   // Название сегмента общей памяти.
   void             *maddr;                  // Адрес сегмента общей памяти.
 
-} uRpcShm;
+};
 
 
 static uRpcShm *urpc_shm_create_int( const char *name, unsigned long size, int create, int ro )

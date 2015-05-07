@@ -49,7 +49,7 @@ typedef struct uRpcSHMTransport {
 } uRpcSHMTransport;
 
 
-typedef struct uRpcSHMClient {
+struct uRpcSHMClient {
 
   uint32_t          urpc_shm_client_type;   // Тип объекта uRpcSHMClient.
 
@@ -60,7 +60,7 @@ typedef struct uRpcSHMClient {
   uRpcSHMTransport **transports;            // Сегменты обмена данными.
   uint32_t          threads_num;            // Число рабочих потоков.
 
-} uRpcSHMClient;
+};
 
 
 uRpcSHMClient *urpc_shm_client_create( const char *uri )

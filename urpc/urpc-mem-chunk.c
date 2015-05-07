@@ -43,7 +43,7 @@ struct ChunkPage {
 };
 
 
-typedef struct uRpcMemChunk {
+struct uRpcMemChunk {
 
   uint32_t          type;                   // Тип объекта uRpcmemChunk.
 
@@ -54,7 +54,7 @@ typedef struct uRpcMemChunk {
   int               page_size;              // Размер страницы.
   int               offset;                 // Смещение до данных от начала страницы.
 
-} uRpcMemChunk;
+};
 
 
 uRpcMemChunk *urpc_mem_chunk_create( int chunk_size )

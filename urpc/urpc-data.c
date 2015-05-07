@@ -50,7 +50,7 @@ typedef struct DataParam {
 } DataParam;
 
 
-typedef struct uRpcData {
+struct uRpcData {
 
   uint32_t      urpc_data_type;             // Тип объекта uRpcData.
 
@@ -67,7 +67,7 @@ typedef struct uRpcData {
   DataBuffer    input;
   DataBuffer    output;
 
-} uRpcData;
+};
 
 
 static DataParam *urpc_data_find_param( DataBuffer *buffer, uint32_t id )
@@ -129,7 +129,7 @@ static void* urpc_data_set_param( DataBuffer *buffer, uint32_t id, const void *o
 
   DataParam *param = urpc_data_find_param( buffer, id );
 
-  if( param != NULL  )
+  if( param != NULL )
     {
     param_id = UINT32_FROM_BE( param->id );
     param_size = UINT32_FROM_BE( param->size );

@@ -29,7 +29,7 @@
 #define URPC_SHM_TYPE 0x54485375
 
 
-typedef struct uRpcShm {
+struct uRpcShm {
 
   uint32_t          type;                   // Тип объекта uRpcShm.
 
@@ -37,7 +37,7 @@ typedef struct uRpcShm {
   int               ro;                     // Признак доступа только для чтения.
   void             *maddr;                  // Адрес сегмента общей памяти.
 
-} uRpcShm;
+};
 
 
 uRpcShm *urpc_shm_create( const char *name, unsigned long size )

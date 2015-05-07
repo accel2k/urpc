@@ -34,7 +34,7 @@
 #define URPC_TCP_SERVER_TYPE 0x53504354
 
 
-typedef struct uRpcTCPServer {
+struct uRpcTCPServer {
 
   uint32_t          urpc_tcp_server_type;   // Тип объекта uRpcTCPServer.
 
@@ -57,7 +57,7 @@ typedef struct uRpcTCPServer {
   volatile uint32_t shutdown;               // Признак завершения работы.
   uRpcRWMutex       lock;                   // Блокировка доступа к критическим данным структуры.
 
-} uRpcTCPServer;
+};
 
 
 // Функция обслуживания новых подключений в потоке.

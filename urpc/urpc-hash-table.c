@@ -31,6 +31,7 @@
 
 
 typedef struct HashNode HashNode;
+
 struct HashNode {
 
   uint32_t          key;                    // Значение ключа.
@@ -40,7 +41,7 @@ struct HashNode {
 };
 
 
-typedef struct uRpcHashTable {
+struct uRpcHashTable {
 
   uint32_t          type;                   // Тип объекта uRpcHashTable.
 
@@ -51,7 +52,7 @@ typedef struct uRpcHashTable {
 
   urpc_hash_table_destroy_callback value_destroy_func;
 
-} uRpcHashTable;
+};
 
 
 uRpcHashTable *urpc_hash_table_create( urpc_hash_table_destroy_callback value_destroy_func )

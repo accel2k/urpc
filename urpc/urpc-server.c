@@ -55,7 +55,7 @@ typedef struct uRpcServerSession {
 } uRpcServerSession;
 
 
-typedef struct uRpcServer {
+struct uRpcServer {
 
   uint32_t          urpc_server_type;       // Тип объекта uRpcServer.
 
@@ -83,7 +83,7 @@ typedef struct uRpcServer {
   volatile uint32_t shutdown;               // Признак завершения работы.
   uRpcMutex         lock;                   // Блокировка доступа к критическим данным структуры.
 
-} uRpcServer;
+};
 
 
 // Функция удаления данных сессии.
