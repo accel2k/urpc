@@ -110,7 +110,7 @@ struct addrinfo *urpc_get_sockaddr( const char *uri )
     addr_hint.ai_protocol = IPPROTO_UDP;
     }
   addr_hint.ai_flags = AI_ADDRCONFIG;
-  if( host == NULL ) addr_hint.ai_flags |= AI_PASSIVE;
+  if( any_address ) addr_hint.ai_flags |= AI_PASSIVE;
 
   if( ( gai_ret = getaddrinfo( any_address ? NULL : host, port, &addr_hint, &addr ) ) != 0 )
     {
