@@ -61,7 +61,7 @@ uRpcHashTable *urpc_hash_table_create( urpc_hash_table_destroy_callback value_de
   uRpcHashTable *hash_table;
   int i;
 
-  hash_table = malloc( HASH_TABLE_SIZE );
+  hash_table = malloc( sizeof( uRpcHashTable ) );
   if( hash_table == NULL ) return NULL;
 
   hash_table->nodes = malloc( HASH_TABLE_SIZE * sizeof( HashNode* ) );
