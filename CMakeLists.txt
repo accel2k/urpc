@@ -3,6 +3,7 @@ cmake_minimum_required( VERSION 2.6 )
 project( uRPC )
 
 include( TestBigEndian )
+include( CheckIncludeFile )
 
 if( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )
@@ -48,6 +49,9 @@ if( ${URPC_BIG_ENDIAN} )
   add_definitions( -DURPC_BIG_ENDIAN )
 endif()
 
+# stdint.h check
+check_include_file( stdint.h HAVE_STDINT_H )
+
 #
 # Output directories.
 if( NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY )
@@ -65,7 +69,7 @@ endif()
 #
 # Include directories.
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/urpc )
-if( ${CMAKE_C_COMPILER_ID} STREQUAL MSVC AND WIN32 )
+if( ${CMAKE_C_COMPILER_ID} STREQUAL MSVC AND NOT HAVE_STDINT_H )
   include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/vs )
 endif()
 
