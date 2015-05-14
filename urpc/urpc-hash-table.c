@@ -144,7 +144,7 @@ int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key, void *value
 int urpc_hash_table_insert_uint32( uRpcHashTable *hash_table, uint32_t key, uint32_t value )
 {
 
-  return urpc_hash_table_insert( hash_table, key, (void*)value );
+  return urpc_hash_table_insert( hash_table, key, (void*)(uintptr_t)value );
 
 }
 
@@ -171,7 +171,7 @@ void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key )
 uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uint32_t key )
 {
 
-  return (uint32_t)urpc_hash_table_find( hash_table, key );
+  return (uintptr_t)urpc_hash_table_find( hash_table, key );
 
 }
 

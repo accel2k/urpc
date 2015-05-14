@@ -10,6 +10,12 @@ if( NOT CMAKE_BUILD_TYPE )
 endif()
 
 #
+# Architecture check.
+if( CMAKE_SIZEOF_VOID_P LESS 4 )
+  message( FATAL_ERROR "Architecture with pointer size less then 32bit is not supported." )
+endif()
+
+#
 # Compilers options.
 if( ${CMAKE_C_COMPILER_ID} STREQUAL GNU  )
   set( CMAKE_C_FLAGS_RELEASE "-O2 -Wall" )

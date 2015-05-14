@@ -54,7 +54,7 @@ int main( int argc, char **argv )
     }
 
   for( key = 0; key < 100000; key += 10000 )
-    if( urpc_hash_table_insert( uhash, key, (void*)key ) <= 0 )
+    if( urpc_hash_table_insert_uint32( uhash, key, key ) <= 0 )
       printf( "error inserting duplicated key %d\n", key );
 
   urpc_hash_table_foreach( uhash, remove_callback, uhash );
