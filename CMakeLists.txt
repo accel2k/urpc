@@ -1,6 +1,7 @@
 cmake_minimum_required( VERSION 2.6 )
 
 project( uRPC )
+set( URPC_VERSION 0.99 )
 
 include( TestBigEndian )
 include( CheckIncludeFile )
@@ -83,3 +84,8 @@ endif()
 # Target.
 add_subdirectory( urpc )
 add_subdirectory( tests )
+
+#
+# Pkgconfig support.
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/urpc.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/bin/urpc.pc @ONLY )
+install( FILES bin/urpc.pc DESTINATION lib/pkgconfig PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
