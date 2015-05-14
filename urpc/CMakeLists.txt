@@ -28,3 +28,21 @@ endif()
 if( UNIX )
   target_link_libraries( urpc rt )
 endif()
+
+install( TARGETS urpc EXPORT urpc DESTINATION lib CONFIGURATIONS Release PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
+
+install( FILES urpc-exports.h
+               urpc-client.h
+               urpc-server.h
+               urpc-data.h
+               urpc-hash-table.h
+               urpc-mem-chunk.h
+               urpc-mutex.h
+               urpc-network.h
+               urpc-rwmutex.h
+               urpc-semaphore.h
+               urpc-shm.h
+               urpc-thread.h
+               urpc-timer.h
+               urpc-types.h
+               DESTINATION include/urpc PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
