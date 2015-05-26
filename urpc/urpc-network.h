@@ -1,11 +1,11 @@
 /*
- * uRpc - rpc (remote procedure call) library.
+ * uRPC - rpc (remote procedure call) library.
  *
- * Copyright 2009, 2010, 2011, 2015 Andrei Fadeev
+ * Copyright 2009-2015 Andrei Fadeev (andrei@webcontrol.ru)
  *
  * This file is part of uRPC.
  *
- * uRPC is free software: you can redistribute it and/or modify
+ * uRPC is dual-licensed: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -18,6 +18,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this library. If not, see <http://www.gnu.org/licenses/>.
  *
+ * Alternatively, you can license this code under a commercial license.
+ * Contact the author in this case.
+ *
 */
 
 /*!
@@ -25,7 +28,7 @@
  *
  * \brief Заголовочный файл библиотеки совместимости с BSD socket
  * \author Andrei Fadeev (andrei@webcontrol.ru)
- * \date 2009, 2010, 2011, 2015
+ * \date 2009-2015
  * \copyright GNU General Public License version 3 or later
  *
  * \defgroup uRpcNetwork uRpcNetwork - библиотека совместимости с BSD socket.

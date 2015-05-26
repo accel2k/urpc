@@ -1,25 +1,30 @@
-/* Based on gtypes.h file from GLIB library.
+/*
+ * uRPC - rpc (remote procedure call) library.
  *
- * GLIB - Library of useful routines for C programming
- * Copyright (C) 1995-1997  Peter Mattis, Spencer Kimball and Josh MacDonald
+ * Copyright 2015 Andrei Fadeev (andrei@webcontrol.ru)
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2 of the License, or (at your option) any later version.
+ * This file is part of uRPC.
  *
- * This library is distributed in the hope that it will be useful,
+ * uRPC is dual-licensed: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * uRPC is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this library. If not, see <http://www.gnu.org/licenses/>.
  *
- */
+ * Alternatively, you can license this code under a commercial license.
+ * Contact the author in this case.
+ *
+*/
 
-#ifndef _endianness_h
-#define _endianness_h
+#ifndef _urpc_endian_h
+#define _urpc_endian_h
 
 #include <stdint.h>
 
@@ -111,4 +116,4 @@
 #endif
 
 
-#endif // _endianness_h
+#endif // _urpc_endian_h
