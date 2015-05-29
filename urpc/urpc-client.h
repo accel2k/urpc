@@ -29,7 +29,8 @@
  * \brief Заголовочный файл клиента удалённых вызовов процедур
  * \author Andrei Fadeev (andrei@webcontrol.ru)
  * \date 2009-2015
- * \copyright GNU General Public License version 3 or later
+ * \license GNU General Public License version 3 или более поздняя<br>
+ * Коммерческая лицензия - свяжитесь с автором
  *
  * \defgroup uRpcClient uRpcClient - Клиент библиотеки удалённых вызовов процедур.
  *
@@ -72,7 +73,7 @@
  * Функция #urpc_client_exec возвращает один из статусов выполнения запроса:
  *
  * - #URPC_STATUS_OK - запрос успешно выполнен;
- * - #URPC_STATUS_FAIL - общая ошибка ывполнения запроса;
+ * - #URPC_STATUS_FAIL - общая ошибка выполнения запроса;
  * - #URPC_STATUS_TIMEOUT - превышено время ожидание ответа;
  * - #URPC_STATUS_TRANSPORT_ERROR - ошибка при передаче данных;
  * - #URPC_STATUS_VERSION_MISMATCH - не совпадают версии протоколов;

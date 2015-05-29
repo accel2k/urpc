@@ -29,7 +29,8 @@
  * \brief Заголовочный файл сервера удалённых вызовов процедур
  * \author Andrei Fadeev (andrei@webcontrol.ru)
  * \date 2009, 2010, 2014, 2015
- * \copyright GNU General Public License version 3 or later
+ * \license GNU General Public License version 3 или более поздняя<br>
+ * Коммерческая лицензия - свяжитесь с автором
  *
  * \defgroup uRpcServer uRpcServer - Сервер библиотеки удалённых вызовов процедур.
  *

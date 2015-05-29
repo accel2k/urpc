@@ -29,7 +29,8 @@
  * \brief Заголовочный файл библиотеки работы с RPC данными
  * \author Andrei Fadeev (andrei@webcontrol.ru)
  * \date 2009-2015
- * \copyright GNU General Public License version 3 or later
+ * \license GNU General Public License version 3 или более поздняя<br>
+ * Коммерческая лицензия - свяжитесь с автором
  *
  * \defgroup uRpcData uRpcData - библиотека буфера приема-передачи RPC данных.
  *

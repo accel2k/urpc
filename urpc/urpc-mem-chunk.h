@@ -29,7 +29,8 @@
  * \brief Заголовочный файл библиотеки хранения множества объектов
  * \author Andrei Fadeev (andrei@webcontrol.ru)
  * \date 2015
- * \copyright GNU General Public License version 3 or later
+ * \license GNU General Public License version 3 или более поздняя<br>
+ * Коммерческая лицензия - свяжитесь с автором
  *
  * \defgroup uRpcMemChunk uRpcMemChunk - библиотека хранения множества объектов.
  *
