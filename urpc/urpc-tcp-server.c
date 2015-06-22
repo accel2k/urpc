@@ -217,6 +217,8 @@ uRpcTCPServer *urpc_tcp_server_create( const char *uri, uint32_t threads_num, ui
   // Ожидаем запуска потока.
   while( urpc_tcp_server->connector_status == 0 ) urpc_timer_sleep( 0.1 );
 
+  freeaddrinfo( addr );
+
   return urpc_tcp_server;
 
   urpc_tcp_server_create_fail:
@@ -252,6 +254,7 @@ void urpc_tcp_server_destroy( uRpcTCPServer *urpc_tcp_server )
     for( i = 0; i < urpc_tcp_server->max_clients; i++ )
       if( urpc_tcp_server->wsockets[i] != INVALID_SOCKET )
         closesocket( urpc_tcp_server->wsockets[i] );
+    free( urpc_tcp_server->wsockets );
     }
 
   if( urpc_tcp_server->wsockets_per_threads != NULL )

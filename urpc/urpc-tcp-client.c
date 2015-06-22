@@ -96,6 +96,8 @@ uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, 
   urpc_tcp_client->timer = urpc_timer_create();
   if( urpc_tcp_client->timer == NULL ) goto urpc_tcp_client_create_fail;
 
+  freeaddrinfo( addr );
+
   return urpc_tcp_client;
 
   urpc_tcp_client_create_fail:

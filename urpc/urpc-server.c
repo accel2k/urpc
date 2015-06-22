@@ -470,6 +470,8 @@ void urpc_server_destroy( uRpcServer *urpc_server )
       if( urpc_server->servers[i] != NULL )
         urpc_thread_destroy( urpc_server->servers[i] );
 
+  urpc_thread_destroy( urpc_server->session_check );
+
   // Удаляем объект обмена данными.
   if( urpc_server->transport != NULL )
     {

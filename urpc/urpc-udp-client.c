@@ -91,6 +91,8 @@ uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout )
   urpc_udp_client->timer = urpc_timer_create();
   if( urpc_udp_client->timer == NULL ) goto urpc_udp_client_create_fail;
 
+  freeaddrinfo( addr );
+
   return urpc_udp_client;
 
   urpc_udp_client_create_fail:

@@ -107,6 +107,8 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, do
 
   urpc_udp_server->client_addr_len = addr->ai_addrlen;
 
+  freeaddrinfo( addr );
+
   return urpc_udp_server;
 
   urpc_udp_server_create_fail:
