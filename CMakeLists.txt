@@ -87,5 +87,5 @@ add_subdirectory( tests )
 
 #
 # Pkgconfig support.
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/urpc/urpc.pc.in ${CMAKE_CURRENT_SOURCE_DIR}/bin/urpc.pc @ONLY )
-install( FILES bin/urpc.pc DESTINATION lib/pkgconfig PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/urpc/urpc.pc.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/urpc.pc @ONLY )
+install( FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/urpc.pc DESTINATION lib/pkgconfig PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )

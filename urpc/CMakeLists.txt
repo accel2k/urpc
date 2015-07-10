@@ -33,7 +33,7 @@ install( TARGETS urpc EXPORT urpc
          RUNTIME DESTINATION bin
          LIBRARY DESTINATION lib
          ARCHIVE DESTINATION lib
-         CONFIGURATIONS Release PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
+         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )
 
 install( FILES urpc-exports.h
                urpc-client.h
@@ -49,4 +49,4 @@ install( FILES urpc-exports.h
                urpc-thread.h
                urpc-timer.h
                urpc-types.h
-               DESTINATION include/urpc PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
+               DESTINATION include/urpc PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )

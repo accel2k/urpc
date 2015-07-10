@@ -4,7 +4,7 @@ includedir=${prefix}/include/urpc
 
 Name: uRPC
 Version: @URPC_VERSION@
-Description: An uRPC library.
+Description: uRPC library.
 
 Libs: -L${libdir} -lurpc
 Cflags: -I${includedir}

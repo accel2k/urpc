@@ -30,3 +30,9 @@ if( WIN32 )
   target_link_libraries( network-test wsock32 ws2_32 )
   target_link_libraries( timer-test wsock32 winmm )
 endif()
+
+install( TARGETS urpc-test EXPORT urpc-test
+         RUNTIME DESTINATION bin
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib
+         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )
