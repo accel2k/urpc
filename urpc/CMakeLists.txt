@@ -29,7 +29,11 @@ if( UNIX )
   target_link_libraries( urpc rt )
 endif()
 
-install( TARGETS urpc EXPORT urpc DESTINATION lib CONFIGURATIONS Release PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
+install( TARGETS urpc EXPORT urpc
+         RUNTIME DESTINATION bin
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib
+         CONFIGURATIONS Release PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ GROUP_WRITE WORLD_READ )
 
 install( FILES urpc-exports.h
                urpc-client.h
