@@ -174,7 +174,7 @@ void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key )
 uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uint32_t key )
 {
 
-  return (uintptr_t)urpc_hash_table_find( hash_table, key );
+  return (uint32_t)(uintptr_t)urpc_hash_table_find( hash_table, key );
 
 }
 

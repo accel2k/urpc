@@ -41,7 +41,7 @@ struct uRpcUDPServer {
 
   SOCKET            socket;                 // Рабочий сокет.
   struct sockaddr **client_addr;            // Массив структур с адресами клиентов.
-  int               client_addr_len;        // Размер адреса клиента.
+  size_t            client_addr_len;        // Размер адреса клиента.
 
   uRpcData        **urpc_data;              // Указатель на объекты RPC данных.
   uint32_t          threads_num;            // Число рабочих потоков.
@@ -92,7 +92,7 @@ uRpcUDPServer *urpc_udp_server_create( const char *uri, uint32_t threads_num, do
   if( urpc_udp_server->socket == INVALID_SOCKET ) goto urpc_udp_server_create_fail;
   urpc_network_set_non_block( urpc_udp_server->socket );
   urpc_network_set_reuse( urpc_udp_server->socket );
-  if( bind( urpc_udp_server->socket, addr->ai_addr, addr->ai_addrlen ) < 0 ) goto urpc_udp_server_create_fail;
+  if( bind( urpc_udp_server->socket, addr->ai_addr, (socklen_t)addr->ai_addrlen ) < 0 ) goto urpc_udp_server_create_fail;
 
   // Структуры для сохранения адресов клиентов.
   urpc_udp_server->client_addr = malloc( threads_num * sizeof( struct sockaddr * ) );
@@ -174,11 +174,11 @@ uRpcData *urpc_udp_server_recv( uRpcUDPServer *urpc_udp_server, uint32_t thread_
   sock_tv.tv_usec = 500000;
 
   // Ждём данные.
-  if( select( urpc_udp_server->socket + 1, &sock_set, NULL, NULL, &sock_tv ) < 0 ) return NULL;
+  if( select( (int)( urpc_udp_server->socket + 1 ), &sock_set, NULL, NULL, &sock_tv ) < 0 ) return NULL;
   if( !FD_ISSET( urpc_udp_server->socket, &sock_set ) ) return NULL;
 
   // Считываем данные.
-  client_addr_len = urpc_udp_server->client_addr_len;
+  client_addr_len = (socklen_t)urpc_udp_server->client_addr_len;
   recv_size = recvfrom( urpc_udp_server->socket, (void*)iheader, URPC_DEFAULT_BUFFER_SIZE, 0, urpc_udp_server->client_addr[ thread_id ], &client_addr_len );
   if( client_addr_len != urpc_udp_server->client_addr_len ) return NULL;
   if( recv_size < 0 ) return NULL;
@@ -210,7 +210,7 @@ int urpc_udp_server_send( uRpcUDPServer *urpc_udp_server, uint32_t thread_id )
   send_size = UINT32_FROM_BE( oheader->size );
 
   // Отправка ответа.
-  if( sendto( urpc_udp_server->socket, (void*)oheader, send_size, 0, urpc_udp_server->client_addr[ thread_id ], urpc_udp_server->client_addr_len ) < 0 ) return -1;
+  if( sendto( urpc_udp_server->socket, (void*)oheader, send_size, 0, urpc_udp_server->client_addr[ thread_id ], (socklen_t)urpc_udp_server->client_addr_len ) < 0 ) return -1;
 
   return 0;
 

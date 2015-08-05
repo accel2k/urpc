@@ -75,9 +75,9 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#define MSG_NOSIGNAL     0
-#define EAGAIN           WSAEWOULDBLOCK
-#define EINTR            WSAEINTR
+#define URPC_MSG_NOSIGNAL   0
+#define URPC_EAGAIN         WSAEWOULDBLOCK
+#define URPC_EINTR          WSAEINTR
 
 #endif
 
@@ -96,10 +96,14 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SOCKET           int
-#define INVALID_SOCKET   -1
-#define closesocket      close
-#define ioctlsocket      ioctl
+#define SOCKET              int
+#define INVALID_SOCKET      -1
+#define closesocket         close
+#define ioctlsocket         ioctl
+
+#define URPC_MSG_NOSIGNAL   0
+#define URPC_EAGAIN         EAGAIN
+#define URPC_EINTR          EINTR
 
 #endif
 

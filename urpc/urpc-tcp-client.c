@@ -88,7 +88,7 @@ uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, 
   // Рабочий сокет.
   urpc_tcp_client->socket = socket( addr->ai_family, SOCK_STREAM, addr->ai_protocol );
   if( urpc_tcp_client->socket == INVALID_SOCKET ) goto urpc_tcp_client_create_fail;
-  if( connect( urpc_tcp_client->socket, addr->ai_addr, addr->ai_addrlen ) < 0 ) goto urpc_tcp_client_create_fail;
+  if( connect( urpc_tcp_client->socket, addr->ai_addr, (socklen_t)addr->ai_addrlen ) < 0 ) goto urpc_tcp_client_create_fail;
   urpc_network_set_tcp_nodelay( urpc_tcp_client->socket );
   urpc_network_set_non_block( urpc_tcp_client->socket );
 
@@ -179,10 +179,10 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     sock_tv.tv_sec = 0;
     sock_tv.tv_usec = 100000;
 
-    selected = select( urpc_tcp_client->socket + 1, NULL, &sock_set, NULL, &sock_tv );
+    selected = select( (int)( urpc_tcp_client->socket + 1 ), NULL, &sock_set, NULL, &sock_tv );
     if( selected < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }
@@ -190,11 +190,11 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     if( selected == 0 ) continue;
 
     // Отправляем данные.
-    sr_size = send( urpc_tcp_client->socket, (char*)oheader + sended, send_size - sended, MSG_NOSIGNAL );
+    sr_size = send( urpc_tcp_client->socket, (char*)oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL );
     if( sr_size <= 0 )
       {
       int send_error = urpc_network_last_error();
-      if( sr_size == 0 || send_error == EINTR || send_error == EAGAIN ) continue;
+      if( sr_size == 0 || send_error == URPC_EINTR || send_error == URPC_EAGAIN ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }
@@ -227,10 +227,10 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     sock_tv.tv_sec = 0;
     sock_tv.tv_usec = 100000;
 
-    selected = select( urpc_tcp_client->socket + 1, &sock_set, NULL, NULL, &sock_tv );
+    selected = select( (int)( urpc_tcp_client->socket + 1 ), &sock_set, NULL, NULL, &sock_tv );
     if( selected < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }
@@ -238,11 +238,11 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     if( selected == 0 ) continue;
 
     // Отправляем данные.
-    sr_size = recv( urpc_tcp_client->socket, (char*)iheader + received, recv_size - received, MSG_NOSIGNAL );
+    sr_size = recv( urpc_tcp_client->socket, (char*)iheader + received, recv_size - received, URPC_MSG_NOSIGNAL );
     if( sr_size <= 0 )
       {
       int recv_error = urpc_network_last_error();
-      if( sr_size == 0 || recv_error == EINTR || recv_error == EAGAIN ) continue;
+      if( sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }
@@ -284,10 +284,10 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     sock_tv.tv_sec = 0;
     sock_tv.tv_usec = 100000;
 
-    selected = select( urpc_tcp_client->socket + 1, &sock_set, NULL, NULL, &sock_tv );
+    selected = select( (int)( urpc_tcp_client->socket + 1 ), &sock_set, NULL, NULL, &sock_tv );
     if( selected < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }
@@ -295,11 +295,11 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
     if( selected == 0 ) continue;
 
     // Отправляем данные.
-    sr_size = recv( urpc_tcp_client->socket, (char*)iheader + received, recv_size - received, MSG_NOSIGNAL );
+    sr_size = recv( urpc_tcp_client->socket, (char*)iheader + received, recv_size - received, URPC_MSG_NOSIGNAL );
     if( sr_size <= 0 )
       {
       int recv_error = urpc_network_last_error();
-      if( sr_size == 0 || recv_error == EINTR || recv_error == EAGAIN ) continue;
+      if( sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN ) continue;
       urpc_tcp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }

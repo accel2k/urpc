@@ -71,14 +71,14 @@ void* server_thread( void *data )
     return NULL;
     }
 
-  if( bind( listener, addr->ai_addr, addr->ai_addrlen ) != 0 )
+  if( bind( listener, addr->ai_addr, (socklen_t)addr->ai_addrlen ) != 0 )
     {
     printf( "can't bind listener socket %d\n", errno );
     return NULL;
     }
 
   client_addr = malloc( addr->ai_addrlen );
-  client_addr_len = addr->ai_addrlen;
+  client_addr_len = (socklen_t)addr->ai_addrlen;
   freeaddrinfo( addr );
 
   if( urpc_type == URPC_TCP )
@@ -156,7 +156,7 @@ void* client_thread( void *data )
 
   while( start == 0 );
 
-  if( connect( client, addr->ai_addr, addr->ai_addrlen ) < 0 )
+  if( connect( client, addr->ai_addr, (socklen_t)addr->ai_addrlen ) < 0 )
     {
     printf( "can't connect to server socket\n" );
     return NULL;

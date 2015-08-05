@@ -87,10 +87,10 @@ static void *urpc_tcp_server_func( void *data )
     sock_tv.tv_usec = 500000;
     FD_SET( urpc_tcp_server->lsocket, &sock_set );
 
-    selected = select( urpc_tcp_server->lsocket + 1, &sock_set, NULL, NULL, &sock_tv );
+    selected = select( (int)( urpc_tcp_server->lsocket + 1 ), &sock_set, NULL, NULL, &sock_tv );
     if( selected < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) return NULL;
+      if( urpc_network_last_error() == URPC_EINTR ) return NULL;
       break;
       }
     if( selected == 0 ) continue;
@@ -103,7 +103,7 @@ static void *urpc_tcp_server_func( void *data )
     if( wsocket == INVALID_SOCKET )
       {
       int accept_error = urpc_network_last_error();
-      if( accept_error == EINTR || accept_error == EAGAIN ) continue;
+      if( accept_error == URPC_EINTR || accept_error == URPC_EAGAIN ) continue;
       break;
       }
 
@@ -206,7 +206,7 @@ uRpcTCPServer *urpc_tcp_server_create( const char *uri, uint32_t threads_num, ui
   urpc_tcp_server->lsocket = socket( addr->ai_family, SOCK_STREAM, addr->ai_protocol );
   if( urpc_tcp_server->lsocket == INVALID_SOCKET ) goto urpc_tcp_server_create_fail;
   urpc_network_set_reuse( urpc_tcp_server->lsocket );
-  if( bind( urpc_tcp_server->lsocket, addr->ai_addr, addr->ai_addrlen ) < 0 ) goto urpc_tcp_server_create_fail;
+  if( bind( urpc_tcp_server->lsocket, addr->ai_addr, (socklen_t)addr->ai_addrlen ) < 0 ) goto urpc_tcp_server_create_fail;
   if( listen( urpc_tcp_server->lsocket, 5 ) < 0 ) goto urpc_tcp_server_create_fail;
   urpc_network_set_non_block( urpc_tcp_server->lsocket );
 
@@ -330,10 +330,10 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
   urpc_rwmutex_reader_unlock( &urpc_tcp_server->lock );
 
   // Ожидаем запрос.
-  selected = select( max_fd + 1, &sock_set, NULL, NULL, &sock_tv );
+  selected = select( (int)( max_fd + 1 ), &sock_set, NULL, NULL, &sock_tv );
   if( selected < 0 )
     {
-    if( urpc_network_last_error() == EINTR ) return NULL;
+    if( urpc_network_last_error() == URPC_EINTR ) return NULL;
     return NULL;
     }
   if( selected == 0 ) return NULL;
@@ -388,10 +388,10 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
     sock_tv.tv_sec = 0;
     sock_tv.tv_usec = 100000;
 
-    selected = select( wsocket + 1, &sock_set, NULL, NULL, &sock_tv );
+    selected = select( (int)( wsocket + 1 ), &sock_set, NULL, NULL, &sock_tv );
     if( selected < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_tcp_server_disconnect_client( urpc_tcp_server, wsocket );
       return NULL;
       }
@@ -399,11 +399,11 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
     if( selected == 0 ) continue;
 
     // Считываем данные.
-    sr_size = recv( wsocket, (char*)iheader + received, recv_size - received, MSG_NOSIGNAL );
+    sr_size = recv( wsocket, (char*)iheader + received, recv_size - received, URPC_MSG_NOSIGNAL );
     if( sr_size <= 0 )
       {
       int recv_error = urpc_network_last_error();
-      if( sr_size == 0 || recv_error == EINTR || recv_error == EAGAIN ) continue;
+      if( sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN ) continue;
       urpc_tcp_server_disconnect_client( urpc_tcp_server, wsocket );
       return NULL;
       }
@@ -445,10 +445,10 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
     sock_tv.tv_sec = 0;
     sock_tv.tv_usec = 100000;
 
-    selected = select( wsocket + 1, &sock_set, NULL, NULL, &sock_tv );
+    selected = select( (int)( wsocket + 1 ), &sock_set, NULL, NULL, &sock_tv );
     if( selected < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_tcp_server_disconnect_client( urpc_tcp_server, wsocket );
       return NULL;
       }
@@ -456,11 +456,11 @@ uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_
     if( selected == 0 ) continue;
 
     // Считываем данные.
-    sr_size = recv( wsocket, (char*)iheader + received, recv_size - received, MSG_NOSIGNAL );
+    sr_size = recv( wsocket, (char*)iheader + received, recv_size - received, URPC_MSG_NOSIGNAL );
     if( sr_size <= 0 )
       {
       int recv_error = urpc_network_last_error();
-      if( sr_size == 0 || recv_error == EINTR || recv_error == EAGAIN ) continue;
+      if( sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN ) continue;
       urpc_tcp_server_disconnect_client( urpc_tcp_server, wsocket );
       return NULL;
       }
@@ -530,10 +530,10 @@ int urpc_tcp_server_send( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id )
     sock_tv.tv_sec = 0;
     sock_tv.tv_usec = 100000;
 
-    selected = select( wsocket + 1, NULL, &sock_set, NULL, &sock_tv );
+    selected = select( (int)(wsocket + 1), NULL, &sock_set, NULL, &sock_tv );
     if( selected < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_tcp_server_disconnect_client( urpc_tcp_server, wsocket );
       return -1;
       }
@@ -541,11 +541,11 @@ int urpc_tcp_server_send( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id )
     if( selected == 0 ) continue;
 
     // Отправляем данные.
-    sr_size = send( wsocket, (char*)oheader + sended, send_size - sended, MSG_NOSIGNAL );
+    sr_size = send( wsocket, (char*)oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL );
     if( sr_size <= 0 )
       {
       int send_error = urpc_network_last_error();
-      if( sr_size == 0 || send_error == EINTR || send_error == EAGAIN ) continue;
+      if( sr_size == 0 || send_error == URPC_EINTR || send_error == URPC_EAGAIN ) continue;
       urpc_tcp_server_disconnect_client( urpc_tcp_server, wsocket );
       return -1;
       }

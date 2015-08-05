@@ -84,7 +84,7 @@ uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout )
   // Рабочий сокет.
   urpc_udp_client->socket = socket( addr->ai_family, SOCK_DGRAM, addr->ai_protocol );
   if( urpc_udp_client->socket == INVALID_SOCKET ) goto urpc_udp_client_create_fail;
-  if( connect( urpc_udp_client->socket, addr->ai_addr, addr->ai_addrlen ) < 0 ) goto urpc_udp_client_create_fail;
+  if( connect( urpc_udp_client->socket, addr->ai_addr, (socklen_t)addr->ai_addrlen ) < 0 ) goto urpc_udp_client_create_fail;
   urpc_network_set_non_block( urpc_udp_client->socket );
 
   // Таймер передачи.
@@ -167,9 +167,9 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
     sock_tv.tv_sec = 0;
     sock_tv.tv_usec = 100000;
 
-    if( select( urpc_udp_client->socket + 1, &sock_set, NULL, NULL, &sock_tv ) < 0 )
+    if( select( (int)( urpc_udp_client->socket + 1 ), &sock_set, NULL, NULL, &sock_tv ) < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_udp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }
@@ -181,7 +181,7 @@ uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client )
     recv_size = recv( urpc_udp_client->socket, (void*)iheader, URPC_DEFAULT_BUFFER_SIZE, 0 );
     if( recv_size < 0 )
       {
-      if( urpc_network_last_error() == EINTR ) continue;
+      if( urpc_network_last_error() == URPC_EINTR ) continue;
       urpc_udp_client->fail = 1;
       return URPC_STATUS_TRANSPORT_ERROR;
       }

@@ -639,9 +639,14 @@ double urpc_data_get_double( uRpcData *urpc_data, uint32_t id )
 int urpc_data_set_string( uRpcData *urpc_data, uint32_t id, const char *string )
 {
 
+  size_t length;
+
   if( urpc_data->urpc_data_type != URPC_DATA_TYPE ) return -1;
 
-  return urpc_data_set_param( &urpc_data->output, id, string, strlen( string ) + 1 ) == NULL ? -1 : 0;
+  length = strlen( string ) + 1;
+  if( length > ( urpc_data->output.buffer_size - urpc_data->output.data_size ) ) return -1;
+
+  return urpc_data_set_param( &urpc_data->output, id, string, (uint32_t)length ) == NULL ? -1 : 0;
 
 }
 

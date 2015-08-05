@@ -73,7 +73,7 @@ struct addrinfo *urpc_get_sockaddr( const char *uri )
   int any_address = 0;
 
   char *host_end;
-  int host_len;
+  size_t host_len;
   int gai_ret;
 
   if( urpc_type == URPC_UNKNOWN || urpc_type == URPC_SHM )

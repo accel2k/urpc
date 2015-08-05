@@ -113,7 +113,7 @@ int main( int argc, char **argv )
     for( i = 0; i < MAX_PARAMS; i++ )
       {
 
-      sparam_length = strlen( sparams[i] ) + 1;
+      sparam_length = (int)strlen( sparams[i] ) + 1;
       urpc_data_set( urpc_data, 5 * i, sparams[i], sparam_length );
       urpc_data_set_uint32( urpc_data, 5 * i + 1, sparam_length );
       urpc_data_set_uint32( urpc_data, 5 * i + 2, iparams[i] );
@@ -157,7 +157,7 @@ int main( int argc, char **argv )
       sparam = urpc_data_get_string( urpc_data, 5 * i );
       iparam = urpc_data_get_uint32( urpc_data, 5 * i + 1 );
 
-      sparam_length = strlen( sparam ) + 1;
+      sparam_length = (int)strlen( sparam ) + 1;
       if( sparam_length != iparam )
         printf( "Parameter %d size mismatch %u != %u\n", i, sparam_length, iparam );
       if( strcmp( sparam, sparams[i] ) )
