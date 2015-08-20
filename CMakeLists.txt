@@ -12,14 +12,22 @@ endif()
 
 #
 # Architecture check.
-if( CMAKE_SIZEOF_VOID_P LESS 4 )
-  message( FATAL_ERROR "Architecture with pointer size less then 32bit is not supported." )
+if( CMAKE_SIZEOF_VOID_P EQUAL 4 )
+  set( CPU_ARCH x32 )
+elseif( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+  set( CPU_ARCH x64 )
+else()
+  message( FATAL_ERROR "Unsupported architecture." )
 endif()
 
 #
 # Compilers options.
 if( ${CMAKE_C_COMPILER_ID} STREQUAL GNU  )
-  set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2 -Wall" )
+  if( ${CPU_ARCH} STREQUAL x32 )
+    set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -march=pentium4 -mfpmath=sse" )
+    set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -march=pentium4 -mfpmath=sse" )
+  endif()
+  set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Ofast -Wall" )
   set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall" )
   add_definitions( -D_GCC_COMPILER )
 elseif( ${CMAKE_C_COMPILER_ID} STREQUAL MSVC )
