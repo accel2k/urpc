@@ -6,6 +6,8 @@ set( URPC_VERSION 0.99 )
 include( TestBigEndian )
 include( CheckIncludeFile )
 
+#
+# Default build type.
 if( NOT CMAKE_BUILD_TYPE )
   set( CMAKE_BUILD_TYPE Release )
 endif()
