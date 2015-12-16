@@ -30,7 +30,7 @@
 
 #define URPC_TIMER_TYPE 0x54525475
 
-struct uRpcTimer
+struct _uRpcTimer
 {
   uint32_t             type;                   /* Тип объекта uRpcTimer. */
   LARGE_INTEGER        pfreq;                  /* Частота обновления PerformanceCounter'а. */

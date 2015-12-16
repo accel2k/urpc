@@ -1,5 +1,5 @@
 
-add_library( urpc SHARED
+add_library (urpc SHARED
              urpc-common.c
              urpc-data.c
              urpc-client.c
@@ -19,23 +19,23 @@ add_library( urpc SHARED
              urpc-${PLATFORM}-rwmutex.c
              urpc-${PLATFORM}-semaphore.c
              urpc-${PLATFORM}-thread.c
-             urpc-${PLATFORM}-shm.c )
+             urpc-${PLATFORM}-shm.c)
 
-if( WIN32 )
-  target_link_libraries( urpc wsock32 ws2_32 )
-endif()
+if (WIN32)
+  target_link_libraries (urpc wsock32 ws2_32)
+endif ()
 
-if( UNIX )
-  target_link_libraries( urpc rt )
-endif()
+if (UNIX)
+  target_link_libraries (urpc rt)
+endif ()
 
-install( TARGETS urpc EXPORT urpc
+install (TARGETS urpc EXPORT urpc
          RUNTIME DESTINATION bin
          LIBRARY DESTINATION lib
          ARCHIVE DESTINATION lib
-         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )
+         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
-install( FILES urpc-exports.h
+install (FILES urpc-exports.h
                urpc-client.h
                urpc-server.h
                urpc-data.h
@@ -49,4 +49,4 @@ install( FILES urpc-exports.h
                urpc-thread.h
                urpc-timer.h
                urpc-types.h
-               DESTINATION include/urpc PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ )
+               DESTINATION include/urpc PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
