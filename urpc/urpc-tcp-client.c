@@ -21,7 +21,7 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-tcp-client.h"
 #include "urpc-common.h"
@@ -31,43 +31,45 @@
 
 #include <stdlib.h>
 
-
 #define URPC_TCP_CLIENT_TYPE 0x43504354
 
+struct _uRpcTCPClient
+{
+  uint32_t             urpc_tcp_client_type;   /* Тип объекта uRpcTCPClient. */
 
-struct uRpcTCPClient {
+  SOCKET               socket;                 /* Рабочий сокет. */
 
-  uint32_t          urpc_tcp_client_type;   // Тип объекта uRpcTCPClient.
+  uint32_t             buffer_size;            /* Размер буфера приёма-передачи. */
+  uRpcData            *urpc_data;              /* Указатель на объект RPC данных. */
+  uRpcTimer           *timer;                  /* Таймаут таймер. */
+  double               timeout;                /* Интервал таймаута. */
 
-  SOCKET            socket;                 // Рабочий сокет.
-
-  uint32_t          buffer_size;            // Размер буфера приёма-передачи.
-  uRpcData         *urpc_data;              // Указатель на объект RPC данных.
-  uRpcTimer        *timer;                  // Таймаут таймер.
-  double            timeout;                // Интервал таймаута.
-
-  volatile uint32_t fail;                   // Признак ошибки.
-
+  volatile uint32_t    fail;                   /* Признак ошибки. */
 };
 
-
-uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, double timeout )
+uRpcTCPClient *
+urpc_tcp_client_create (const char *uri,
+                        uint32_t    max_data_size,
+                        double      timeout)
 {
-
   uRpcTCPClient *urpc_tcp_client = NULL;
   struct addrinfo *addr = NULL;
 
-  // Проверка ограничений.
-  if( max_data_size > URPC_MAX_DATA_SIZE ) return NULL;
-  if( timeout < URPC_MIN_TIMEOUT ) timeout = URPC_MIN_TIMEOUT;
+  /* Проверка ограничений. */
+  if (max_data_size > URPC_MAX_DATA_SIZE)
+    return NULL;
+  if (timeout < URPC_MIN_TIMEOUT)
+    timeout = URPC_MIN_TIMEOUT;
   max_data_size += URPC_HEADER_SIZE;
 
-  // Проверяем тип адреса.
-  if( urpc_get_type( uri ) != URPC_TCP ) return NULL;
+  /* Проверяем тип адреса. */
+  if (urpc_get_type (uri) != URPC_TCP)
+    return NULL;
 
-  // Структура объекта.
-  urpc_tcp_client = malloc( sizeof( uRpcTCPClient ) );
-  if( urpc_tcp_client == NULL ) return NULL;
+  /* Структура объекта. */
+  urpc_tcp_client = malloc (sizeof (uRpcTCPClient));
+  if (urpc_tcp_client == NULL)
+    return NULL;
 
   urpc_tcp_client->urpc_tcp_client_type = URPC_TCP_CLIENT_TYPE;
   urpc_tcp_client->socket = INVALID_SOCKET;
@@ -77,66 +79,72 @@ uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, 
   urpc_tcp_client->timeout = timeout;
   urpc_tcp_client->fail = 0;
 
-  // Буферы приёма-передачи.
-  urpc_tcp_client->urpc_data = urpc_data_create( max_data_size, sizeof( uRpcHeader ), NULL, NULL, 0 );
-  if( urpc_tcp_client->urpc_data == NULL ) goto urpc_tcp_client_create_fail;
+  /* Буферы приёма-передачи. */
+  urpc_tcp_client->urpc_data = urpc_data_create (max_data_size, sizeof (uRpcHeader), NULL, NULL, 0);
+  if (urpc_tcp_client->urpc_data == NULL)
+    goto urpc_tcp_client_create_fail;
 
-  // Адрес сервера.
-  addr = urpc_get_sockaddr( uri );
-  if( addr == NULL ) goto urpc_tcp_client_create_fail;
+  /* Адрес сервера. */
+  addr = urpc_get_sockaddr (uri);
+  if (addr == NULL)
+    goto urpc_tcp_client_create_fail;
 
-  // Рабочий сокет.
-  urpc_tcp_client->socket = socket( addr->ai_family, SOCK_STREAM, addr->ai_protocol );
-  if( urpc_tcp_client->socket == INVALID_SOCKET ) goto urpc_tcp_client_create_fail;
-  if( connect( urpc_tcp_client->socket, addr->ai_addr, (socklen_t)addr->ai_addrlen ) < 0 ) goto urpc_tcp_client_create_fail;
-  urpc_network_set_tcp_nodelay( urpc_tcp_client->socket );
-  urpc_network_set_non_block( urpc_tcp_client->socket );
+  /* Рабочий сокет. */
+  urpc_tcp_client->socket = socket (addr->ai_family, SOCK_STREAM, addr->ai_protocol);
+  if (urpc_tcp_client->socket == INVALID_SOCKET)
+    goto urpc_tcp_client_create_fail;
+  if (connect (urpc_tcp_client->socket, addr->ai_addr, (socklen_t) addr->ai_addrlen) < 0)
+    goto urpc_tcp_client_create_fail;
+  urpc_network_set_tcp_nodelay (urpc_tcp_client->socket);
+  urpc_network_set_non_block (urpc_tcp_client->socket);
 
-  // Таймер передачи.
-  urpc_tcp_client->timer = urpc_timer_create();
-  if( urpc_tcp_client->timer == NULL ) goto urpc_tcp_client_create_fail;
+  /* Таймер передачи. */
+  urpc_tcp_client->timer = urpc_timer_create ();
+  if (urpc_tcp_client->timer == NULL)
+    goto urpc_tcp_client_create_fail;
 
-  freeaddrinfo( addr );
+  freeaddrinfo (addr);
 
   return urpc_tcp_client;
 
-  urpc_tcp_client_create_fail:
-    urpc_tcp_client_destroy( urpc_tcp_client );
-    if( addr != NULL ) freeaddrinfo( addr );
+urpc_tcp_client_create_fail:
+  urpc_tcp_client_destroy (urpc_tcp_client);
+  if (addr != NULL)
+    freeaddrinfo (addr);
 
   return NULL;
-
 }
 
-
-void urpc_tcp_client_destroy( uRpcTCPClient *urpc_tcp_client )
+void
+urpc_tcp_client_destroy (uRpcTCPClient *urpc_tcp_client)
 {
+  if (urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE)
+    return;
 
-  if( urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE ) return;
+  if (urpc_tcp_client->socket != INVALID_SOCKET)
+    closesocket (urpc_tcp_client->socket);
+  if (urpc_tcp_client->timer != NULL)
+    urpc_timer_destroy (urpc_tcp_client->timer);
+  if (urpc_tcp_client->urpc_data != NULL)
+    urpc_data_destroy (urpc_tcp_client->urpc_data);
 
-  if( urpc_tcp_client->socket != INVALID_SOCKET ) closesocket( urpc_tcp_client->socket );
-  if( urpc_tcp_client->timer != NULL ) urpc_timer_destroy( urpc_tcp_client->timer );
-  if( urpc_tcp_client->urpc_data != NULL ) urpc_data_destroy( urpc_tcp_client->urpc_data );
-
-  free( urpc_tcp_client );
-
+  free (urpc_tcp_client);
 }
 
-
-uRpcData *urpc_tcp_client_lock( uRpcTCPClient *urpc_tcp_client )
+uRpcData *
+urpc_tcp_client_lock (uRpcTCPClient *urpc_tcp_client)
 {
-
-  if( urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE ) return NULL;
-  if( urpc_tcp_client->fail ) return NULL;
+  if (urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE)
+    return NULL;
+  if (urpc_tcp_client->fail)
+    return NULL;
 
   return urpc_tcp_client->urpc_data;
-
 }
 
-
-uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
+uint32_t
+urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
 {
-
   fd_set sock_set;
   struct timeval sock_tv;
 
@@ -152,167 +160,174 @@ uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client )
 
   int sr_size;
 
-  if( urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE ) return URPC_STATUS_FAIL;
-  if( urpc_tcp_client->fail ) return URPC_STATUS_TRANSPORT_ERROR;
-
-  iheader = urpc_data_get_header( urpc_tcp_client->urpc_data, URPC_DATA_INPUT );
-  oheader = urpc_data_get_header( urpc_tcp_client->urpc_data, URPC_DATA_OUTPUT );
-  send_size = UINT32_FROM_BE( oheader->size );
-
-  // Время начала передачи.
-  urpc_timer_start( urpc_tcp_client->timer );
-
-  // Отправляем запрос.
-  while( sended != send_size )
-    {
-
-    // Проверка таймаута при передаче данных.
-    if( urpc_timer_elapsed( urpc_tcp_client->timer ) >  urpc_tcp_client->timeout )
-      {
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
-
-    // Проверяем возможность записи в канал связи с интервалом в 100мс.
-    FD_ZERO( &sock_set );
-    FD_SET( urpc_tcp_client->socket, &sock_set );
-    sock_tv.tv_sec = 0;
-    sock_tv.tv_usec = 100000;
-
-    selected = select( (int)( urpc_tcp_client->socket + 1 ), NULL, &sock_set, NULL, &sock_tv );
-    if( selected < 0 )
-      {
-      if( urpc_network_last_error() == URPC_EINTR ) continue;
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
-
-    if( selected == 0 ) continue;
-
-    // Отправляем данные.
-    sr_size = send( urpc_tcp_client->socket, (char*)oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL );
-    if( sr_size <= 0 )
-      {
-      int send_error = urpc_network_last_error();
-      if( sr_size == 0 || send_error == URPC_EINTR || send_error == URPC_EAGAIN ) continue;
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
-
-    sended += sr_size;
-
-    // Перезапускаем таймер.
-    urpc_timer_start( urpc_tcp_client->timer );
-
-    }
-
-  // Время начала приёма.
-  urpc_timer_start( urpc_tcp_client->timer );
-
-  // Принимаем заголовок ответа.
-  recv_size = sizeof( uRpcHeader );
-  while( received != recv_size )
-    {
-
-    // Проверка таймаута при приёме данных.
-    if( urpc_timer_elapsed( urpc_tcp_client->timer ) >  urpc_tcp_client->timeout )
-      {
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
-
-    // Проверяем возможность чтения из канала связи с интервалом в 100мс.
-    FD_ZERO( &sock_set );
-    FD_SET( urpc_tcp_client->socket, &sock_set );
-    sock_tv.tv_sec = 0;
-    sock_tv.tv_usec = 100000;
-
-    selected = select( (int)( urpc_tcp_client->socket + 1 ), &sock_set, NULL, NULL, &sock_tv );
-    if( selected < 0 )
-      {
-      if( urpc_network_last_error() == URPC_EINTR ) continue;
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
-
-    if( selected == 0 ) continue;
-
-    // Отправляем данные.
-    sr_size = recv( urpc_tcp_client->socket, (char*)iheader + received, recv_size - received, URPC_MSG_NOSIGNAL );
-    if( sr_size <= 0 )
-      {
-      int recv_error = urpc_network_last_error();
-      if( sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN ) continue;
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
-
-    received += sr_size;
-
-    // Перезапускаем таймер.
-    urpc_timer_start( urpc_tcp_client->timer );
-
-    }
-
-  // Проверяем заголовок ответа.
-  if( UINT32_FROM_BE( iheader->magic ) != URPC_MAGIC )
-    {
-    urpc_tcp_client->fail = 1;
+  if (urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE)
+    return URPC_STATUS_FAIL;
+  if (urpc_tcp_client->fail)
     return URPC_STATUS_TRANSPORT_ERROR;
-    }
-  recv_size = UINT32_FROM_BE( iheader->size );
-  if( recv_size > urpc_tcp_client->buffer_size )
+
+  iheader = urpc_data_get_header (urpc_tcp_client->urpc_data, URPC_DATA_INPUT);
+  oheader = urpc_data_get_header (urpc_tcp_client->urpc_data, URPC_DATA_OUTPUT);
+  send_size = UINT32_FROM_BE (oheader->size);
+
+  /* Время начала передачи. */
+  urpc_timer_start (urpc_tcp_client->timer);
+
+  /* Отправляем запрос. */
+  while (sended != send_size)
     {
-    urpc_tcp_client->fail = 1;
-    return URPC_STATUS_TRANSPORT_ERROR;
+      /* Проверка таймаута при передаче данных. */
+      if (urpc_timer_elapsed (urpc_tcp_client->timer) > urpc_tcp_client->timeout)
+        {
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
+
+      /* Проверяем возможность записи в канал связи с интервалом в 100мс. */
+      FD_ZERO (&sock_set);
+      FD_SET (urpc_tcp_client->socket, &sock_set);
+      sock_tv.tv_sec = 0;
+      sock_tv.tv_usec = 100000;
+
+      selected = select ((int) (urpc_tcp_client->socket + 1), NULL, &sock_set, NULL, &sock_tv);
+      if (selected < 0)
+        {
+          if (urpc_network_last_error () == URPC_EINTR)
+            continue;
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
+
+      if (selected == 0)
+        continue;
+
+      /* Отправляем данные. */
+      sr_size =
+        send (urpc_tcp_client->socket, (char *) oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL);
+      if (sr_size <= 0)
+        {
+          int send_error = urpc_network_last_error ();
+          if (sr_size == 0 || send_error == URPC_EINTR || send_error == URPC_EAGAIN)
+            continue;
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
+
+      sended += sr_size;
+
+      /* Перезапускаем таймер. */
+      urpc_timer_start (urpc_tcp_client->timer);
     }
 
-  // Принимаем данные ответа.
-  while( received != recv_size )
+  /* Время начала приёма. */
+  urpc_timer_start (urpc_tcp_client->timer);
+
+  /* Принимаем заголовок ответа. */
+  recv_size = sizeof (uRpcHeader);
+  while (received != recv_size)
     {
+      /* Проверка таймаута при приёме данных. */
+      if (urpc_timer_elapsed (urpc_tcp_client->timer) > urpc_tcp_client->timeout)
+        {
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
 
-    // Проверка таймаута при приёме данных.
-    if( urpc_timer_elapsed( urpc_tcp_client->timer ) >  urpc_tcp_client->timeout )
-      {
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
+      /* Проверяем возможность чтения из канала связи с интервалом в 100мс. */
+      FD_ZERO (&sock_set);
+      FD_SET (urpc_tcp_client->socket, &sock_set);
+      sock_tv.tv_sec = 0;
+      sock_tv.tv_usec = 100000;
 
-    // Проверяем возможность чтения из канала связи с интервалом в 100мс.
-    FD_ZERO( &sock_set );
-    FD_SET( urpc_tcp_client->socket, &sock_set );
-    sock_tv.tv_sec = 0;
-    sock_tv.tv_usec = 100000;
+      selected = select ((int) (urpc_tcp_client->socket + 1), &sock_set, NULL, NULL, &sock_tv);
+      if (selected < 0)
+        {
+          if (urpc_network_last_error () == URPC_EINTR)
+            continue;
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
 
-    selected = select( (int)( urpc_tcp_client->socket + 1 ), &sock_set, NULL, NULL, &sock_tv );
-    if( selected < 0 )
-      {
-      if( urpc_network_last_error() == URPC_EINTR ) continue;
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
+      if (selected == 0)
+        continue;
 
-    if( selected == 0 ) continue;
+      /* Отправляем данные. */
+      sr_size =  recv (urpc_tcp_client->socket, (char *) iheader + received, 
+                       recv_size - received, URPC_MSG_NOSIGNAL);
+      if (sr_size <= 0)
+        {
+          int recv_error = urpc_network_last_error ();
+          if (sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+            continue;
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
 
-    // Отправляем данные.
-    sr_size = recv( urpc_tcp_client->socket, (char*)iheader + received, recv_size - received, URPC_MSG_NOSIGNAL );
-    if( sr_size <= 0 )
-      {
-      int recv_error = urpc_network_last_error();
-      if( sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN ) continue;
-      urpc_tcp_client->fail = 1;
-      return URPC_STATUS_TRANSPORT_ERROR;
-      }
+      received += sr_size;
 
-    received += sr_size;
-
-    // Перезапускаем таймер.
-    urpc_timer_start( urpc_tcp_client->timer );
-
+      /* Перезапускаем таймер. */
+      urpc_timer_start (urpc_tcp_client->timer);
     }
 
-  urpc_data_set_data_size( urpc_tcp_client->urpc_data, URPC_DATA_INPUT, recv_size - URPC_HEADER_SIZE );
+  /* Проверяем заголовок ответа. */
+  if (UINT32_FROM_BE (iheader->magic) != URPC_MAGIC)
+    {
+      urpc_tcp_client->fail = 1;
+      return URPC_STATUS_TRANSPORT_ERROR;
+    }
+  recv_size = UINT32_FROM_BE (iheader->size);
+  if (recv_size > urpc_tcp_client->buffer_size)
+    {
+      urpc_tcp_client->fail = 1;
+      return URPC_STATUS_TRANSPORT_ERROR;
+    }
+
+  /* Принимаем данные ответа. */
+  while (received != recv_size)
+    {
+      /* Проверка таймаута при приёме данных. */
+      if (urpc_timer_elapsed (urpc_tcp_client->timer) > urpc_tcp_client->timeout)
+        {
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
+
+      /* Проверяем возможность чтения из канала связи с интервалом в 100мс. */
+      FD_ZERO (&sock_set);
+      FD_SET (urpc_tcp_client->socket, &sock_set);
+      sock_tv.tv_sec = 0;
+      sock_tv.tv_usec = 100000;
+
+      selected = select ((int) (urpc_tcp_client->socket + 1), &sock_set, NULL, NULL, &sock_tv);
+      if (selected < 0)
+        {
+          if (urpc_network_last_error () == URPC_EINTR)
+            continue;
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
+
+      if (selected == 0)
+        continue;
+
+      /* Отправляем данные. */
+      sr_size = recv (urpc_tcp_client->socket, (char *) iheader + received,
+                      recv_size - received, URPC_MSG_NOSIGNAL);
+      if (sr_size <= 0)
+        {
+          int recv_error = urpc_network_last_error ();
+          if (sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+            continue;
+          urpc_tcp_client->fail = 1;
+          return URPC_STATUS_TRANSPORT_ERROR;
+        }
+
+      received += sr_size;
+
+      /* Перезапускаем таймер. */
+      urpc_timer_start (urpc_tcp_client->timer);
+    }
+
+  urpc_data_set_data_size (urpc_tcp_client->urpc_data, URPC_DATA_INPUT, recv_size - URPC_HEADER_SIZE);
 
   return URPC_STATUS_OK;
-
 }

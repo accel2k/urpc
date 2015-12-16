@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-thread.h
  *
  * \brief Заголовочный файл библиотеки работы с потоками
@@ -40,24 +40,22 @@
  * Все функции библиотеки используют указатель на структуру uRpcThread.
  *
  * Выполнение потока осуществляется в рамках функции типа #urpc_thread_func. В функцию может быть
- * передан указатель на внешние данные. Поток завершается после выполнения в его функции оператора
- * return или вызова функции #urpc_thread_exit.
+ * передан указатель на внешние данные.
  *
  * Создание потока осуществляется функцией #urpc_thread_create. Родительский поток может узнать
  * о завершении дочернего потока с использованием функции #urpc_thread_join. Функция #urpc_thread_destroy
  * ожидает завершения потока и после этого освобождает память занятую управляющей структурой.
  *
-*/
+ */
 
-#ifndef _urpc_thread_h
-#define _urpc_thread_h
+#ifndef __URPC_THREAD_H__
+#define __URPC_THREAD_H__
 
 #include <urpc-exports.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 #if defined( _WIN32 )
 #include <windows.h>
@@ -69,18 +67,18 @@ typedef HANDLE uRpcThread;
 typedef pthread_t uRpcThread;
 #endif
 
-
-/*! Тип функции запускаемой в качестве потока.
+/**
+ *
+ * Тип функции запускаемой в качестве потока.
  *
  * \param data указатель на данные передаваемые в поток.
  *
  * \return Результат работы потока.
  *
-*/
-typedef void* (*urpc_thread_func)( void *data );
+ */
+typedef void *(*urpc_thread_func)      (void                  *data);
 
-
-/*! Создание потока.
+/**
  *
  * Функция создаёт новый поток и запускает выполнение в нём пользовательской функции.
  *
@@ -89,49 +87,37 @@ typedef void* (*urpc_thread_func)( void *data );
  *
  * \return Указатель на поток или NULL.
  *
-*/
-URPC_EXPORT uRpcThread *urpc_thread_create( urpc_thread_func func, void *data );
+ */
+URPC_EXPORT
+uRpcThread *urpc_thread_create         (urpc_thread_func       func,
+                                        void                  *data);
 
-
-/*! Удаление потока.
+/**
  *
  * функция ожидает завершения потока и освобождает память занятую управляющей структурой.
  *
- * \param thread указатель на структуру.
+ * \param thread указатель на поток.
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_thread_destroy( uRpcThread *thread );
+ */
+URPC_EXPORT
+void urpc_thread_destroy               (uRpcThread            *thread);
 
-
-/*! Ожидание завершения потока.
+/**
  *
  * Функция ожидает завершения потока.
  *
- * \param thread указатель на структуру.
- *
- * \return Результат работы потока.
- *
-*/
-URPC_EXPORT void *urpc_thread_join( uRpcThread *thread );
-
-
-/*! Завершение работы потока.
- *
- * Функция может быть вызвана только в дочернем потоке и преведет к
- * завершению его работы. Результат работы потока вернет функция #urpc_thread_join.
- *
- * \param retval результат работы потока.
+ * \param thread указатель на поток.
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_thread_exit( void *retval );
-
+ */
+URPC_EXPORT
+void urpc_thread_join                  (uRpcThread            *thread);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_thread_h
+#endif /* __URPC_THREAD_H__ */

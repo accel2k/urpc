@@ -21,7 +21,7 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-semaphore.h"
 
@@ -36,145 +36,158 @@
 #include <sys/stat.h>
 #include <semaphore.h>
 
-
 #define URPC_SEM_TYPE 0x544D5375
 
-
-struct uRpcSem {
-
-  uint32_t          type;                   // Тип объекта uRpcSem.
-  sem_t            *sem;                    // Идентификатор семафора.
-  char             *name;                   // Название семафора.
-
+struct _uRpcSem
+{
+  uint32_t             type;                   /* Тип объекта uRpcSem. */
+  sem_t               *sem;                    /* Идентификатор семафора. */
+  char                *name;                   /* Название семафора. */
 };
 
-
-static uRpcSem *urpc_sem_create_int( const char *name, int initial_value, int create )
+static uRpcSem *
+urpc_sem_create_int (const char *name,
+                     int         initial_value,
+                     int         create)
 {
-
-  uRpcSem *sem = malloc( sizeof( uRpcSem ) );
+  uRpcSem *sem = malloc (sizeof (uRpcSem));
   int oflags = 0;
 
-  if( create ) oflags = O_RDWR | O_CREAT | O_EXCL;
-  else oflags = O_RDWR;
+  if (sem == NULL)
+    return NULL;
 
-  if( sem == NULL )return NULL;
-  if( create ) sem->sem = sem_open( name, oflags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, initial_value );
-  else sem->sem = sem_open( name, oflags );
-  if( sem->sem == SEM_FAILED )
-    { free( sem ); return NULL; }
-
-  if( create )
+  if (create)
     {
-    int name_size = strlen( name ) + 1;
-    sem->name = malloc( name_size );
-    memcpy( sem->name, name, name_size );
+      oflags = O_RDWR | O_CREAT | O_EXCL;
+      sem->sem = sem_open (name, oflags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP, initial_value);
     }
   else
-    sem->name = NULL;
+    {
+      oflags = O_RDWR;
+      sem->sem = sem_open (name, oflags);
+    }
+
+  if (sem->sem == SEM_FAILED)
+    {
+      free (sem);
+      return NULL;
+    }
+
+  if (create)
+    {
+      int name_size = strlen (name) + 1;
+      sem->name = malloc (name_size);
+      if (sem->name == NULL)
+        {
+          sem_close (sem->sem);
+          sem_unlink (name);
+          free (sem);
+          return NULL;
+        }
+      memcpy( sem->name, name, name_size );
+    }
+  else
+    {
+      sem->name = NULL;
+    }
 
   sem->type = URPC_SEM_TYPE;
 
   return sem;
-
 }
 
-
-uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int queue )
+uRpcSem *
+urpc_sem_create (const char *name,
+                 uRpcSemStat stat,
+                 int         queue)
 {
-
-  return urpc_sem_create_int( name, stat == URPC_SEM_LOCKED ? 0 : queue, 1 );
-
+  return urpc_sem_create_int (name, stat == URPC_SEM_LOCKED ? 0 : queue, 1);
 }
 
-
-uRpcSem *urpc_sem_open( const char *name )
+uRpcSem *
+urpc_sem_open (const char *name)
 {
-
-  return urpc_sem_create_int( name, 0, 0 );
-
+  return urpc_sem_create_int (name, 0, 0);
 }
 
-
-void urpc_sem_destroy( uRpcSem *sem )
+void
+urpc_sem_destroy (uRpcSem *sem)
 {
+  if (sem->type != URPC_SEM_TYPE)
+    return;
 
-  if( sem->type != URPC_SEM_TYPE ) return;
-
-  sem_close( sem->sem );
-  if( sem->name != NULL ) sem_unlink( sem->name );
-  free( sem->name );
-  free( sem );
-
+  sem_close (sem->sem);
+  if (sem->name != NULL)
+    sem_unlink( sem->name );
+  free (sem->name);
+  free (sem);
 }
 
-
-void urpc_sem_remove( const char *name )
+void
+urpc_sem_remove (const char *name)
 {
-
-  sem_unlink( name );
-
+  sem_unlink (name);
 }
 
-
-void urpc_sem_lock( uRpcSem *sem )
+void
+urpc_sem_lock (uRpcSem *sem)
 {
+  if (sem->type != URPC_SEM_TYPE)
+    return;
 
-  if( sem->type != URPC_SEM_TYPE ) return;
-
-  while( sem_wait( sem->sem ) != 0 );
-
+  while (sem_wait (sem->sem) != 0);
 }
 
-
-int urpc_sem_trylock( uRpcSem *sem )
+int
+urpc_sem_trylock (uRpcSem *sem)
 {
+  if (sem->type != URPC_SEM_TYPE)
+    return -1;
 
-  if( sem->type != URPC_SEM_TYPE ) return -1;
-
-  return sem_trywait( sem->sem ) == 0 ? 0 : -1;
-
+  return sem_trywait (sem->sem) == 0 ? 0 : -1;
 }
 
-
-int urpc_sem_timedlock( uRpcSem *sem, double time )
+int
+urpc_sem_timedlock (uRpcSem *sem,
+                    double   time)
 {
-
   struct timeval cur_time;
   struct timespec sem_wait_time;
 
-  if( sem->type != URPC_SEM_TYPE ) return -1;
+  if (sem->type != URPC_SEM_TYPE)
+    return -1;
 
-  gettimeofday( &cur_time, NULL );
+  gettimeofday (&cur_time, NULL);
   sem_wait_time.tv_sec = (int)time + cur_time.tv_sec;
-  sem_wait_time.tv_nsec = 1000000000 * ( time - (int)time ) + 1000 * cur_time.tv_usec;
-  if( sem_wait_time.tv_nsec >= 1000000000 )
+  sem_wait_time.tv_nsec = 1000000000 * (time - (int)time) + 1000 * cur_time.tv_usec;
+  if (sem_wait_time.tv_nsec >= 1000000000)
     {
-    sem_wait_time.tv_nsec -= 1000000000;
-    sem_wait_time.tv_sec += 1;
+      sem_wait_time.tv_nsec -= 1000000000;
+      sem_wait_time.tv_sec += 1;
     }
 
-  while( 1 )
+  while (1)
     {
-    if( sem_timedwait( sem->sem, &sem_wait_time ) < 0 )
-      {
-      if( errno == EINTR ) continue;
-      else if( errno == ETIMEDOUT ) return 1;
-      else return -1;
-      }
-    break;
+      if( sem_timedwait( sem->sem, &sem_wait_time ) < 0 )
+        {
+          if (errno == EINTR)
+            continue;
+          else if (errno == ETIMEDOUT)
+            return 1;
+          else
+            return -1;
+        }
+      break;
     }
 
   return 0;
-
 }
 
-
-void urpc_sem_unlock( uRpcSem *sem )
+void
+urpc_sem_unlock (uRpcSem *sem)
 {
+  if (sem->type != URPC_SEM_TYPE)
+    return;
 
-  if( sem->type != URPC_SEM_TYPE ) return;
-
-  while( sem_post( sem->sem ) != 0 );
-
+  while (sem_post (sem->sem) != 0);
 }

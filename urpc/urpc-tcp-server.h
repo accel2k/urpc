@@ -21,13 +21,13 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/* Заголовочный файл сервера удалённых вызовов процедур по протоколу TCP.
- * Функции TCP сервера используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
+/* Заголовочный файл сервера удалённых вызовов процедур по протоколу TCP.  Функции TCP сервера
+   используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
 
-#ifndef _urpc_tcp_server_h
-#define _urpc_tcp_server_h
+#ifndef __URPC_TCP_SERVER_H__
+#define __URPC_TCP_SERVER_H__
 
 #include <urpc-network.h>
 #include <urpc-types.h>
@@ -37,40 +37,40 @@
 extern "C" {
 #endif
 
-
-typedef struct uRpcTCPServer uRpcTCPServer;
-
+typedef struct _uRpcTCPServer uRpcTCPServer;
 
 /* Функция создаёт RPC сервер обслуживающий клиентов по протоколу TCP.
- * При запуске сервера создаётся threads_num объектов каждый из которых может
- * использоваться в своём потоке. Сами потоки создаются функцией urpc_server_create.
- * В дальнейшем при вызове функций каждый поток передаёт свой идентификатор.
- * Параметры функции аналогичны urpc_server_create. */
-uRpcTCPServer *urpc_tcp_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, uint32_t max_data_size, double timeout );
-
+   При запуске сервера создаётся threads_num объектов каждый из которых может
+   использоваться в своём потоке. Сами потоки создаются функцией urpc_server_create.
+   В дальнейшем при вызове функций каждый поток передаёт свой идентификатор.
+   Параметры функции аналогичны urpc_server_create. */
+uRpcTCPServer *urpc_tcp_server_create          (const char            *uri,
+                                                uint32_t               threads_num,
+                                                uint32_t               max_clients,
+                                                uint32_t               max_data_size,
+                                                double                 timeout);
 
 /* Функция удаляет сервер. */
-void urpc_tcp_server_destroy( uRpcTCPServer *urpc_tcp_server );
-
+void urpc_tcp_server_destroy                   (uRpcTCPServer         *urpc_tcp_server);
 
 /* Функция принимает один запрос в потоке thread_id. */
-uRpcData *urpc_tcp_server_recv( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id );
-
+uRpcData *urpc_tcp_server_recv                 (uRpcTCPServer         *urpc_tcp_server,
+                                                uint32_t               thread_id);
 
 /* Функция отправляет ответ в потоке thread_id. */
-int urpc_tcp_server_send( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id );
-
+int urpc_tcp_server_send                       (uRpcTCPServer         *urpc_tcp_server,
+                                                uint32_t               thread_id);
 
 /* Функция возвращает дескриптор сокета клиента обслуживаемого сейчас в потоке thread_id. */
-SOCKET urpc_tcp_server_get_client_socket( uRpcTCPServer *urpc_tcp_server, uint32_t thread_id );
-
+SOCKET urpc_tcp_server_get_client_socket       (uRpcTCPServer         *urpc_tcp_server,
+                                                uint32_t               thread_id);
 
 /* Функция закрывает указанный сокет связи с клиентом. */
-int urpc_tcp_server_disconnect_client( uRpcTCPServer *urpc_tcp_server, SOCKET wsocket );
-
+int urpc_tcp_server_disconnect_client          (uRpcTCPServer         *urpc_tcp_server,
+                                                SOCKET                 wsocket);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_tcp_server_h
+#endif /* __URPC_TCP_SERVER_H__ */

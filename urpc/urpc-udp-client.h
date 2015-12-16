@@ -21,13 +21,13 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/* Заголовочный файл клиента удалённых вызовов процедур по протоколу UDP.
- * Функции UDP клиента используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
+/* Заголовочный файл клиента удалённых вызовов процедур по протоколу UDP. Функции UDP клиента
+   используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
 
-#ifndef _urpc_udp_client_h
-#define _urpc_udp_client_h
+#ifndef __URPC_UDP_CLIENT_H__
+#define __URPC_UDP_CLIENT_H__
 
 #include <urpc-types.h>
 #include <urpc-data.h>
@@ -36,29 +36,24 @@
 extern "C" {
 #endif
 
-
-typedef struct uRpcUDPClient uRpcUDPClient;
-
+typedef struct _uRpcUDPClient uRpcUDPClient;
 
 /* Функция создаёт RPC клиента и подключается к серверу по протоколу UDP.
- * Параметры функции аналогичны urpc_server_create. */
-uRpcUDPClient *urpc_udp_client_create( const char *uri, double timeout );
-
+   Параметры функции аналогичны urpc_server_create. */
+uRpcUDPClient *urpc_udp_client_create          (const char            *uri,
+                                                double                 timeout);
 
 /* Функция удаляет клиента. */
-void urpc_udp_client_destroy( uRpcUDPClient *urpc_udp_client );
-
+void urpc_udp_client_destroy                   (uRpcUDPClient         *urpc_udp_client);
 
 /* Функция блокирует канал связи. */
-uRpcData *urpc_udp_client_lock( uRpcUDPClient *urpc_udp_client );
-
+uRpcData *urpc_udp_client_lock                 (uRpcUDPClient         *urpc_udp_client);
 
 /* Функция производит отправку запроса серверу и приём от него ответа. */
-uint32_t urpc_udp_client_exchange( uRpcUDPClient *urpc_udp_client );
-
+uint32_t urpc_udp_client_exchange              (uRpcUDPClient         *urpc_udp_client);
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif // _urpc_udp_client_h
+#endif /* __URPC_UDP_CLIENT_H__ */

@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-client.h
  *
  * \brief Заголовочный файл клиента удалённых вызовов процедур
@@ -91,26 +91,25 @@
  * После завершения работы с RPC сервером необходимо отключиться от сервера и удалить объект
  * RPC клиента функцией #urpc_client_destroy.
  *
-*/
+ */
 
-#ifndef _urpc_client_h
-#define _urpc_client_h
+#ifndef __URPC_CLIENT_H__
+#define __URPC_CLIENT_H__
 
 #include <urpc-exports.h>
 #include <urpc-types.h>
 #include <urpc-data.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
+typedef struct _uRpcClient uRpcClient;
 
-typedef struct uRpcClient uRpcClient;
-
-
-/*! Создание RPC клиента.
+/**
  *
- * Создаёт RPC клиент для связи с сервером заданым адресом uri. Адрес задается в виде строки:
+ * Функция создаёт RPC клиент для связи с сервером заданым адресом uri. Адрес задается в виде строки:
  * "<type>://name:port", где:
  * - &lt;type&gt; - тип RPC ( udp, tcp, shm );
  * - name - имя или ip адрес системы;
@@ -125,25 +124,27 @@ typedef struct uRpcClient uRpcClient;
  *
  * \return Указатель на uRpcClient объект в случае успеха, иначе NULL.
  *
-*/
-URPC_EXPORT uRpcClient *urpc_client_create( const char *uri, uint32_t max_data_size, double timeout );
+ */
+URPC_EXPORT
+uRpcClient    *urpc_client_create              (const char            *uri,
+                                                uint32_t               max_data_size,
+                                                double                 timeout);
 
-
-/*! Удаление RPC клиента.
+/**
  *
- * Закрывает соединение с сервером и удаляет RPC клиент.
+ * Функция закрывает соединение с сервером и удаляет RPC клиент.
  *
  * \param urpc_client указатель на uRpcClient объект.
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_client_destroy( uRpcClient *urpc_client );
+ */
+URPC_EXPORT
+void           urpc_client_destroy             (uRpcClient            *urpc_client);
 
-
-/*! Задание механизма безопасности.
+/**
  *
- * Определяет механизм безопасности используемый для взаимодействия с сервером. По
+ * Функция определяет механизм безопасности используемый для взаимодействия с сервером. По
  * умолчанию для взаимодействия с сервером не используется никаких механизмов аутентификации
  * и шифрования.
  *
@@ -152,64 +153,67 @@ URPC_EXPORT void urpc_client_destroy( uRpcClient *urpc_client );
  *
  * \return 0 если режим безопасности успешно установлен, отрицательное число в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_client_set_security( uRpcClient *urpc_client, uRpcSecurity mode );
+ */
+URPC_EXPORT
+int            urpc_client_set_security        (uRpcClient            *urpc_client,
+                                                uRpcSecurity           mode);
 
-
-/*! Задание клиентского ключа аутентификации.
+/**
  *
- * Задаёт ключ используемый для аутентификации клиента на сервере.
+ * Функция задаёт ключ используемый для аутентификации клиента на сервере.
  *
  * \param urpc_client указатель на uRpcClient объект;
  * \param priv_key указатель на секретный клиентский ключ.
  *
  * \return 0 если ключ успешно задан, отрицательное число в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_client_set_client_key( uRpcClient *urpc_client, const unsigned char *priv_key );
+ */
+URPC_EXPORT
+int            urpc_client_set_client_key      (uRpcClient            *urpc_client,
+                                                const unsigned char   *priv_key);
 
-
-/*! Задание серверного ключа аутентификации.
+/**
  *
- * Задаёт ключ используемый для аутентификации сервера клиентом.
+ * Функция задаёт ключ используемый для аутентификации сервера клиентом.
  *
  * \param urpc_client указатель на uRpcClient объект;
  * \param pub_key указатель на публичный серверный ключ.
  *
  * \return 0 если ключ успешно задан, отрицательное число в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_client_set_server_key( uRpcClient *urpc_client, const unsigned char *pub_key );
+ */
+URPC_EXPORT
+int            urpc_client_set_server_key      (uRpcClient            *urpc_client,
+                                                const unsigned char   *pub_key);
 
-
-/*! Подключение к серверу.
+/**
  *
- * Производит подключение к серверу с использованием выбранного механизма безопасности.
+ * Функция производит подключение к серверу с использованием выбранного механизма безопасности.
  *
  * \param urpc_client указатель на uRpcClient объект.
  *
  * \return 0 если подключение к серверу установлено, отрицательное число в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_client_connect( uRpcClient *urpc_client );
+ */
+URPC_EXPORT
+int            urpc_client_connect             (uRpcClient            *urpc_client);
 
-
-/*! Блокировка канала передачи.
+/**
  *
- * Ждет пока освободится транспортный уровень для передачи данных, обнуляет буфер передаваемых
+ * Функция ждет пока освободится транспортный уровень для передачи данных, обнуляет буфер передаваемых
  * данных и блокирует канал передачи для текущего вызывающего потока.
  *
  * \param urpc_client указатель на uRpcClient объект.
  *
  * \return Указатель на объект \link uRpcData \endlink в случае успешного завершения, иначе NULL.
  *
-*/
-URPC_EXPORT uRpcData *urpc_client_lock( uRpcClient *urpc_client );
+ */
+URPC_EXPORT
+uRpcData      *urpc_client_lock                (uRpcClient            *urpc_client);
 
-
-/*! Вызов удалённой процедуры.
+/**
  *
- * Производит передачу параметров процедуры, её вызов и передачу результата работы. Успешное
+ * Функция производит передачу параметров процедуры, её вызов и передачу результата работы. Успешное
  * завершение функции говорит только о том, что удалённая процедура была вызвана и результат работы
  * получен обратно. Возвращаемое значение удалённой процедуры должно передаваться среди результатов.
  *
@@ -218,24 +222,25 @@ URPC_EXPORT uRpcData *urpc_client_lock( uRpcClient *urpc_client );
  *
  * \return Статус выполнения запроса.
  *
-*/
-URPC_EXPORT uint32_t urpc_client_exec( uRpcClient *urpc_client, uint32_t proc_id );
+ */
+URPC_EXPORT
+uint32_t       urpc_client_exec                (uRpcClient            *urpc_client,
+                                                uint32_t               proc_id);
 
-
-/*! Освобождение канала передачи.
+/**
  *
- * Освобождает канал передачи делая его доступным другим потокам.
+ * Функция освобождает канал передачи делая его доступным другим потокам.
  *
  * \param urpc_client указатель на uRpcClient объект.
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_client_unlock( uRpcClient *urpc_client );
-
+ */
+URPC_EXPORT
+void           urpc_client_unlock              (uRpcClient            *urpc_client);
 
 #ifdef __cplusplus
-} // extern "C"
+} /* extern "C" */
 #endif
 
-#endif // _urpc_client_h
+#endif /* __URPC_CLIENT_H__ */

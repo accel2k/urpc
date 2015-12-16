@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-types.h
  *
  * \brief Заголовочный файл констант системы uRPC
@@ -32,48 +32,51 @@
  * \license GNU General Public License version 3 или более поздняя<br>
  * Коммерческая лицензия - свяжитесь с автором
  *
-*/
+ */
 
-#ifndef _urpc_types_h
-#define _urpc_types_h
-
+#ifndef __URCP_TYPES_H__
+#define __URCP_TYPES_H__
 
 /* Значения по умолчанию. */
-
-/*! Интервал времени в течение которого должна завершиться процедура обмена данными. */
-#define URPC_DEFAULT_DATA_TIMEOUT          5.0
-
-/*! Интервал времени при привышении которого происходит отключение клиента. */
-#define URPC_DEFAULT_SESSION_TIMEOUT       600.0
-
-/*! Максимально возможный объём данных передаваемых по RPC для протоколов TCP и SHM. */
-#define URPC_MAX_DATA_SIZE                 16*1024*1024
-
-/*! Размер данных передаваемых по RPC по умолчанию. Является максимально возможным для протокола UDP.*/
-#define URPC_DEFAULT_DATA_SIZE             65000
-
-/*! Максимально возможное число потоков сервера. */
-#define URPC_MAX_THREADS_NUM               32
-
+#define URPC_DEFAULT_DATA_TIMEOUT              5.0             /**< Интервал времени в течение которого должна
+                                                                    завершиться процедура обмена данными. */
+#define URPC_DEFAULT_SESSION_TIMEOUT           600.0           /**< Интервал времени при привышении которого
+                                                                    происходит отключение клиента. */
+#define URPC_MAX_DATA_SIZE                     16*1024*1024    /**< Максимально возможный объём данных передаваемых
+                                                                    по RPC для протоколов TCP и SHM. */
+#define URPC_DEFAULT_DATA_SIZE                 65000           /**< Размер данных передаваемых по RPC по умолчанию.
+                                                                    Является максимально возможным для протокола UDP.*/
+#define URPC_MAX_THREADS_NUM                   32              /**< Максимально возможное число потоков сервера. */
 
 /* Пользовательские идентификаторы. */
-#define URPC_PARAM_USER                    0x20000000  /*!< Идентификатор начала пользовательских параметров. */
-#define URPC_PROC_USER                     0x20000000  /*!< Идентификатор начала пользовательских функций. */
-
+#define URPC_PARAM_USER                        0x20000000      /**< Идентификатор начала пользовательских параметров. */
+#define URPC_PROC_USER                         0x20000000      /**< Идентификатор начала пользовательских функций. */
 
 /* Статус выполнения. */
-#define URPC_STATUS_OK                     0x00010000  /*!< Выполнено. */
-#define URPC_STATUS_FAIL                   0x00020000  /*!< Общая ошибка. */
-#define URPC_STATUS_TIMEOUT                0x00030000  /*!< Превышено время ожидания ответа. */
-#define URPC_STATUS_TRANSPORT_ERROR        0x00040000  /*!< Ошибка при передаче данных. */
-#define URPC_STATUS_VERSION_MISMATCH       0x00050000  /*!< Не совпадают версии протоколов. */
-#define URPC_STATUS_TOO_MANY_CONNECTIONS   0x00060000  /*!< Число уже подключенных клиентов больше установленного сервером ограничения. */
-#define URPC_STATUS_AUTH_ERROR             0x00070000  /*!< Ошибка при проверке аутентификации. */
+#define URPC_STATUS_OK                         0x00010000      /**< Выполнено. */
+#define URPC_STATUS_FAIL                       0x00020000      /**< Общая ошибка. */
+#define URPC_STATUS_TIMEOUT                    0x00030000      /**< Превышено время ожидания ответа. */
+#define URPC_STATUS_TRANSPORT_ERROR            0x00040000      /**< Ошибка при передаче данных. */
+#define URPC_STATUS_VERSION_MISMATCH           0x00050000      /**< Не совпадают версии протоколов. */
+#define URPC_STATUS_TOO_MANY_CONNECTIONS       0x00060000      /**< Число уже подключенных клиентов больше
+                                                                    установленного сервером ограничения. */
+#define URPC_STATUS_AUTH_ERROR                 0x00070000      /**< Ошибка при проверке аутентификации. */
 
+typedef enum
+{
+  URPC_UNKNOWN                               = 0,
+  URPC_UDP                                   = 101,
+  URPC_TCP                                   = 102,
+  URPC_SHM                                   = 103
+} uRpcType;
 
-typedef enum { URPC_UNKNOWN = 0, URPC_UDP, URPC_TCP, URPC_SHM } uRpcType;
+typedef enum
+{
+  URPC_SECURITY_NO                           = 0,
+  URPC_SECURITY_PRIVKEY_AUTH                 = 101,
+  URPC_SECURITY_PUBKEY_AUTH                  = 102,
+  URPC_SECURITY_PRIVKEY_ENCRYPT              = 103,
+  URPC_SECURITY_PUBKEY_ENCRYPT               = 104
+} uRpcSecurity;
 
-typedef enum { URPC_SECURITY_NO = 0, URPC_SECURITY_PRIVKEY_AUTH, URPC_SECURITY_PUBKEY_AUTH, URPC_SECURITY_PRIVKEY_ENCRYPT, URPC_SECURITY_PUBKEY_ENCRYPT } uRpcSecurity;
-
-
-#endif // _urpc_types_h
+#endif /* __URCP_TYPES_H__ */

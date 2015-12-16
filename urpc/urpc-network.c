@@ -21,33 +21,27 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-network.h"
 
-
-int urpc_network_set_tcp_nodelay( SOCKET socket )
+int
+urpc_network_set_tcp_nodelay (SOCKET socket)
 {
-
   int flag = 1;
-  return setsockopt( socket, IPPROTO_TCP, TCP_NODELAY, (void *)&flag, sizeof( flag ) );
-
+  return setsockopt (socket, IPPROTO_TCP, TCP_NODELAY, (void *)&flag, sizeof (flag));
 }
 
-
-int urpc_network_set_reuse( SOCKET socket )
+int
+urpc_network_set_reuse (SOCKET socket)
 {
-
   int flag = 1;
-  return setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof( flag ) );
-
+  return setsockopt (socket, SOL_SOCKET, SO_REUSEADDR, (void *)&flag, sizeof (flag));
 }
 
-
-int urpc_network_set_non_block( SOCKET socket )
+int
+urpc_network_set_non_block (SOCKET socket)
 {
-
   int flag = 1;
-  return ioctlsocket( socket, FIONBIO, (void*)&flag );
-
+  return ioctlsocket (socket, FIONBIO, (void*)&flag);
 }

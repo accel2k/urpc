@@ -21,13 +21,14 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/* Заголовочный файл сервера удалённых вызовов процедур через механизм разделяемой памяти и семафоры.
- * Функции UDP сервера используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
+/* Заголовочный файл сервера удалённых вызовов процедур через механизм разделяемой
+   памяти и семафоры. Функции UDP сервера используются библиотекой uRPC самостоятельно
+   и не предназначены для пользователей. */
 
-#ifndef _urpc_shm_server_h
-#define _urpc_shm_server_h
+#ifndef __URPC_SHM_SERVER_H__
+#define __URPC_SHM_SERVER_H__
 
 #include <urpc-types.h>
 #include <urpc-data.h>
@@ -36,33 +37,30 @@
 extern "C" {
 #endif
 
-
-typedef struct uRpcSHMServer uRpcSHMServer;
-
+typedef struct _uRpcSHMServer uRpcSHMServer;
 
 /* Функция создаёт RPC сервер обслуживающий клиентов по протоколу SHM.
- * При запуске сервера создаётся threads_num объектов каждый из которых может
- * использоваться в своём потоке. Сами потоки создаются функцией urpc_server_create.
- * В дальнейшем при вызове функций каждый поток передаёт свой идентификатор.
- * Параметры функции аналогичны urpc_server_create. */
-uRpcSHMServer *urpc_shm_server_create( const char *uri, uint32_t threads_num, uint32_t max_data_size );
-
+   При запуске сервера создаётся threads_num объектов каждый из которых может
+   использоваться в своём потоке. Сами потоки создаются функцией urpc_server_create.
+   В дальнейшем при вызове функций каждый поток передаёт свой идентификатор.
+   Параметры функции аналогичны urpc_server_create. */
+uRpcSHMServer *urpc_shm_server_create          (const char            *uri,
+                                                uint32_t               threads_num,
+                                                uint32_t               max_data_size);
 
 /* Функция удаляет сервер. */
-void urpc_shm_server_destroy( uRpcSHMServer *urpc_shm_server );
-
+void urpc_shm_server_destroy                   (uRpcSHMServer         *urpc_shm_server);
 
 /* Функция принимает один запрос в потоке thread_id. */
-uRpcData *urpc_shm_server_recv( uRpcSHMServer *urpc_shm_server, uint32_t thread_id );
-
+uRpcData *urpc_shm_server_recv                 (uRpcSHMServer         *urpc_shm_server,
+                                                uint32_t               thread_id);
 
 /* Функция отправляет ответ в потоке thread_id. */
-int urpc_shm_server_send( uRpcSHMServer *urpc_shm_server, uint32_t thread_id );
-
+int urpc_shm_server_send                       (uRpcSHMServer         *urpc_shm_server,
+                                                uint32_t               thread_id );
 
 #ifdef __cplusplus
-
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_shm_server_h
+#endif /* __URPC_SHM_SERVER_H__ */

@@ -21,106 +21,111 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
+
+#define ERROR -1
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "urpc-semaphore.h"
 #include "urpc-thread.h"
-
 
 volatile int start = 0;
 volatile int server_ready = 0;
 
 int counts = 250000;
+int sum = 0;
 
-
-void* server_thread( void *data )
+void *
+server_thread (void *data)
 {
-
   int i;
 
-  uRpcSem *sem_start = urpc_sem_create( "start", 0, 1 );
-  uRpcSem *sem_stop = urpc_sem_create( "stop", 0, 1 );
+  uRpcSem *sem_start = urpc_sem_create ("start", 0, 1);
+  uRpcSem *sem_stop = urpc_sem_create ("stop", 0, 1);
 
-  if( sem_start == NULL || sem_stop == NULL )
-    { printf( "can't create semaphores\n" ); return NULL; }
+  if (sem_start == NULL || sem_stop == NULL)
+    {
+      printf ("can't create semaphores\n");
+      exit (ERROR);
+    }
 
   server_ready = 1;
 
-  while( start == 0 );
+  while (start == 0);
 
-  for( i = 0; i < counts; i++ )
+  for (i = 0; i < counts; i++)
     {
-    urpc_sem_lock( sem_start );
-    urpc_sem_unlock( sem_stop );
+      urpc_sem_lock (sem_start);
+      sum += 1;
+      urpc_sem_unlock (sem_stop);
     }
 
-  printf( "server thread final timed lock\n" );
+  urpc_sem_timedlock (sem_start, 2.0);
 
-  urpc_sem_timedlock( sem_start, 2.0 );
-
-  printf( "server thread stopped after %d iterations\n", i );
-
-  urpc_sem_destroy( sem_start );
-  urpc_sem_destroy( sem_stop );
+  urpc_sem_destroy (sem_start);
+  urpc_sem_destroy (sem_stop);
 
   return NULL;
-
 }
 
-
-void* client_thread( void *data )
+void *
+client_thread (void *data)
 {
-
   int i;
 
   uRpcSem *sem_start;
   uRpcSem *sem_stop;
 
-  while( server_ready == 0 );
+  while (server_ready == 0);
 
-  sem_start = urpc_sem_open( "start" );
-  sem_stop = urpc_sem_open( "stop" );
+  sem_start = urpc_sem_open ("start");
+  sem_stop = urpc_sem_open ("stop");
 
-  if( sem_start == NULL || sem_stop == NULL )
-    { printf( "can't open semaphores\n" ); return NULL; }
-
-  while( start == 0 );
-
-  for( i = 0; i < counts; i++ )
+  if (sem_start == NULL || sem_stop == NULL)
     {
-    urpc_sem_unlock( sem_start );
-    urpc_sem_lock( sem_stop );
+      printf ("can't open semaphores\n");
+      exit (ERROR);
     }
 
-  printf( "client thread final timed lock\n" );
+  while (start == 0);
 
-  urpc_sem_timedlock( sem_stop, 2.0 );
+  for (i = 0; i < counts; i++)
+    {
+      urpc_sem_unlock (sem_start);
+      urpc_sem_lock (sem_stop);
+    }
 
-  printf( "client thread stopped after %d iterations\n", i );
+  urpc_sem_timedlock (sem_stop, 2.0);
 
-  urpc_sem_destroy( sem_start );
-  urpc_sem_destroy( sem_stop );
+  urpc_sem_destroy (sem_start);
+  urpc_sem_destroy (sem_stop);
 
   return NULL;
-
 }
 
-
-int main( int argc, char **argv )
+int
+main (int    argc,
+      char **argv)
 {
-
   uRpcThread *server;
   uRpcThread *client;
 
-  server = urpc_thread_create( server_thread, NULL );
-  client = urpc_thread_create( client_thread, NULL );
+  server = urpc_thread_create (server_thread, NULL);
+  client = urpc_thread_create (client_thread, NULL);
 
   start = 1;
 
-  urpc_thread_destroy( server );
-  urpc_thread_destroy( client );
+  urpc_thread_destroy (server);
+  urpc_thread_destroy (client);
+
+  if (sum != counts)
+    {
+      printf ("semaphore error");
+      exit (ERROR);
+    }
+
+  printf ("All done\n");
 
   return 0;
-
 }

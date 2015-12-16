@@ -21,7 +21,7 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-shm.h"
 
@@ -33,52 +33,61 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-
 #define URPC_SHM_TYPE 0x54485375
 
+struct _uRpcShm
+{
+  uint32_t             type;                   /* Тип объекта uRpcShm. */
 
-struct uRpcShm {
-
-  uint32_t          type;                   // Тип объекта uRpcShm.
-
-  int               shm_id;                 // Идентификатор сегмента общей памяти.
-  unsigned long     size;                   // Размер сегмента общей памяти.
-  int               ro;                     // Признак доступа только для чтения.
-  char             *name;                   // Название сегмента общей памяти.
-  void             *maddr;                  // Адрес сегмента общей памяти.
-
+  int                  shm_id;                 /* Идентификатор сегмента общей памяти. */
+  unsigned long        size;                   /* Размер сегмента общей памяти. */
+  int                  ro;                     /* Признак доступа только для чтения. */
+  char                *name;                   /* Название сегмента общей памяти. */
+  void                *maddr;                  /* Адрес сегмента общей памяти. */
 };
 
-
-static uRpcShm *urpc_shm_create_int( const char *name, unsigned long size, int create, int ro )
+static uRpcShm *
+urpc_shm_create_int (const char   *name,
+                     unsigned long size,
+                     int           create,
+                     int           ro)
 {
-
-  uRpcShm *shm = malloc( sizeof( uRpcShm ) );
+  uRpcShm *shm = malloc (sizeof (uRpcShm));
   int oflags = 0;
 
-  if( create ) oflags = O_RDWR | O_CREAT | O_EXCL;
-  else if( !ro ) oflags = O_RDWR;
-  else oflags = O_RDONLY;
+  if (shm == NULL)
+    return NULL;
 
-  if( shm == NULL ) return NULL;
-  shm->shm_id = shm_open( name, oflags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP );
-  if( shm->shm_id < 0 )
-    { free( shm ); return NULL; }
+  if (create)
+    oflags = O_RDWR | O_CREAT | O_EXCL;
+  else if (!ro)
+    oflags = O_RDWR;
+  else
+    oflags = O_RDONLY;
 
-  if( create )
+  shm->shm_id = shm_open (name, oflags, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+  if (shm->shm_id < 0)
     {
-    int name_size = strlen( name ) + 1;
-    shm->name = malloc( name_size );
-    if( shm->name == NULL )
-      {
-      close( shm->shm_id );
-      free( shm );
+      free (shm);
       return NULL;
-      }
-    memcpy( shm->name, name, name_size );
+    }
+
+  if (create)
+    {
+      int name_size = strlen (name) + 1;
+      shm->name = malloc (name_size);
+      if (shm->name == NULL)
+        {
+          close (shm->shm_id);
+          free (shm);
+          return NULL;
+        }
+      memcpy (shm->name, name, name_size);
     }
   else
-    shm->name = NULL;
+    {
+      shm->name = NULL;
+    }
 
   shm->ro = ro;
   shm->size = size;
@@ -86,74 +95,73 @@ static uRpcShm *urpc_shm_create_int( const char *name, unsigned long size, int c
   shm->type = URPC_SHM_TYPE;
 
   return shm;
-
 }
 
-
-uRpcShm *urpc_shm_create( const char *name, unsigned long size )
+uRpcShm *
+urpc_shm_create (const char   *name,
+                 unsigned long size)
 {
-
-  return urpc_shm_create_int( name, size, 1, 0 );
-
+  return urpc_shm_create_int (name, size, 1, 0);
 }
 
-
-uRpcShm *urpc_shm_open( const char *name, unsigned long size )
+uRpcShm *
+urpc_shm_open (const char   *name,
+               unsigned long size)
 {
-
-  return urpc_shm_create_int( name, size, 0, 0 );
-
+  return urpc_shm_create_int (name, size, 0, 0);
 }
 
-
-uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size )
+uRpcShm *
+urpc_shm_open_ro (const char   *name,
+                  unsigned long size)
 {
-
-  return urpc_shm_create_int( name, size, 0, 1 );
-
+  return urpc_shm_create_int (name, size, 0, 1);
 }
 
-
-void urpc_shm_destroy( uRpcShm *shm )
+void
+urpc_shm_destroy (uRpcShm *shm)
 {
+  if (shm->type != URPC_SHM_TYPE)
+    return;
 
-  if( shm->type != URPC_SHM_TYPE ) return;
-
-  if( shm->shm_id >=0 ) close( shm->shm_id );
-  if( shm->maddr != NULL ) munmap( shm->maddr, shm->size );
-  if( shm->name != NULL ) shm_unlink( shm->name );
-  free( shm->name );
-  free( shm );
-
+  if (shm->shm_id >=0)
+    close (shm->shm_id);
+  if (shm->maddr != NULL)
+    munmap (shm->maddr, shm->size);
+  if (shm->name != NULL)
+    shm_unlink (shm->name);
+  free (shm->name);
+  free (shm);
 }
 
-
-void urpc_shm_remove( const char *name )
+void
+urpc_shm_remove (const char *name)
 {
-
-  shm_unlink( name );
-
+  shm_unlink (name);
 }
 
-
-void *urpc_shm_map( uRpcShm *shm )
+void *
+urpc_shm_map (uRpcShm *shm)
 {
-
   int pflags;
 
-  if( shm->type != URPC_SHM_TYPE ) return NULL;
+  if (shm->type != URPC_SHM_TYPE)
+    return NULL;
 
   pflags = shm->ro ? PROT_READ : PROT_READ | PROT_WRITE;
 
-  shm->maddr = mmap( NULL, shm->size, pflags, MAP_SHARED, shm->shm_id, 0 );
-  if( shm->maddr == MAP_FAILED ) return NULL;
+  shm->maddr = mmap (NULL, shm->size, pflags, MAP_SHARED, shm->shm_id, 0);
+  if (shm->maddr == MAP_FAILED)
+    return NULL;
 
-  if( shm->name != NULL && ftruncate( shm->shm_id, shm->size ) < 0 )
-    { munmap( shm->maddr, shm->size ); return NULL; }
+  if (shm->name != NULL && ftruncate (shm->shm_id, shm->size) < 0)
+    {
+      munmap (shm->maddr, shm->size);
+      return NULL;
+    }
 
-  close( shm->shm_id );
+  close (shm->shm_id);
   shm->shm_id = -1;
 
   return shm->maddr;
-
 }

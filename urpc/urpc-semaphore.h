@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-semaphore.h
  *
  * \brief Заголовочный файл библиотеки работы с семафорами
@@ -58,10 +58,10 @@
  * завершает свою работу независимо от результата. #urpc_sem_timedlock - функция пытается заблокировать
  * семафор в течение указанного времени. #urpc_sem_unlock - функция разблокирует семафор.
  *
-*/
+ */
 
-#ifndef _urpc_semaphore_h
-#define _urpc_semaphore_h
+#ifndef __URPC_SEMAPHORE_H__
+#define __URPC_SEMAPHORE_H__
 
 #include <urpc-exports.h>
 
@@ -69,13 +69,15 @@
 extern "C" {
 #endif
 
+typedef enum
+{
+  URPC_SEM_LOCKED   = 0,
+  URPC_SEM_UNLOCKED = 1
+} uRpcSemStat;
 
-typedef enum { URPC_SEM_LOCKED = 0, URPC_SEM_UNLOCKED = 1 } uRpcSemStat;
+typedef struct _uRpcSem uRpcSem;
 
-typedef struct uRpcSem uRpcSem;
-
-
-/*! Создание семафора.
+/**
  *
  * Функция создаёт семафор и возвращает указатель на него. При создании семафора
  * можно указать его начальное состояние URPC_SEM_LOCKED - семафор заблокирован или
@@ -87,11 +89,13 @@ typedef struct uRpcSem uRpcSem;
  *
  * \return Указатель на семафор или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int queue );
+ */
+URPC_EXPORT
+uRpcSem *urpc_sem_create       (const char            *name,
+                                uRpcSemStat            stat,
+                                int                    queue);
 
-
-/*! Открытие существующего семафора.
+/**
  *
  * Функция открывает уже созданный семафор и возвращает указатель на него. Функция не
  * изменяет текущего состояния семафора.
@@ -100,11 +104,11 @@ URPC_EXPORT uRpcSem *urpc_sem_create( const char *name, uRpcSemStat stat, int qu
  *
  * \return Указатель на семафор или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT uRpcSem *urpc_sem_open( const char *name );
+ */
+URPC_EXPORT
+uRpcSem *urpc_sem_open         (const char            *name);
 
-
-/*! Удаление семафора.
+/**
  *
  * Функция удаляет семафор и освобождает память занятую им.
  *
@@ -113,10 +117,10 @@ URPC_EXPORT uRpcSem *urpc_sem_open( const char *name );
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_sem_destroy( uRpcSem *sem );
+URPC_EXPORT
+void urpc_sem_destroy          (uRpcSem               *sem);
 
-
-/*! Удаление объекта семафора.
+/**
  *
  * Функция удаляет объект операционной системы связанный с семафором.
  * В случае удаления семафора функцией #urpc_sem_destroy объект удаляется автоматически.
@@ -127,11 +131,11 @@ URPC_EXPORT void urpc_sem_destroy( uRpcSem *sem );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_sem_remove( const char *name );
+ */
+URPC_EXPORT
+void urpc_sem_remove           (const char            *name);
 
-
-/*! Блокировка семафора.
+/**
  *
  * Функция безусловно пытается заблокировать семафор. Функция завершает свою работу
  * только в случае успешной блокировки.
@@ -140,11 +144,11 @@ URPC_EXPORT void urpc_sem_remove( const char *name );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_sem_lock( uRpcSem *sem );
+ */
+URPC_EXPORT
+void urpc_sem_lock             (uRpcSem               *sem);
 
-
-/*! Блокировка семафора.
+/**
  *
  * Функция однократно пытается заблокировать семафор и завершает свою работу.
  *
@@ -152,11 +156,11 @@ URPC_EXPORT void urpc_sem_lock( uRpcSem *sem );
  *
  * \return 0 - в случае успешной блокировки, иначе отрицательное число.
  *
-*/
-URPC_EXPORT int urpc_sem_trylock( uRpcSem *sem );
+ */
+URPC_EXPORT
+int urpc_sem_trylock           (uRpcSem               *sem);
 
-
-/*! Блокировка семафора.
+/**
  *
  * Функция пытается заблокировать семафор в течение времени. Если в течение указанного времени
  * блокировка была получена функция завершает свою работу немедленно.
@@ -166,11 +170,12 @@ URPC_EXPORT int urpc_sem_trylock( uRpcSem *sem );
  *
  * \return 0 - в случае успешной блокировки, положительное число в случае таймаута, иначе отрицательное число.
  *
-*/
-URPC_EXPORT int urpc_sem_timedlock( uRpcSem *sem, double time );
+ */
+URPC_EXPORT
+int urpc_sem_timedlock         (uRpcSem               *sem,
+                                double                 time);
 
-
-/*! Разблокировка семафора.
+/**
  *
  * Функция разблокирует семафор.
  *
@@ -178,12 +183,12 @@ URPC_EXPORT int urpc_sem_timedlock( uRpcSem *sem, double time );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_sem_unlock( uRpcSem *sem );
-
+ */
+URPC_EXPORT
+void urpc_sem_unlock           (uRpcSem               *sem);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_semaphore_h
+#endif /* __URPC_SEMAPHORE_H__ */

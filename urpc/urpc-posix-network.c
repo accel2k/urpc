@@ -21,36 +21,29 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-network.h"
 
-
-int urpc_network_init( void )
+int
+urpc_network_init (void)
 {
-
   return 0;
-
 }
 
-
-void urpc_network_close( void )
+void
+urpc_network_close (void)
 {
-
 }
 
-
-int urpc_network_last_error( void )
+int
+urpc_network_last_error (void)
 {
-
   return errno;
-
 }
 
-
-const char* urpc_network_last_error_str( void )
+const char *
+urpc_network_last_error_str (void)
 {
-
-  return strerror( errno );
-
+  return strerror (errno);
 }

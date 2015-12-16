@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-timer.h
  *
  * \brief Заголовочный файл библиотеки работы с таймерами
@@ -45,10 +45,10 @@
  * Функция urpc_timer_sleep может использоваться для остановки выполнения программы или
  * потока на заданную длительность времени.
  *
-*/
+ */
 
-#ifndef _urpc_timer_h
-#define _urpc_timer_h
+#ifndef __URPC_TIMER_H__
+#define __URPC_TIMER_H__
 
 #include <urpc-exports.h>
 
@@ -56,31 +56,31 @@
 extern "C" {
 #endif
 
+typedef struct _uRpcTimer uRpcTimer;
 
-typedef struct uRpcTimer uRpcTimer;
-
-
-/*! Создание таймера.
+/**
  *
- * Функция создаёт таймера и запоминает начальное время.
+ * Функция создаёт таймер и запоминает начальное время.
  *
  * \return Указатель на таймер или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT uRpcTimer *urpc_timer_create( void );
+ */
+URPC_EXPORT
+uRpcTimer *urpc_timer_create   (void);
 
-
-/*! Удаление таймера.
+/**
+ *
+ * Функция удаляет таймер.
  *
  * \param timer указатель на таймер.
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_timer_destroy( uRpcTimer *timer );
+ */
+URPC_EXPORT
+void urpc_timer_destroy        (uRpcTimer             *timer);
 
-
-/*! Задание начального момента времени.
+/**
  *
  * Функция запоминает начальный момент относительно которого функция
  * #urpc_timer_elapsed будет измерять интервал времени.
@@ -89,11 +89,11 @@ URPC_EXPORT void urpc_timer_destroy( uRpcTimer *timer );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_timer_start( uRpcTimer *timer );
+ */
+URPC_EXPORT
+void urpc_timer_start          (uRpcTimer             *timer);
 
-
-/*! Измерение интервала времени.
+/**
  *
  * Функция возвращает значение интервала времени в секундах между начальним
  * и текущим моментами.
@@ -103,10 +103,10 @@ URPC_EXPORT void urpc_timer_start( uRpcTimer *timer );
  * \return Интервал времени в секундах или отрицательное число в случае ошибки.
  *
 */
-URPC_EXPORT double urpc_timer_elapsed( uRpcTimer *timer );
+URPC_EXPORT
+double urpc_timer_elapsed      (uRpcTimer             *timer);
 
-
-/*! Остановка выполнения программы.
+/**
  *
  * Функция останавливает выполнения программы на заданную длительность времени.
  *
@@ -115,11 +115,11 @@ URPC_EXPORT double urpc_timer_elapsed( uRpcTimer *timer );
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_timer_sleep( double time );
-
+URPC_EXPORT
+void urpc_timer_sleep          (double                 time);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_timer_h
+#endif /* __URPC_TIMER_H__ */

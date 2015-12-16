@@ -21,7 +21,7 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-thread.h"
 
@@ -29,46 +29,35 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-
-uRpcThread *urpc_thread_create( urpc_thread_func func, void *data )
+uRpcThread *
+urpc_thread_create (urpc_thread_func func,
+                    void            *data)
 {
+  uRpcThread *thread = malloc (sizeof (uRpcThread));
 
-  uRpcThread *thread = malloc( sizeof( uRpcThread ) );
-
-  if( thread == NULL ) return NULL;
-  if( pthread_create( thread, NULL, func, data ) != 0 )
-    { free( thread ); return NULL; }
+  if (thread == NULL)
+    return NULL;
+  if (pthread_create (thread, NULL, func, data) != 0)
+    {
+      free (thread);
+      return NULL;
+    }
 
   return thread;
-
 }
 
-
-void urpc_thread_destroy( uRpcThread *thread )
+void
+urpc_thread_destroy (uRpcThread *thread)
 {
+  while (pthread_join (*thread, NULL) != 0);
 
-  while( pthread_join( *thread, NULL ) != 0 );
-
-  free( thread );
-
+  free (thread);
 }
 
-
-void *urpc_thread_join( uRpcThread *thread )
+void
+urpc_thread_join (uRpcThread *thread)
 {
-
   void *retval;
 
-  while( pthread_join( *thread, &retval ) != 0 );
-
-  return retval;
-
-}
-
-
-void urpc_thread_exit( void *retval )
-{
-
-  pthread_exit( retval );
-
+  while (pthread_join (*thread, &retval) != 0);
 }

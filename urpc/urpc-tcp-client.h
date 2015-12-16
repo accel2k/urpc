@@ -21,13 +21,13 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/* Заголовочный файл клиента удалённых вызовов процедур по протоколу TCP.
- * Функции TCP клиента используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
+/* Заголовочный файл клиента удалённых вызовов процедур по протоколу TCP. Функции TCP клиента
+   используются библиотекой uRPC самостоятельно и не предназначены для пользователей. */
 
-#ifndef _urpc_tcp_client_h
-#define _urpc_tcp_client_h
+#ifndef __URPC_TCP_CLIENT_H__
+#define __URPC_TCP_CLIENT_H__
 
 #include <urpc-types.h>
 #include <urpc-data.h>
@@ -36,29 +36,25 @@
 extern "C" {
 #endif
 
-
-typedef struct uRpcTCPClient uRpcTCPClient;
-
+typedef struct _uRpcTCPClient uRpcTCPClient;
 
 /* Функция создаёт RPC клиента и подключается к серверу по протоколу TCP.
- * Параметры функции аналогичны urpc_server_create. */
-uRpcTCPClient *urpc_tcp_client_create( const char *uri, uint32_t max_data_size, double exec_timeout );
-
+   Параметры функции аналогичны urpc_server_create. */
+uRpcTCPClient *urpc_tcp_client_create          (const char            *uri,
+                                                uint32_t               max_data_size,
+                                                double                 exec_timeout);
 
 /* Функция удаляет клиента. */
-void urpc_tcp_client_destroy( uRpcTCPClient *urpc_tcp_client );
-
+void urpc_tcp_client_destroy                   (uRpcTCPClient         *urpc_tcp_client);
 
 /* Функция блокирует канал связи. */
-uRpcData *urpc_tcp_client_lock( uRpcTCPClient *urpc_tcp_client );
-
+uRpcData *urpc_tcp_client_lock                 (uRpcTCPClient         *urpc_tcp_client);
 
 /* Функция производит отправку запроса серверу и приём от него ответа. */
-uint32_t urpc_tcp_client_exchange( uRpcTCPClient *urpc_tcp_client );
-
+uint32_t urpc_tcp_client_exchange              (uRpcTCPClient         *urpc_tcp_client);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_tcp_client_h
+#endif /* __URPC_TCP_CLIENT_H__ */

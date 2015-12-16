@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-server.h
  *
  * \brief Заголовочный файл сервера удалённых вызовов процедур
@@ -71,10 +71,10 @@
  *
  * Удаление сервера производится функцией #urpc_server_destroy.
  *
-*/
+ */
 
-#ifndef _urpc_server_h
-#define _urpc_server_h
+#ifndef __URPC_SERVER_H__
+#define __URPC_SERVER_H__
 
 #include <urpc-exports.h>
 #include <urpc-types.h>
@@ -84,12 +84,11 @@
 extern "C" {
 #endif
 
+typedef struct _uRpcServer uRpcServer;
 
-typedef struct uRpcServer uRpcServer;
-
-
-/*! Тип callback функции вызываемой при получении запроса на выполнение.
+/**
  *
+ * Тип callback функции вызываемой при получении запроса на выполнение.
  * Данные запроса клиента доступны для чтения через объект \link uRpcData \endlink. Данные ответа
  * должны быть записаны через этот же объект. Если серверная процедура успешно выполнена функция
  * должна вернуть значение ноль. Отрицательное значение возвращается в случае ошибок при вызове
@@ -102,13 +101,15 @@ typedef struct uRpcServer uRpcServer;
  *
  * \return 0 если RPC запрос был выполнен, иначе отрицательное число.
  *
-*/
-typedef int (*urpc_server_callback)( uint32_t session, uRpcData *urpc_data, void *proc_data, void *key_data );
+ */
+typedef int (*urpc_server_callback)            (uint32_t               session,
+                                                uRpcData              *urpc_data,
+                                                void                  *proc_data,
+                                                void                  *key_data);
 
-
-/*! Создание RPC сервера.
+/**
  *
- * Создает RPC сервер заданый адресом uri. Адрес задается в виде строки:
+ * Функция создает RPC сервер по адресу uri. Адрес задается в виде строки:
  * "<type>://name:port", где:
  * - &lt;type&gt; - тип RPC ( udp, tcp, shm );
  * - name - имя или ip адрес системы;
@@ -126,25 +127,30 @@ typedef int (*urpc_server_callback)( uint32_t session, uRpcData *urpc_data, void
  *
  * \return Указатель на uRpcServer объект в случае успеха, иначе NULL.
  *
-*/
-URPC_EXPORT uRpcServer *urpc_server_create( const char *uri, uint32_t threads_num, uint32_t max_clients, double session_timeout, uint32_t max_data_size, double data_timeout );
+ */
+URPC_EXPORT
+uRpcServer *urpc_server_create                 (const char            *uri,
+                                                uint32_t               threads_num,
+                                                uint32_t               max_clients,
+                                                double                 session_timeout,
+                                                uint32_t               max_data_size,
+                                                double                 data_timeout);
 
-
-/*! Удаление RPC сервера.
+/**
  *
- * Завершает потоки исполнения и удаляет RPC сервер.
+ * Функция завершает потоки исполнения и удаляет RPC сервер.
  *
  * \param urpc_server указатель на uRpcServer объект.
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_server_destroy( uRpcServer *urpc_server );
+ */
+URPC_EXPORT
+void urpc_server_destroy                       (uRpcServer            *urpc_server);
 
-
-/*! Задание механизма безопасности.
+/**
  *
- * Определяет механизм безопасности используемый для взаимодействия с сервером. По
+ * Функция определяет механизм безопасности используемый для взаимодействия с сервером. По
  * умолчанию для взаимодействия с сервером не используется никаких механизмов аутентификации
  * и шифрования.
  *
@@ -153,26 +159,28 @@ URPC_EXPORT void urpc_server_destroy( uRpcServer *urpc_server );
  *
  * \return 0 если режим безопасности успешно установлен, отрицательное число в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_server_set_security( uRpcServer *urpc_server, uRpcSecurity mode );
+ */
+URPC_EXPORT
+int urpc_server_set_security                   (uRpcServer            *urpc_server,
+                                                uRpcSecurity           mode);
 
-
-/*! Задание серверного ключа аутентификации.
+/**
  *
- * Задаёт ключ используемый сервером для аутентификации ответов клиенту.
+ * Функция задаёт ключ используемый сервером для аутентификации ответов клиенту.
  *
  * \param urpc_server указатель на uRpcServer объект;
  * \param priv_key указатель на секретный серверный ключ.
  *
  * \return 0 если ключ успешно задан, отрицательное число в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_server_set_server_key( uRpcServer *urpc_server, const unsigned char *priv_key );
+ */
+URPC_EXPORT
+int urpc_server_set_server_key                 (uRpcServer            *urpc_server,
+                                                const unsigned char   *priv_key);
 
-
-/*! Добавление клиентского ключа аутентификации.
+/**
  *
- * Добавляет ключ используемый для аутентификации клиента сервером. Сервер может хранить
+ * Функция добавляет ключ используемый для аутентификации клиента сервером. Сервер может хранить
  * несколько ключей аутентификации. При вызове процедуры клиентом аутентифицированном этим
  * ключом в callback функцию будет передан указатель на данные key_data.
  *
@@ -182,13 +190,15 @@ URPC_EXPORT int urpc_server_set_server_key( uRpcServer *urpc_server, const unsig
  *
  * \return 0 если ключ успешно задан, отрицательное число в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_server_add_client_key( uRpcServer *urpc_server, const unsigned char *pub_key, void *key_data );
+ */
+URPC_EXPORT
+int urpc_server_add_client_key                 (uRpcServer            *urpc_server,
+                                                const unsigned char   *pub_key,
+                                                void                  *key_data);
 
-
-/*! Регистрация callback функции
+/**
  *
- * Регистрирует callback функцию с идентификатором proc_id. Эта функция будет вызвана
+ * Функция регистрирует callback функцию с идентификатором proc_id. Эта функция будет вызвана
  * когда клиент вызовет #urpc_client_exec с соответствующим proc_id. Все переданные
  * параметры доступны в callback функции через объект \link uRpcData \endlink. Результат
  * работы должен быть передан обратно регистрацией переменных через объект \link uRpcData \endlink.
@@ -200,25 +210,28 @@ URPC_EXPORT int urpc_server_add_client_key( uRpcServer *urpc_server, const unsig
  *
  * \return 0 в случае успешного завершения, иначе отрицательное значение.
  *
-*/
-URPC_EXPORT int urpc_server_add_proc( uRpcServer *urpc_server, uint32_t proc_id, urpc_server_callback proc, void *proc_data );
+ */
+URPC_EXPORT
+int urpc_server_add_proc                       (uRpcServer            *urpc_server,
+                                                uint32_t               proc_id,
+                                                urpc_server_callback   proc,
+                                                void                  *proc_data);
 
-
-/*! Запуск сервера.
+/**
  *
- * Производит запуск сервера с использованием выбранного механизма безопасности и
+ * Функция производит запуск сервера с использованием выбранного механизма безопасности и
  * зарегистрированными процедурами.
  *
  * \param urpc_server указатель на uRpcServer объект;
  *
  * \return 0 в случае успешного запуска, иначе отрицательное значение.
  *
-*/
-URPC_EXPORT int urpc_server_bind( uRpcServer *urpc_server );
-
+ */
+URPC_EXPORT
+int urpc_server_bind                           (uRpcServer            *urpc_server);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_server_h
+#endif /* __URPC_SERVER_H__ */

@@ -21,42 +21,52 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "urpc-common.h"
 
+#define ERROR -1
 
-int main( int argc, char **argv )
+int
+main (int    argc,
+      char **argv)
 {
+  int i = 0;
+  char *uri[] =
+    {
+      "tcp://[::1234:7890]:12345/",
+      "tcp://127.0.0.1:12345/",
+      "tcp://localhost:12345/",
+      "tcp://www.ya.ru:12345/",
+      "tcp://*:12345/",
+      "udp://[::1234:7890]:12345/",
+      "udp://127.0.0.1:12345/",
+      "udp://localhost:12345/",
+      "udp://www.ya.ru:12345/",
+      "udp://*:12345/",
+      NULL
+    };
 
-  struct addrinfo *addr;
-  char *uri;
+  urpc_network_init ();
 
-  urpc_network_init();
+  while (uri[i] != NULL)
+    {
+      struct addrinfo *addr;
+      addr = urpc_get_sockaddr (uri[i]);
+      if (addr == NULL)
+        {
+        printf ("error resolving %s\n", uri[i]);
+        exit (ERROR);
+        }
+      freeaddrinfo (addr);
+      i += 1;
+    }
 
-  uri = "tcp://[::1234:7890]:12345/";
-  addr = urpc_get_sockaddr( uri );
-  freeaddrinfo( addr );
+  printf ("All done\n");
 
-  uri = "tcp://127.0.0.1:12345/";
-  addr = urpc_get_sockaddr( uri );
-  freeaddrinfo( addr );
-
-  uri = "tcp://localhost:12345/";
-  addr = urpc_get_sockaddr( uri );
-  freeaddrinfo( addr );
-
-  uri = "tcp://www.ya.ru:12345/";
-  addr = urpc_get_sockaddr( uri );
-  freeaddrinfo( addr );
-
-  uri = "tcp://*:12345/";
-  addr = urpc_get_sockaddr( uri );
-  freeaddrinfo( addr );
-
-  urpc_network_close();
+  urpc_network_close ();
 
   return 0;
-
 }

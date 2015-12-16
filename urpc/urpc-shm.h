@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-shm.h
  *
  * \brief Заголовочный файл библиотеки работы с разделяемой памятью
@@ -52,10 +52,10 @@
  * После создания сегмента разделяемой памяти необходимо выполнить отображение его в адресное пространство процесса.
  * Это действие выполняется функцией #urpc_shm_map.
  *
-*/
+ */
 
-#ifndef _urpc_shm_h
-#define _urpc_shm_h
+#ifndef __URPC_SHM_H__
+#define __URPC_SHM_H__
 
 #include <urpc-exports.h>
 
@@ -63,11 +63,9 @@
 extern "C" {
 #endif
 
+typedef struct _uRpcShm uRpcShm;
 
-typedef struct uRpcShm uRpcShm;
-
-
-/*! Создание сегмента разделяемой памяти.
+/**
  *
  * Функция создаёт сегмент разделяемой памяти и возвращает указатель на него.
  *
@@ -76,11 +74,12 @@ typedef struct uRpcShm uRpcShm;
  *
  * \return Указатель на сегмент разделяемой памяти или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT uRpcShm *urpc_shm_create( const char *name, unsigned long size );
+ */
+URPC_EXPORT
+uRpcShm *urpc_shm_create       (const char            *name,
+                                unsigned long          size);
 
-
-/*! Открытие сегмента разделяемой памяти.
+/**
  *
  * Функция открывает сегмент разделяемой памяти в режиме чтения/записи и возвращает указатель на него.
  *
@@ -89,11 +88,12 @@ URPC_EXPORT uRpcShm *urpc_shm_create( const char *name, unsigned long size );
  *
  * \return Указатель на сегмент разделяемой памяти или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT uRpcShm *urpc_shm_open( const char *name, unsigned long size );
+ */
+URPC_EXPORT
+uRpcShm *urpc_shm_open         (const char            *name,
+                                unsigned long          size);
 
-
-/*! Открытие сегмента разделяемой памяти.
+/**
  *
  * Функция открывает сегмент разделяемой памяти в режиме только чтения и возвращает указатель на него.
  *
@@ -103,10 +103,11 @@ URPC_EXPORT uRpcShm *urpc_shm_open( const char *name, unsigned long size );
  * \return Указатель на сегмент разделяемой памяти или NULL в случае ошибки.
  *
 */
-URPC_EXPORT uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size );
+URPC_EXPORT
+uRpcShm *urpc_shm_open_ro      (const char            *name,
+                                unsigned long          size);
 
-
-/*! Удаление сегмента разделяемой памяти.
+/**
  *
  * Функция удаляет сегмент разделяемой памяти и освобождает память занятую им.
  *
@@ -115,10 +116,10 @@ URPC_EXPORT uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size );
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_shm_destroy( uRpcShm *shm );
+URPC_EXPORT
+void urpc_shm_destroy          (uRpcShm               *shm);
 
-
-/*! Удаление объекта разделяемой памяти.
+/**
  *
  * Функция удаляет объект операционной системы связанный с сегментом разделяемой памяти.
  * В случае удаления сегмента разделяемой памяти функцией #urpc_shm_destroy объект удаляется
@@ -129,22 +130,24 @@ URPC_EXPORT void urpc_shm_destroy( uRpcShm *shm );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_shm_remove( const char *name );
+ */
+URPC_EXPORT
+void urpc_shm_remove           (const char            *name);
 
-
-/*! Отображение сегмента разделяемой памяти в адресное пространство процесса.
+/**
+ *
+ * Функция отображает сегмент раделяемой памяти в адресное пространство процесса.
  *
  * \param shm указатель на сегмент разделяемой памяти.
  *
  * \return адрес в пространстве процесса связанный с разделяемой памятью или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT void *urpc_shm_map( uRpcShm *shm );
-
+ */
+URPC_EXPORT
+void *urpc_shm_map             (uRpcShm               *shm);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_shm_h
+#endif /* __URPC_SHM_H__ */

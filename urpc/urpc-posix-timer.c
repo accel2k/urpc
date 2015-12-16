@@ -21,7 +21,7 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-timer.h"
 
@@ -30,84 +30,78 @@
 #include <stdint.h>
 #include <unistd.h>
 
-
 #define URPC_TIMER_TYPE 0x54525475
 
-
-struct uRpcTimer {
-
-  uint32_t          type;                   // Тип объекта uRpcTimer.
-  struct timespec   start;                  // Начальный момент времени.
-
+struct _uRpcTimer
+{
+  uint32_t             type;                   /* Тип объекта uRpcTimer. */
+  struct timespec      start;                  /* Начальный момент времени. */
 };
 
-
-uRpcTimer *urpc_timer_create( void )
+uRpcTimer *
+urpc_timer_create (void)
 {
+  uRpcTimer *timer = malloc (sizeof (uRpcTimer));
 
-  uRpcTimer *timer = malloc( sizeof( uRpcTimer ) );
+  if (timer == NULL)
+    return NULL;
 
-  if( timer == NULL ) return NULL;
-
-  clock_gettime( CLOCK_MONOTONIC, &timer->start );
+  clock_gettime (CLOCK_MONOTONIC, &timer->start);
   timer->type = URPC_TIMER_TYPE;
 
   return timer;
-
 }
 
-
-void urpc_timer_destroy( uRpcTimer *timer )
+void
+urpc_timer_destroy (uRpcTimer *timer)
 {
+  if (timer->type != URPC_TIMER_TYPE)
+    return;
 
-  if( timer->type != URPC_TIMER_TYPE ) return;
-
-  free( timer );
-
+  free (timer);
 }
 
-
-void urpc_timer_start( uRpcTimer *timer )
+void
+urpc_timer_start (uRpcTimer *timer)
 {
+  if (timer->type != URPC_TIMER_TYPE)
+    return;
 
-  if( timer->type != URPC_TIMER_TYPE ) return;
-
-  clock_gettime( CLOCK_MONOTONIC, &timer->start );
-
+  clock_gettime (CLOCK_MONOTONIC, &timer->start);
 }
 
-
-double urpc_timer_elapsed( uRpcTimer *timer )
+double
+urpc_timer_elapsed (uRpcTimer *timer)
 {
-
   struct timespec stop;
   struct timespec start;
 
   int sec_diff;
   double elapsed;
 
-  if( timer->type != URPC_TIMER_TYPE ) return -1.0;
+  if (timer->type != URPC_TIMER_TYPE)
+    return -1.0;
 
   start = timer->start;
-  clock_gettime( CLOCK_MONOTONIC, &stop );
+  clock_gettime (CLOCK_MONOTONIC, &stop);
 
   sec_diff = stop.tv_sec - start.tv_sec;
-  if( sec_diff == 0 ) elapsed = ( stop.tv_nsec - start.tv_nsec ) / 1000000000.0;
+  if (sec_diff == 0)
+    {
+      elapsed = (stop.tv_nsec - start.tv_nsec) / 1000000000.0;
+    }
   else
     {
-    elapsed = sec_diff - 1;
-    elapsed += ( 1000000000 - start.tv_nsec ) / 1000000000.0;
-    elapsed += stop.tv_nsec / 1000000000.0;
+      elapsed = sec_diff - 1;
+      elapsed += (1000000000 - start.tv_nsec) / 1000000000.0;
+      elapsed += stop.tv_nsec / 1000000000.0;
     }
 
   return elapsed;
-
 }
 
-
-void urpc_timer_sleep( double time )
+void
+urpc_timer_sleep (double time)
 {
-
-  usleep( 1000000.0 * time );
-
+  usleep (1000000.0 * time);
 }

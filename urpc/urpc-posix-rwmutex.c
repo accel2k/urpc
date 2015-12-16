@@ -21,7 +21,7 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-rwmutex.h"
 
@@ -30,66 +30,50 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-
-void urpc_rwmutex_init( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_init (uRpcRWMutex *rwmutex)
 {
-
-  pthread_rwlock_init( (pthread_rwlock_t*)rwmutex, NULL );
-
+  pthread_rwlock_init ((pthread_rwlock_t*)rwmutex, NULL);
 }
 
-
-void urpc_rwmutex_clear( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_clear (uRpcRWMutex *rwmutex)
 {
-
-  pthread_rwlock_destroy( (pthread_rwlock_t*)rwmutex );
-
+  pthread_rwlock_destroy ((pthread_rwlock_t*)rwmutex);
 }
 
-
-void urpc_rwmutex_reader_lock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_reader_lock (uRpcRWMutex *rwmutex)
 {
-
-  while( pthread_rwlock_rdlock( (pthread_rwlock_t*)rwmutex ) != 0 );
-
+  while (pthread_rwlock_rdlock ((pthread_rwlock_t*)rwmutex) != 0);
 }
 
-
-int urpc_rwmutex_reader_trylock( uRpcRWMutex *rwmutex )
+int
+urpc_rwmutex_reader_trylock (uRpcRWMutex *rwmutex)
 {
-
-  return pthread_rwlock_tryrdlock( (pthread_rwlock_t*)rwmutex ) == 0 ? 0 : 1;
-
+  return pthread_rwlock_tryrdlock ((pthread_rwlock_t*)rwmutex) == 0 ? 0 : 1;
 }
 
-
-void urpc_rwmutex_reader_unlock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_reader_unlock (uRpcRWMutex *rwmutex)
 {
-
-  while( pthread_rwlock_unlock( (pthread_rwlock_t*)rwmutex ) != 0 );
-
+  while (pthread_rwlock_unlock ((pthread_rwlock_t*)rwmutex) != 0);
 }
 
-
-void urpc_rwmutex_writer_lock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_writer_lock (uRpcRWMutex *rwmutex)
 {
-
-  while( pthread_rwlock_wrlock( (pthread_rwlock_t*)rwmutex ) != 0 );
-
+  while (pthread_rwlock_wrlock ((pthread_rwlock_t*)rwmutex) != 0);
 }
 
-
-int urpc_rwmutex_writer_trylock( uRpcRWMutex *rwmutex )
+int
+urpc_rwmutex_writer_trylock (uRpcRWMutex *rwmutex)
 {
-
-  return pthread_rwlock_trywrlock( (pthread_rwlock_t*)rwmutex ) == 0 ? 0 : 1;
-
+  return pthread_rwlock_trywrlock ((pthread_rwlock_t*)rwmutex) == 0 ? 0 : 1;
 }
 
-
-void urpc_rwmutex_writer_unlock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_writer_unlock (uRpcRWMutex *rwmutex)
 {
-
-  while( pthread_rwlock_unlock( (pthread_rwlock_t*)rwmutex ) != 0 );
-
+  while (pthread_rwlock_unlock ((pthread_rwlock_t*)rwmutex) != 0);
 }

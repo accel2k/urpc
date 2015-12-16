@@ -21,12 +21,14 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "urpc-rwmutex.h"
 #include "urpc-thread.h"
 
+#define ERROR -1
 
 volatile int start = 0;
 
@@ -35,57 +37,44 @@ uRpcRWMutex mutex;
 int counts = 2500000;
 int cur_i, prev_i;
 
-
-void* reader_thread_func( void *data )
+void *
+reader_thread_func (void *data)
 {
+  while (start == 0);
 
-  int id = *(int*)data;
-
-  while( start == 0 );
-
-  while( cur_i < counts )
+  while (cur_i < counts)
     {
-    urpc_rwmutex_reader_lock( &mutex );
-    if( prev_i != cur_i - 1 ) printf( "index error %d <=> %d\n", prev_i, cur_i );
-    urpc_rwmutex_reader_unlock( &mutex );
+      urpc_rwmutex_reader_lock (&mutex);
+      if (prev_i != cur_i - 1)
+        {
+          printf ("index error %d <=> %d\n", prev_i, cur_i);
+          exit (ERROR);
+        }
+      urpc_rwmutex_reader_unlock (&mutex);
     }
 
-  printf( "reader thread %d stopped after %d iterations\n", id, cur_i );
-
   return NULL;
-
 }
 
-
-void* writer_thread_func( void *data )
+void *
+writer_thread_func (void *data)
 {
+  while (start == 0);
 
-  int id = *(int*)data;
-
-  while( start == 0 );
-
-  while( cur_i < counts )
+  while (cur_i < counts)
     {
-    urpc_rwmutex_writer_lock( &mutex );
-    prev_i = cur_i;
-    cur_i += 1;
-    urpc_rwmutex_writer_unlock( &mutex );
+      urpc_rwmutex_writer_lock (&mutex);
+      prev_i = cur_i;
+      cur_i += 1;
+      urpc_rwmutex_writer_unlock (&mutex);
     }
 
-  printf( "writer thread %d stopped after %d iterations\n", id, cur_i );
-
   return NULL;
-
 }
 
-
-int main( int argc, char **argv )
+int
+main (int argc, char **argv)
 {
-
-  int id1 = 1;
-  int id2 = 2;
-  int id3 = 3;
-
   uRpcThread *rthread1;
   uRpcThread *rthread2;
   uRpcThread *wthread;
@@ -93,18 +82,25 @@ int main( int argc, char **argv )
   prev_i = 0;
   cur_i = 1;
 
-  rthread1 = urpc_thread_create( reader_thread_func, &id1 );
-  rthread2 = urpc_thread_create( reader_thread_func, &id2 );
-  wthread = urpc_thread_create( writer_thread_func, &id3 );
-  urpc_rwmutex_init( &mutex );
+  rthread1 = urpc_thread_create (reader_thread_func, NULL);
+  rthread2 = urpc_thread_create (reader_thread_func, NULL);
+  wthread = urpc_thread_create (writer_thread_func, NULL);
+  urpc_rwmutex_init (&mutex);
 
   start = 1;
 
-  urpc_thread_destroy( rthread1 );
-  urpc_thread_destroy( rthread2 );
-  urpc_thread_destroy( wthread );
-  urpc_rwmutex_clear( &mutex );
+  urpc_thread_destroy (rthread1);
+  urpc_thread_destroy (rthread2);
+  urpc_thread_destroy (wthread);
+  urpc_rwmutex_clear (&mutex);
+
+  if (cur_i != counts)
+    {
+      printf ("rwmutex error in threads");
+      exit (ERROR);
+    }
+
+  printf ("All done\n");
 
   return 0;
-
 }

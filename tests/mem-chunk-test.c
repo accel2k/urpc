@@ -21,61 +21,83 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include "urpc-mem-chunk.h"
 
+#define ERROR -1
 
 #define N_DATA 250000
 
-typedef struct TestData {
-
-  uint32_t    id;
-  uint32_t    data[16];
-
+typedef struct
+{
+  uint32_t id;
+  uint32_t data[16];
 } TestData;
 
-
-int main( int argc, char **argv )
+int
+main (int    argc,
+      char **argv)
 {
 
   TestData **data;
   int i, j;
 
-  uRpcMemChunk *umem_chunk = urpc_mem_chunk_create( sizeof( TestData ) + 1 );
-  data = malloc( N_DATA * sizeof( TestData* ) );
+  uRpcMemChunk *umem_chunk = urpc_mem_chunk_create (sizeof (TestData) + 1);
+  data = malloc (N_DATA * sizeof (TestData *));
 
-  for( i = 0; i < N_DATA; i++ )
+  for (i = 0; i < N_DATA; i++)
     {
-    data[i] = urpc_mem_chunk_alloc( umem_chunk );
-    data[i]->id = i;
-    for( j = 0; j < 16; j++ )
-      data[i]->data[j] = i * j;
+      data[i] = urpc_mem_chunk_alloc (umem_chunk);
+      data[i]->id = i;
+      for (j = 0; j < 16; j++)
+        data[i]->data[j] = i * j;
     }
 
-  for( i = 0; i < N_DATA; i++ )
+  for (i = 0; i < N_DATA; i++)
     {
-    if( data[i]->id != i ) printf( "error in id %u != %u\n", data[i]->id, i );
-    for( j = 0; j < 16; j++ )
-      if( data[i]->data[j] != i * j ) printf( "error in data[%u] %u != %u\n", j, data[i]->data[j], i*j );
+      if (data[i]->id != i)
+        {
+          printf ("error in id %u != %u\n", data[i]->id, i);
+          exit (ERROR);
+        }
+      for (j = 0; j < 16; j++)
+        {
+          if (data[i]->data[j] != i * j)
+            {
+              printf ("error in data[%u] %u != %u\n", j, data[i]->data[j], i * j);
+              exit (ERROR);
+            }
+        }
     }
 
-  for( i = 0; i < N_DATA; i += 10 )
-    urpc_mem_chunk_free( umem_chunk, data[i] );
+  for (i = 0; i < N_DATA; i += 10)
+    urpc_mem_chunk_free (umem_chunk, data[i]);
 
-  for( i = 0; i < N_DATA; i += 10 )
+  for (i = 0; i < N_DATA; i += 10)
     {
-    data[i] = urpc_mem_chunk_alloc( umem_chunk );
-    if( data[i]->id != i ) printf( "realloc error in id %u != %u\n", data[i]->id, i );
-    for( j = 0; j < 16; j++ )
-      if( data[i]->data[j] != i * j ) printf( "realloc error in data[%u] %u != %u\n", j, data[i]->data[j], i*j );
+      data[i] = urpc_mem_chunk_alloc (umem_chunk);
+      if (data[i]->id != i)
+        {
+          printf ("realloc error in id %u != %u\n", data[i]->id, i);
+          exit (ERROR);
+        }
+      for (j = 0; j < 16; j++)
+        {
+          if (data[i]->data[j] != i * j)
+            {
+              printf ("realloc error in data[%u] %u != %u\n", j, data[i]->data[j], i * j);
+              exit (ERROR);
+            }
+        }
     }
 
-  urpc_mem_chunk_destroy( umem_chunk );
+  urpc_mem_chunk_destroy (umem_chunk);
+
+  printf ("All done\n");
 
   return 0;
-
 }

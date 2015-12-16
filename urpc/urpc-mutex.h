@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-mutex.h
  *
  * \brief Заголовочный файл библиотеки работы с мьютексами
@@ -53,10 +53,10 @@
  * в случае успешной блокировки. #urpc_mutex_trylock - функция однократно пытается заблокировать мьютекс и
  * завершает свою работу независимо от результата. #urpc_mutex_unlock - функция разблокирует мьютекс.
  *
-*/
+ */
 
-#ifndef _urpc_mutex_h
-#define _urpc_mutex_h
+#ifndef __URPC_MUTEX_H__
+#define __URPC_MUTEX_H__
 
 #include <urpc-exports.h>
 
@@ -64,19 +64,17 @@
 extern "C" {
 #endif
 
-
-#if defined( _WIN32 )
+#if defined(_WIN32)
 #include <windows.h>
 typedef CRITICAL_SECTION uRpcMutex;
 #endif
 
-#if defined( __unix__ )
+#if defined(__unix__)
 #include <pthread.h>
 typedef pthread_mutex_t uRpcMutex;
 #endif
 
-
-/*! Инициализация мьютекса.
+/**
  *
  * Функция инициализирует мьютекс.
  *
@@ -85,10 +83,10 @@ typedef pthread_mutex_t uRpcMutex;
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_mutex_init( uRpcMutex *mutex );
+URPC_EXPORT
+void           urpc_mutex_init                 (uRpcMutex             *mutex);
 
-
-/*! Удаление мьютекса.
+/**
  *
  * Функция освобождает ресурсы выделенные для мьютекса.
  *
@@ -97,10 +95,10 @@ URPC_EXPORT void urpc_mutex_init( uRpcMutex *mutex );
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_mutex_clear( uRpcMutex *mutex );
+URPC_EXPORT
+void           urpc_mutex_clear                (uRpcMutex             *mutex);
 
-
-/*! Блокировка мьютекса.
+/**
  *
  * Функция безусловно пытается заблокировать мьютекс. Функция завершает свою работу
  * только в случае успешной блокировки.
@@ -110,10 +108,10 @@ URPC_EXPORT void urpc_mutex_clear( uRpcMutex *mutex );
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_mutex_lock( uRpcMutex *mutex );
+URPC_EXPORT
+void           urpc_mutex_lock                 (uRpcMutex             *mutex);
 
-
-/*! Блокировка мьютекса.
+/**
  *
  * Функция однократно пытается заблокировать мьютекс и завершает свою работу.
  *
@@ -122,10 +120,10 @@ URPC_EXPORT void urpc_mutex_lock( uRpcMutex *mutex );
  * \return 0 - в случае успешной блокировки, иначе отрицательное число.
  *
 */
-URPC_EXPORT int urpc_mutex_trylock( uRpcMutex *mutex );
+URPC_EXPORT
+int            urpc_mutex_trylock              (uRpcMutex             *mutex);
 
-
-/*! Разблокировка мьютекса.
+/**
  *
  * Функция разблокирует мьютекс. Если мьютекс был заблокирован другим потоком
  * поведение функции не определено.
@@ -135,11 +133,11 @@ URPC_EXPORT int urpc_mutex_trylock( uRpcMutex *mutex );
  * \return Нет.
  *
 */
-URPC_EXPORT void urpc_mutex_unlock( uRpcMutex *mutex );
-
+URPC_EXPORT
+void           urpc_mutex_unlock               (uRpcMutex             *mutex);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_mutex_h
+#endif /* __URPC_MUTEX_H__ */

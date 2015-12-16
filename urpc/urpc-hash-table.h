@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-hash-table.h
  *
  * \brief Заголовочный файл библиотеки работы с хэш таблицей
@@ -54,35 +54,34 @@
  * - #urpc_hash_table_find_uint32 - поиск значения по ключу;
  * - #urpc_hash_table_remove - удаление указателя по ключу.
  *
-*/
+ */
 
-#ifndef _urpc_hash_table_h
-#define _urpc_hash_table_h
+#ifndef __URPC_HASH_TABLE_H__
+#define __URPC_HASH_TABLE_H__
 
 #include <urpc-exports.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
+typedef struct _uRpcHashTable uRpcHashTable;
 
-typedef struct uRpcHashTable uRpcHashTable;
-
-
-/*! Тип функции вызываемой при удалении ключа из массива.
+/**
  *
  * Функция используется для освобождения памяти выделенной для значения ключа.
+ * при его удалении из массива.
  *
  * \param data указатель на значение удаляемого ключа.
  *
  * \return Нет.
  *
-*/
-typedef void (*urpc_hash_table_destroy_callback)( void *data );
+ */
+typedef void (*urpc_hash_table_destroy_callback)   (void              *data);
 
-
-/*! Тип функции вызываемой при обходе всех ключей массива.
+/**
  *
  * Функция используется для выполнения определённых действий над всеми ключами массива.
  * В этой функции нельзя удалять элементы массива отличные от текущего обрабатываемого.
@@ -95,11 +94,12 @@ typedef void (*urpc_hash_table_destroy_callback)( void *data );
  *
  * \return Нет.
  *
-*/
-typedef void (*urpc_hash_table_foreach_callback)( uint32_t key, void *value, void *user_data );
+ */
+typedef void (*urpc_hash_table_foreach_callback)   (uint32_t           key,
+                                                    void              *value,
+                                                    void              *user_data);
 
-
-/*! Создание хэш таблицы.
+/**
  *
  * Функция создаёт пустую хэш таблицу.
  *
@@ -107,11 +107,11 @@ typedef void (*urpc_hash_table_foreach_callback)( uint32_t key, void *value, voi
  *
  * \return Указатель на хэш таблицу или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT uRpcHashTable *urpc_hash_table_create( urpc_hash_table_destroy_callback value_destroy_func );
+ */
+URPC_EXPORT
+uRpcHashTable *urpc_hash_table_create          (urpc_hash_table_destroy_callback value_destroy_func);
 
-
-/*! Удаление хэш таблицы.
+/**
  *
  * Функция удаляет все указатели из таблицы, а затем удаляет саму таблицу.
  *
@@ -119,11 +119,11 @@ URPC_EXPORT uRpcHashTable *urpc_hash_table_create( urpc_hash_table_destroy_callb
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *hash_table );
+ */
+URPC_EXPORT
+void           urpc_hash_table_destroy         (uRpcHashTable         *hash_table);
 
-
-/*! Добавление ключа в хэш таблицу.
+/**
  *
  * Функция добавляет ключ и ассоциированный с этим ключом указатель в хэш таблицу.
  * Если указанный ключ уже существует, функция вернёт значение большее нуля. При этом
@@ -135,11 +135,13 @@ URPC_EXPORT void urpc_hash_table_destroy( uRpcHashTable *hash_table );
  *
  * \return 0 - если ключ добавлен, 1 - если ключ уже существует, -1 в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key, void *value );
+ */
+URPC_EXPORT
+int            urpc_hash_table_insert          (uRpcHashTable         *hash_table,
+                                                uint32_t               key,
+                                                void                  *value);
 
-
-/*! Добавление ключа в хэш таблицу.
+/**
  *
  * Функция добавляет ключ и ассоциированное с этим ключом значение типа uint32 в хэш таблицу.
  * Если указанный ключ уже существует, функция вернёт значение большее нуля. При этом
@@ -151,11 +153,13 @@ URPC_EXPORT int urpc_hash_table_insert( uRpcHashTable *hash_table, uint32_t key,
  *
  * \return 0 - если ключ добавлен, 1 - если ключ уже существует, -1 в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_hash_table_insert_uint32( uRpcHashTable *hash_table, uint32_t key, uint32_t value );
+ */
+URPC_EXPORT
+int            urpc_hash_table_insert_uint32   (uRpcHashTable         *hash_table,
+                                                uint32_t               key,
+                                                uint32_t               value);
 
-
-/*! Поиск указателя по ключу.
+/**
  *
  * Функция ищет в таблице ключ и возвращает указатель на данные.
  *
@@ -164,12 +168,12 @@ URPC_EXPORT int urpc_hash_table_insert_uint32( uRpcHashTable *hash_table, uint32
  *
  * \return Указатель на данные или NULL если такого ключа нет в таблице.
  *
- *
-*/
-URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key );
+ */
+URPC_EXPORT
+void          *urpc_hash_table_find            (uRpcHashTable         *hash_table,
+                                                uint32_t               key);
 
-
-/*! Поиск значения по ключу.
+/**
  *
  * Функция ищет в таблице ключ и возвращает значение типа uint32. По результату
  * возвращаемому этой функцией нельзя дать однозначный ответ о присутствии ключа
@@ -180,14 +184,15 @@ URPC_EXPORT void *urpc_hash_table_find( uRpcHashTable *hash_table, uint32_t key 
  *
  * \return значение ассоциированное с ключом или 0 если такого ключа нет в таблице.
  *
- *
-*/
-URPC_EXPORT uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uint32_t key );
+ */
+URPC_EXPORT
+uint32_t       urpc_hash_table_find_uint32     (uRpcHashTable         *hash_table,
+                                                uint32_t               key);
 
-
-/*! Обработка всех элементов массива.
+/**
  *
- * Функция вызывает для каждого ключа в массиве пользовательскую функцию #urpc_hash_table_foreach_callback.
+ * Функция вызывает для каждого ключа в массиве пользовательскую функцию
+ * #urpc_hash_table_foreach_callback.
  *
  * \param hash_table указатель на хэш таблицу;
  * \param callback пользовательская функция;
@@ -195,11 +200,13 @@ URPC_EXPORT uint32_t urpc_hash_table_find_uint32( uRpcHashTable *hash_table, uin
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_hash_table_foreach( uRpcHashTable *hash_table, urpc_hash_table_foreach_callback callback, void *user_data );
+ */
+URPC_EXPORT
+void           urpc_hash_table_foreach         (uRpcHashTable         *hash_table,
+                                                urpc_hash_table_foreach_callback callback,
+                                                void                  *user_data);
 
-
-/*! Размер таблицы.
+/**
  *
  * Функция возвращает число элементов размещённых в таблице.
  *
@@ -207,23 +214,26 @@ URPC_EXPORT void urpc_hash_table_foreach( uRpcHashTable *hash_table, urpc_hash_t
  *
  * \return Число элементов в таблице.
  *
-*/
-URPC_EXPORT uint32_t urpc_hash_table_size( uRpcHashTable *hash_table );
+ */
+URPC_EXPORT
+uint32_t       urpc_hash_table_size            (uRpcHashTable         *hash_table);
 
-
-/*! Удаление ключа из таблицы.
+/**
+ *
+ * Функция удаляет ключ из таблицы.
  *
  * \param hash_table указатель на хэш таблицу;
  * \param key значение ключа.
  *
  * \return 0 если ключ был удалён, 1 если такого ключа нет, -1 в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_hash_table_remove( uRpcHashTable *hash_table, uint32_t key );
-
+ */
+URPC_EXPORT
+int            urpc_hash_table_remove          (uRpcHashTable         *hash_table,
+                                                uint32_t               key);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_hash_table_h
+#endif /* __URPC_HASH_TABLE_H__ */

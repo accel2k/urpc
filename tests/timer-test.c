@@ -21,45 +21,49 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
+#include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "urpc-timer.h"
+
+#define ERROR -1
 
 #if defined( _WIN32 )
 #include <Windows.h>
 #endif
 
-
-int main( int argc, char **argv )
+int
+main (int argc, char **argv)
 {
-
+  double delta;
+  double delay;
   double elapsed;
-  uRpcTimer *timer = urpc_timer_create();
+  uRpcTimer *timer;
+  int i;
 
 #if defined( _WIN32 )
-  timeBeginPeriod( 1 );
+  timeBeginPeriod (1);
 #endif
 
-  urpc_timer_sleep( 0.025 );
-  elapsed = urpc_timer_elapsed( timer );
-  printf( "sleep for 25ms - waked up after %.3lfms\n", 1000.0 * elapsed );
+  timer = urpc_timer_create ();
 
-  urpc_timer_start( timer );
-  urpc_timer_sleep( 0.125 );
-  elapsed = urpc_timer_elapsed( timer );
-  printf( "sleep for 125ms - waked up after %.3lfms\n", 1000.0 * elapsed );
+  for (i = 0; i < 10; i++)
+    {
+    delay = 0.025 + 0.1 * i;
+    urpc_timer_start (timer);
+    urpc_timer_sleep (delay);
+    elapsed = urpc_timer_elapsed (timer);
+    delta = delay / elapsed;
+    if (delta < 0.95 || delta > 1.05)
+      {
+        printf ("sleep error, requested %.3lfms, real %.3lfms\n", 1000.0 * delay, 1000.0 * elapsed);
+        exit (ERROR);
+      }
+    }
 
-  urpc_timer_start( timer );
-  urpc_timer_sleep( 0.250 );
-  elapsed = urpc_timer_elapsed( timer );
-  printf( "sleep for 250ms - waked up after %.3lfms\n", 1000.0 * elapsed );
-
-  urpc_timer_start( timer );
-  urpc_timer_sleep( 1.250 );
-  elapsed = urpc_timer_elapsed( timer );
-  printf( "sleep for 1250ms - waked up after %.3lfms\n", 1000.0 * elapsed );
+  printf ("All done\n");
 
   return 0;
-
 }

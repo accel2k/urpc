@@ -23,19 +23,17 @@
  *
 */
 
-#ifndef _urpc_exports_h
-#define _urpc_exports_h
+#ifndef __URPC_EXPORTS_H__
+#define __URPC_EXPORTS_H__
 
-
-#if defined( _WIN32 )
-  #if defined( urpc_EXPORTS )
-    #define URPC_EXPORT __declspec( dllexport )
+#if defined (_WIN32)
+  #if defined (urpc_EXPORTS)
+    #define URPC_EXPORT __declspec (dllexport)
   #else
-    #define URPC_EXPORT __declspec( dllimport )
+    #define URPC_EXPORT __declspec (dllimport)
   #endif
 #else
   #define URPC_EXPORT
 #endif
 
-
-#endif // _urpc_exports_h
+#endif /* __URPC_EXPORTS_H__ */

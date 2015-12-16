@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-mem-chunk.h
  *
  * \brief Заголовочный файл библиотеки хранения множества объектов
@@ -43,34 +43,34 @@
  * - #urpc_mem_chunk_alloc - выделение памяти под новый объект;
  * - #urpc_mem_chunk_free - освобождение памяти неиспользуемого объекта.
  *
-*/
+ */
 
-#ifndef _urpc_mem_chunk_h
-#define _urpc_mem_chunk_h
+#ifndef __URPC_MEM_CHUNK_H__
+#define __URPC_MEM_CHUNK_H__
 
 #include <urpc-exports.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
+typedef struct _uRpcMemChunk uRpcMemChunk;
 
-typedef struct uRpcMemChunk uRpcMemChunk;
-
-
-/*! Создание блока объектов.
+/**
  *
- * При создании указывается объекты какого размера будут использоваться.
+ * Функция создаёт блок объектов. При создании указывается объекты
+ * какого размера будут использоваться.
  *
  * \param chunk_size размер одного объекта.
  *
  * \return Указатель на блок объектов или NULL в случае ошибки.
  *
 */
-URPC_EXPORT uRpcMemChunk *urpc_mem_chunk_create( int chunk_size );
+URPC_EXPORT
+uRpcMemChunk          *urpc_mem_chunk_create   (int            chunk_size);
 
-
-/*! Удаление блока объектов.
+/**
  *
  * Функция освобождает всю память занятую объектами. С этого момента
  * использовать указатели на объекты нельзя.
@@ -79,33 +79,38 @@ URPC_EXPORT uRpcMemChunk *urpc_mem_chunk_create( int chunk_size );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_mem_chunk_destroy( uRpcMemChunk *mem_chunk );
+ */
+URPC_EXPORT
+void                   urpc_mem_chunk_destroy  (uRpcMemChunk  *mem_chunk);
 
-
-/*! Выделение памяти под новый объект.
+/**
+ *
+ * Функция выделяет память под новый объект.
  *
  * \param mem_chunk указатель на блок объектов.
  *
  * \return Указатель на память для нового объекта или NULL в случае ошибки.
  *
-*/
-URPC_EXPORT void *urpc_mem_chunk_alloc( uRpcMemChunk *mem_chunk );
+ */
+URPC_EXPORT
+void                  *urpc_mem_chunk_alloc    (uRpcMemChunk  *mem_chunk);
 
-
-/*! Освобождение памяти используемой объектом.
+/**
+ *
+ * Функция освобождает память используемую объектом.
  *
  * \param mem_chunk указатель на блок объектов;
  * \param chunk указатель на память освобождаемого объекта.
  *
  * \return 0 - если память успешно особождена, -1 в случае ошибки.
  *
-*/
-URPC_EXPORT int urpc_mem_chunk_free( uRpcMemChunk *mem_chunk, void *chunk );
-
+ */
+URPC_EXPORT
+int                    urpc_mem_chunk_free     (uRpcMemChunk  *mem_chunk,
+                                                void          *chunk);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_mem_chunk_h
+#endif /* __URPC_MEM_CHUNK_H__ */

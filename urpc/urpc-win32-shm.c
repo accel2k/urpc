@@ -21,110 +21,121 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-shm.h"
 
 #include <windows.h>
 #include <stdint.h>
 
-
 #define URPC_SHM_TYPE 0x54485375
 
+struct _uRpcShm
+{
+  uint32_t             type;                   /* Тип объекта uRpcShm. */
 
-struct uRpcShm {
-
-  uint32_t          type;                   // Тип объекта uRpcShm.
-
-  HANDLE            shm;                    // Идентификатор сегмента общей памяти.
-  int               ro;                     // Признак доступа только для чтения.
-  void             *maddr;                  // Адрес сегмента общей памяти.
-
+  HANDLE               shm;                    /* Идентификатор сегмента общей памяти. */
+  int                  ro;                     /* Признак доступа только для чтения. */
+  void                *maddr;                  /* Адрес сегмента общей памяти. */
 };
 
-
-uRpcShm *urpc_shm_create( const char *name, unsigned long size )
+uRpcShm *
+urpc_shm_create (const char   *name,
+                 unsigned long size)
 {
+  uRpcShm *shm = malloc (sizeof (uRpcShm));
 
-  uRpcShm *shm = malloc( sizeof( uRpcShm ) );
-  if( shm == NULL ) return NULL;
+  if (shm == NULL)
+    return NULL;
 
-  shm->shm = CreateFileMapping( INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, name );
-  if( shm->shm == NULL )
-    { free( shm ); return NULL; }
+  shm->shm = CreateFileMapping (INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, name);
+  if (shm->shm == NULL)
+    {
+      free (shm);
+      return NULL;
+    }
 
   shm->ro = 0;
   shm->maddr = NULL;
   shm->type = URPC_SHM_TYPE;
 
   return shm;
-
 }
 
-
-uRpcShm *urpc_shm_open( const char *name, unsigned long size )
+uRpcShm *
+urpc_shm_open (const char   *name,
+               unsigned long size)
 {
+  uRpcShm *shm = malloc (sizeof (uRpcShm));
 
-  uRpcShm *shm = malloc( sizeof( uRpcShm ) );
-  if( shm == NULL ) return NULL;
+  if (shm == NULL)
+    return NULL;
 
-  shm->shm = OpenFileMapping( FILE_MAP_WRITE, FALSE, name );
-  if( shm->shm == NULL )
-    { free( shm ); return NULL; }
+  shm->shm = OpenFileMapping (FILE_MAP_WRITE, FALSE, name);
+  if (shm->shm == NULL)
+    {
+      free (shm);
+      return NULL;
+    }
 
   shm->ro = 0;
   shm->maddr = NULL;
   shm->type = URPC_SHM_TYPE;
 
   return shm;
-
 }
 
-uRpcShm *urpc_shm_open_ro( const char *name, unsigned long size )
+uRpcShm *
+urpc_shm_open_ro (const char   *name,
+                  unsigned long size)
 {
+  uRpcShm *shm = malloc (sizeof (uRpcShm));
 
-  uRpcShm *shm = malloc( sizeof( uRpcShm ) );
-  if( shm == NULL ) return NULL;
+  if (shm == NULL)
+    return NULL;
 
-  shm->shm = OpenFileMapping( FILE_MAP_READ, FALSE, name );
-  if( shm->shm == NULL )
-    { free( shm ); return NULL; }
+  shm->shm = OpenFileMapping (FILE_MAP_READ, FALSE, name);
+  if (shm->shm == NULL)
+    {
+      free (shm);
+      return NULL;
+    }
 
   shm->ro = 1;
   shm->maddr = NULL;
   shm->type = URPC_SHM_TYPE;
 
   return shm;
-
 }
 
-
-void urpc_shm_destroy( uRpcShm *shm )
+void
+urpc_shm_destroy (uRpcShm *shm)
 {
+  if (shm->type != URPC_SHM_TYPE)
+    return;
 
-  if( shm->type != URPC_SHM_TYPE ) return;
+  if (shm->maddr != NULL)
+    UnmapViewOfFile (shm->maddr);
 
-  if( shm->maddr != NULL ) UnmapViewOfFile( shm->maddr );
-  CloseHandle( shm->shm );
-
+  CloseHandle (shm->shm);
 }
 
-
-void urpc_shm_remove( const char *name )
+void
+urpc_shm_remove (const char *name)
 {
 }
 
-
-void *urpc_shm_map( uRpcShm *shm )
+void *
+urpc_shm_map (uRpcShm *shm)
 {
-
   DWORD pflags;
 
-  if( shm->type != URPC_SHM_TYPE ) return NULL;
+  if (shm->type != URPC_SHM_TYPE)
+    return NULL;
 
   pflags = shm->ro ? FILE_MAP_READ : FILE_MAP_WRITE;
 
-  shm->maddr = MapViewOfFile( shm->shm, pflags, 0, 0, 0 );
-  return shm->maddr;
+  shm->maddr = MapViewOfFile (shm->shm, pflags, 0, 0, 0);
 
+  return shm->maddr;
 }

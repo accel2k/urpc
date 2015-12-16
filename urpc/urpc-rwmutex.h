@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-rwmutex.h
  *
  * \brief Заголовочный файл библиотеки работы с разделяемыми мьютексами
@@ -50,17 +50,16 @@
  * в случае успешной блокировки. #urpc_mutex_trylock - функция однократно пытается заблокировать мьютекс и
  * завершает свою работу независимо от результата. #urpc_mutex_unlock - функция разблокирует мьютекс.
  *
-*/
+ */
 
-#ifndef _urpc_rwmutex_h
-#define _urpc_rwmutex_h
+#ifndef __URPC_RWMUTEX_H__
+#define __URPC_RWMUTEX_H__
 
 #include <urpc-exports.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 #if defined( _WIN32 )
 #include <windows.h>
@@ -72,8 +71,7 @@ typedef SRWLOCK uRpcRWMutex;
 typedef pthread_rwlock_t uRpcRWMutex;
 #endif
 
-
-/*! Инициализация мьютекса.
+/**
  *
  * Функция инициализирует мьютекс.
  *
@@ -81,11 +79,11 @@ typedef pthread_rwlock_t uRpcRWMutex;
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_rwmutex_init( uRpcRWMutex *rwmutex );
+ */
+URPC_EXPORT
+void urpc_rwmutex_init                 (uRpcRWMutex           *rwmutex);
 
-
-/*! Удаление мьютекса.
+/**
  *
  * Функция освобождает ресурсы выделенные для мьютекса.
  *
@@ -93,11 +91,11 @@ URPC_EXPORT void urpc_rwmutex_init( uRpcRWMutex *rwmutex );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_rwmutex_clear( uRpcRWMutex *rwmutex );
+ */
+URPC_EXPORT
+void urpc_rwmutex_clear                (uRpcRWMutex           *rwmutex);
 
-
-/*! Блокировка мьютекса для чтения.
+/**
  *
  * Функция безусловно пытается заблокировать мьютекс для чтения. Функция завершает свою работу
  * только в случае успешной блокировки.
@@ -106,11 +104,11 @@ URPC_EXPORT void urpc_rwmutex_clear( uRpcRWMutex *rwmutex );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_rwmutex_reader_lock( uRpcRWMutex *rwmutex );
+ */
+URPC_EXPORT
+void urpc_rwmutex_reader_lock          (uRpcRWMutex           *rwmutex);
 
-
-/*! Блокировка мьютекса для чтения.
+/**
  *
  * Функция однократно пытается заблокировать мьютекс для чтения и завершает свою работу.
  *
@@ -118,11 +116,11 @@ URPC_EXPORT void urpc_rwmutex_reader_lock( uRpcRWMutex *rwmutex );
  *
  * \return 0 - в случае успешной блокировки, иначе отрицательное число.
  *
-*/
-URPC_EXPORT int urpc_rwmutex_reader_trylock( uRpcRWMutex *rwmutex );
+ */
+URPC_EXPORT
+int urpc_rwmutex_reader_trylock        (uRpcRWMutex           *rwmutex);
 
-
-/*! Разблокировка мьютекса.
+/**
  *
  * Функция разблокирует мьютекс заблокированный для чтения. Если мьютекс был заблокирован
  * другим потоком поведение функции не определено.
@@ -131,11 +129,11 @@ URPC_EXPORT int urpc_rwmutex_reader_trylock( uRpcRWMutex *rwmutex );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_rwmutex_reader_unlock( uRpcRWMutex *rwmutex );
+ */
+URPC_EXPORT
+void urpc_rwmutex_reader_unlock        (uRpcRWMutex           *rwmutex);
 
-
-/*! Блокировка мьютекса для записи.
+/**
  *
  * Функция безусловно пытается заблокировать мьютекс для записи. Функция завершает свою работу
  * только в случае успешной блокировки.
@@ -144,11 +142,11 @@ URPC_EXPORT void urpc_rwmutex_reader_unlock( uRpcRWMutex *rwmutex );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_rwmutex_writer_lock( uRpcRWMutex *rwmutex );
+ */
+URPC_EXPORT
+void urpc_rwmutex_writer_lock          (uRpcRWMutex           *rwmutex);
 
-
-/*! Блокировка мьютекса для записи.
+/**
  *
  * Функция однократно пытается заблокировать мьютекс для записи и завершает свою работу.
  *
@@ -156,11 +154,11 @@ URPC_EXPORT void urpc_rwmutex_writer_lock( uRpcRWMutex *rwmutex );
  *
  * \return 0 - в случае успешной блокировки, иначе отрицательное число.
  *
-*/
-URPC_EXPORT int urpc_rwmutex_writer_trylock( uRpcRWMutex *rwmutex );
+ */
+URPC_EXPORT
+int urpc_rwmutex_writer_trylock        (uRpcRWMutex           *rwmutex);
 
-
-/*! Разблокировка мьютекса.
+/**
  *
  * Функция разблокирует мьютекс заблокируемый для записи. Если мьютекс был заблокирован
  * другим потоком поведение функции не определено.
@@ -169,12 +167,12 @@ URPC_EXPORT int urpc_rwmutex_writer_trylock( uRpcRWMutex *rwmutex );
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_rwmutex_writer_unlock( uRpcRWMutex *rwmutex );
-
+ */
+URPC_EXPORT
+void urpc_rwmutex_writer_unlock        (uRpcRWMutex           *rwmutex);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_rwmutex_h
+#endif /* __URPC_RWMUTEX_H__ */

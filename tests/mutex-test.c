@@ -21,61 +21,63 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "urpc-mutex.h"
 #include "urpc-thread.h"
 
+#define ERROR -1
 
 volatile int start = 0;
 
 uRpcMutex mutex;
 
 int counts = 2500000;
+int sum = 0;
 
-
-void* thread_func( void *data )
+void *
+thread_func (void *data)
 {
+  int i;
 
-  int i = 0;
-  int id = *(int*)data;
+  while (start == 0);
 
-  while( start == 0 );
-
-  while( i < counts )
+  for (i = 0; i < counts; i++)
     {
-    urpc_mutex_lock( &mutex );
-    i++;
-    urpc_mutex_unlock( &mutex );
+      urpc_mutex_lock (&mutex);
+      sum++;
+      urpc_mutex_unlock (&mutex);
     }
 
-  printf( "thread %d stopped after %d iterations\n", id, i );
-
   return NULL;
-
 }
 
 
-int main( int argc, char **argv )
+int
+main (int argc, char **argv)
 {
-
-  int id1 = 1;
-  int id2 = 2;
-
   uRpcThread *thread1;
   uRpcThread *thread2;
 
-  urpc_mutex_init( &mutex );
-  thread1 = urpc_thread_create( thread_func, &id1 );
-  thread2 = urpc_thread_create( thread_func, &id2 );
+  urpc_mutex_init (&mutex);
+  thread1 = urpc_thread_create (thread_func, NULL);
+  thread2 = urpc_thread_create (thread_func, NULL);
 
   start = 1;
 
-  urpc_thread_destroy( thread1 );
-  urpc_thread_destroy( thread2 );
-  urpc_mutex_clear( &mutex );
+  urpc_thread_destroy (thread1);
+  urpc_thread_destroy (thread2);
+  urpc_mutex_clear (&mutex);
+
+  if ( sum != 2 * counts )
+    {
+      printf ("mutex error in threads");
+      exit (ERROR);
+    }
+
+  printf ("All done");
 
   return 0;
-
 }

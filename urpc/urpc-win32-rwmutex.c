@@ -21,70 +21,55 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-rwmutex.h"
 
 #include <windows.h>
 
-
-void urpc_rwmutex_init( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_init (uRpcRWMutex *rwmutex)
 {
-
-  InitializeSRWLock( (PSRWLOCK)rwmutex );
-
+  InitializeSRWLock ((PSRWLOCK)rwmutex);
 }
 
-
-void urpc_rwmutex_clear( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_clear (uRpcRWMutex *rwmutex)
 {
-
 }
 
-
-void urpc_rwmutex_reader_lock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_reader_lock (uRpcRWMutex *rwmutex)
 {
-
-  AcquireSRWLockShared( (PSRWLOCK)rwmutex );
-
+  AcquireSRWLockShared ((PSRWLOCK)rwmutex);
 }
 
-
-int urpc_rwmutex_reader_trylock( uRpcRWMutex *rwmutex )
+int
+urpc_rwmutex_reader_trylock (uRpcRWMutex *rwmutex)
 {
-
-  return TryAcquireSRWLockShared( (PSRWLOCK)rwmutex ) != 0 ? 0 : 1;
-
+  return TryAcquireSRWLockShared ((PSRWLOCK)rwmutex) != 0 ? 0 : 1;
 }
 
-
-void urpc_rwmutex_reader_unlock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_reader_unlock (uRpcRWMutex *rwmutex)
 {
-
-  ReleaseSRWLockShared( (PSRWLOCK)rwmutex );
-
+  ReleaseSRWLockShared ((PSRWLOCK)rwmutex);
 }
 
-
-void urpc_rwmutex_writer_lock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_writer_lock (uRpcRWMutex *rwmutex)
 {
-
-  AcquireSRWLockExclusive( (PSRWLOCK)rwmutex );
-
+  AcquireSRWLockExclusive ((PSRWLOCK)rwmutex);
 }
 
-
-int urpc_rwmutex_writer_trylock( uRpcRWMutex *rwmutex )
+int
+urpc_rwmutex_writer_trylock (uRpcRWMutex *rwmutex)
 {
-
-  return TryAcquireSRWLockExclusive( (PSRWLOCK)rwmutex ) != 0 ? 0 : 1;
-
+  return TryAcquireSRWLockExclusive ((PSRWLOCK)rwmutex) != 0 ? 0 : 1;
 }
 
-
-void urpc_rwmutex_writer_unlock( uRpcRWMutex *rwmutex )
+void
+urpc_rwmutex_writer_unlock (uRpcRWMutex *rwmutex)
 {
-
-  ReleaseSRWLockExclusive( (PSRWLOCK)rwmutex );
-
+  ReleaseSRWLockExclusive ((PSRWLOCK)rwmutex);
 }

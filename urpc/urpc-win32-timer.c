@@ -21,71 +21,65 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-timer.h"
 #include "urpc-network.h"
 
 #include <stdint.h>
 
-
 #define URPC_TIMER_TYPE 0x54525475
 
-
-struct uRpcTimer {
-
-  uint32_t          type;                   // Тип объекта uRpcTimer.
-  LARGE_INTEGER     pfreq;                  // Частота обновления PerformanceCounter'а.
-  LARGE_INTEGER     start;                  // Начальный момент времени.
-
+struct uRpcTimer
+{
+  uint32_t             type;                   /* Тип объекта uRpcTimer. */
+  LARGE_INTEGER        pfreq;                  /* Частота обновления PerformanceCounter'а. */
+  LARGE_INTEGER        start;                  /* Начальный момент времени. */
 };
 
-
-uRpcTimer *urpc_timer_create( void )
+uRpcTimer *
+urpc_timer_create (void)
 {
+  uRpcTimer *timer = malloc (sizeof (uRpcTimer));
 
-  uRpcTimer *timer = malloc( sizeof( uRpcTimer ) );
+  if (timer == NULL)
+    return NULL;
 
-  if( timer == NULL ) return NULL;
-
-  QueryPerformanceFrequency( &timer->pfreq );
-  QueryPerformanceCounter( &timer->start );
+  QueryPerformanceFrequency (&timer->pfreq);
+  QueryPerformanceCounter (&timer->start);
   timer->type = URPC_TIMER_TYPE;
 
   return timer;
-
 }
 
-
-void urpc_timer_destroy( uRpcTimer *timer )
+void
+urpc_timer_destroy (uRpcTimer *timer)
 {
+  if (timer->type != URPC_TIMER_TYPE)
+    return;
 
-  if( timer->type != URPC_TIMER_TYPE ) return;
-
-  free( timer );
-
+  free (timer);
 }
 
-
-void urpc_timer_start( uRpcTimer *timer )
+void
+urpc_timer_start (uRpcTimer *timer)
 {
+  if (timer->type != URPC_TIMER_TYPE)
+    return;
 
-  if( timer->type != URPC_TIMER_TYPE ) return;
-
-  QueryPerformanceCounter( &timer->start );
-
+  QueryPerformanceCounter (&timer->start);
 }
 
-
-double urpc_timer_elapsed( uRpcTimer *timer )
+double
+urpc_timer_elapsed (uRpcTimer *timer)
 {
-
   LARGE_INTEGER finish;
   double elapsed;
 
-  if( timer->type != URPC_TIMER_TYPE ) return -1.0;
+  if (timer->type != URPC_TIMER_TYPE)
+    return -1.0;
 
-  QueryPerformanceCounter( &finish );
+  QueryPerformanceCounter (&finish);
   finish.QuadPart = finish.QuadPart - timer->start.QuadPart;
   finish.QuadPart *= 1000000;
   finish.QuadPart /= timer->pfreq.QuadPart;
@@ -93,13 +87,10 @@ double urpc_timer_elapsed( uRpcTimer *timer )
   elapsed /= 1000000.0;
 
   return elapsed;
-
 }
 
-
-void urpc_timer_sleep( double time )
+void
+urpc_timer_sleep (double time)
 {
-
-  Sleep( (DWORD)( 1000 * time ) );
-
+  Sleep ((DWORD)(1000 * time));
 }

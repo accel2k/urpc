@@ -21,15 +21,17 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-network.h"
 
-
-static struct {
+static struct
+{
   int errnum;
   const char *desc;
-} urpc_network_win_errors [] = {
+}
+urpc_network_win_errors[] =
+{
   { 1, "Unknown error" },
   { WSABASEERR, "No error" },
   { WSAEACCES, "Permission denied" },
@@ -137,46 +139,41 @@ static struct {
   { 0, NULL }
 };
 
-
-int urpc_network_init( void )
+int
+urpc_network_init (void)
 {
-
   WSADATA wsa_data;
 
-  if( WSAStartup( MAKEWORD( 2, 2 ), &wsa_data ) ) return -1;
+  if (WSAStartup (MAKEWORD (2, 2), &wsa_data))
+    return -1;
+
   return 0;
-
 }
 
-void urpc_network_close( void )
+void
+urpc_network_close (void)
 {
-
-  WSACleanup();
-
+  WSACleanup ();
 }
 
-
-int urpc_network_last_error( void )
+int
+urpc_network_last_error (void)
 {
-
-  return WSAGetLastError();
-
+  return WSAGetLastError ();
 }
 
-
-const char* urpc_network_last_error_str( void )
+const char *
+urpc_network_last_error_str (void)
 {
-
   int i = 0;
-  int network_error = WSAGetLastError();
+  int network_error = WSAGetLastError ();
 
-  while( urpc_network_win_errors[i].errnum )
+  while (urpc_network_win_errors[i].errnum != 0)
     {
-    if( urpc_network_win_errors[i].errnum == network_error )
-      return urpc_network_win_errors[i].desc;
-    i += 1;
+      if (urpc_network_win_errors[i].errnum == network_error)
+        return urpc_network_win_errors[i].desc;
+      i += 1;
     }
 
   return urpc_network_win_errors[0].desc;
-
 }

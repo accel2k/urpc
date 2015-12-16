@@ -21,44 +21,41 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-thread.h"
 
 #include <windows.h>
 
-
-uRpcThread *urpc_thread_create( urpc_thread_func func, void *data )
+uRpcThread *
+urpc_thread_create (urpc_thread_func func,
+                    void            *data)
 {
+  uRpcThread *thread = malloc (sizeof (uRpcThread));
 
-  uRpcThread *thread = malloc( sizeof( uRpcThread ) );
+  if (thread == NULL)
+    return NULL;
 
-  if( thread == NULL ) return NULL;
-  *thread = CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)func, data, 0, NULL );
-  if( *thread == NULL )
-    { free( thread ); return NULL; }
+  *thread = CreateThread (NULL, 0, (LPTHREAD_START_ROUTINE)func, data, 0, NULL);
+  if (*thread == NULL)
+    {
+      free (thread);
+      return NULL;
+    }
 
   return thread;
-
 }
 
-
-void urpc_thread_destroy( uRpcThread *thread )
+void
+urpc_thread_destroy (uRpcThread *thread)
 {
+  while (WaitForSingleObject (*thread, INFINITE) != WAIT_OBJECT_0);
 
-  while( WaitForSingleObject( *thread, INFINITE ) != WAIT_OBJECT_0 );
-
-  free( thread );
-
+  free (thread);
 }
 
-
-void *urpc_thread_join( uRpcThread *thread )
+void
+urpc_thread_join (uRpcThread *thread)
 {
-
-  while( WaitForSingleObject( *thread, INFINITE ) != WAIT_OBJECT_0 );
-
-  return NULL;
-
+  while (WaitForSingleObject (*thread, INFINITE) != WAIT_OBJECT_0);
 }
-

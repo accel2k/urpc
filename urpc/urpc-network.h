@@ -21,9 +21,9 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
-/*!
+/**
  * \file urpc-network.h
  *
  * \brief Заголовочный файл библиотеки совместимости с BSD socket
@@ -64,25 +64,23 @@
  *
  */
 
-#ifndef _urpc_network_h
-#define _urpc_network_h
+#ifndef __URPC_NETWORK_H__
+#define __URPC_NETWORK_H__
 
 #include <urpc-exports.h>
 
-
-#if defined( _WIN32 )
+#if defined(_WIN32)
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#define URPC_MSG_NOSIGNAL   0
-#define URPC_EAGAIN         WSAEWOULDBLOCK
-#define URPC_EINTR          WSAEINTR
+#define URPC_MSG_NOSIGNAL      0
+#define URPC_EAGAIN            WSAEWOULDBLOCK
+#define URPC_EINTR             WSAEINTR
 
 #endif
 
-
-#if defined( __unix__ )
+#if defined(__unix__)
 
 #include <errno.h>
 #include <unistd.h>
@@ -96,107 +94,109 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define SOCKET              int
-#define INVALID_SOCKET      -1
-#define closesocket         close
-#define ioctlsocket         ioctl
+#define SOCKET                 int
+#define INVALID_SOCKET         -1
+#define closesocket            close
+#define ioctlsocket            ioctl
 
-#define URPC_MSG_NOSIGNAL   0
-#define URPC_EAGAIN         EAGAIN
-#define URPC_EINTR          EINTR
+#define URPC_MSG_NOSIGNAL      0
+#define URPC_EAGAIN            EAGAIN
+#define URPC_EINTR             EINTR
 
 #endif
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
- /*! Инициализация сетевой подсистемы.
-  *
-  * Функция инициализации вызывается в самом начале програмы. Функция может быть вызвана
-  * несколько раз, в этом случае функция завершения работы должна быть вызвана такое же число раз.
-  * В Unix является заглушкой.
-  *
-  * \return 0 - в случае успеха, иначе -1.
-  *
- */
-URPC_EXPORT int urpc_network_init( void );
-
-
-/*! Завершение работы с сетевой подсистемой.
+/**
  *
- * Функция завершения работы с сетью, вызывается в самом конце программы. Должна быть вызвана
- * такое же число раз как #urpc_network_init. В Unix является заглушкой.
+ * Функция инициализирует сетевую подсистему. Функция инициализации вызывается в самом начале
+ * програмы. Функция может быть вызвана несколько раз, в этом случае функция завершения работы
+ * должна быть вызвана такое же число раз. В Unix является заглушкой.
+ *
+ * \return 0 - в случае успеха, иначе -1.
+ *
+ */
+URPC_EXPORT
+int            urpc_network_init               (void);
+
+/**
+ *
+ * Функция завершает работу с сетевой подсситемой. Функция вызывается в конце работы программы.
+ * Должна быть вызвана* такое же число раз как #urpc_network_init. В Unix является заглушкой.
  *
  * \return Нет.
  *
-*/
-URPC_EXPORT void urpc_network_close( void );
+ */
+URPC_EXPORT
+void           urpc_network_close              (void);
 
-
-/*! Получение кода последней ошибки.
+/**
  *
- *  В Unix возвращается значение errno, в Windows значение функции WSAGetLastError.
+ * Функция возвращает код последней ошибки. В Unix возвращается значение errno, в Windows
+ * значение функции WSAGetLastError.
  *
  * \return Код последней ошибки.
  *
-*/
-URPC_EXPORT int urpc_network_last_error( void );
+ */
+URPC_EXPORT
+int            urpc_network_last_error         (void);
 
-
-/*! Получение строки с описанием последней ошибки.
+/**
  *
- * Возвращаемые строки не должны модифицироваться вызывающей програмой.
+ * Функция возвращает строку с описанием последней ошибки. Возвращаемая строка не должна
+ * модифицироваться вызывающей програмой.
  *
  * \return Строка с описанием последней ошибки.
  *
-*/
-URPC_EXPORT const char* urpc_network_last_error_str( void );
+ */
+URPC_EXPORT
+const char    *urpc_network_last_error_str     (void);
 
-
-/*! Отключение алгоритм Нейгла для указанного сокета.
+/**
  *
- * Отключает объединение маленьких пакетов в один для TCP соединений и соответственно
- * уменьшает задержки в отправке данных.
+ * Функция отключает объединение маленьких пакетов в один для TCP соединений (алгоритм Нейгла)
+ * и соответственно уменьшает задержки в отправке данных.
  *
  * \param socket дескриптор сокета.
  *
  * \return 0 - в случае успеха, иначе -1.
  *
-*/
-URPC_EXPORT int urpc_network_set_tcp_nodelay( SOCKET socket );
+ */
+URPC_EXPORT
+int            urpc_network_set_tcp_nodelay    (SOCKET                 socket);
 
-
-/*! Разрешение использование адреса до момента полного завершения предыдуших соединений.
+/**
  *
+ * Функция разрешает использовать IP адрес до момента полного завершения предыдуших соединений.
  * Становится возможным повторный запуск программы сразу после её завершений.
  *
  * \param socket дескриптор сокета.
  *
  * \return 0 - в случае успеха, иначе -1.
  *
-*/
-URPC_EXPORT int urpc_network_set_reuse( SOCKET socket );
+ */
+URPC_EXPORT
+int            urpc_network_set_reuse          (SOCKET                 socket);
 
-
-/*! Переводит соединение в неблокирующий режим.
+/**
  *
- * После перевода в неблокирующий режим функции recv и send будут немедленно завершать
- * свою работу в независимости от размера принятых и переданных данных. Для реализации
- * полноценного обмена становится необходимым использование функции select.
+ * Функция переводит соединение в неблокирующий режим. После перевода в неблокирующий режим
+ * функции recv и send будут немедленно завершать свою работу в независимости от размера
+ * принятых и переданных данных. Для реализации полноценного обмена становится необходимым
+ * использование функции select.
  *
  * \param socket дескриптор сокета.
  *
  * \return 0 - в случае успеха, иначе -1.
  *
 */
-URPC_EXPORT int urpc_network_set_non_block( SOCKET socket );
-
+URPC_EXPORT
+int            urpc_network_set_non_block      (SOCKET                 socket);
 
 #ifdef __cplusplus
-} // extern "C"
+}
 #endif
 
-#endif // _urpc_network_h
+#endif /* __URPC_NETWORK_H__ */

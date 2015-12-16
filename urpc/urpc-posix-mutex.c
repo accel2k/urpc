@@ -21,7 +21,7 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-mutex.h"
 
@@ -30,42 +30,32 @@
 #include <stdlib.h>
 #include <sys/time.h>
 
-
-void urpc_mutex_init( uRpcMutex *mutex )
+void
+urpc_mutex_init (uRpcMutex *mutex)
 {
-
-  pthread_mutex_init( (pthread_mutex_t*)mutex, NULL );
-
+  pthread_mutex_init ((pthread_mutex_t*)mutex, NULL);
 }
 
-
-void urpc_mutex_clear( uRpcMutex *mutex )
+void
+urpc_mutex_clear (uRpcMutex *mutex)
 {
-
-  pthread_mutex_destroy( (pthread_mutex_t*)mutex );
-
+  pthread_mutex_destroy ((pthread_mutex_t*)mutex);
 }
 
-
-void urpc_mutex_lock( uRpcMutex *mutex )
+void
+urpc_mutex_lock (uRpcMutex *mutex)
 {
-
-  while( pthread_mutex_lock( (pthread_mutex_t*)mutex ) != 0 );
-
+  while (pthread_mutex_lock ((pthread_mutex_t*)mutex) != 0);
 }
 
-
-int urpc_mutex_trylock( uRpcMutex *mutex )
+int
+urpc_mutex_trylock (uRpcMutex *mutex)
 {
-
-  return pthread_mutex_trylock( (pthread_mutex_t*)mutex ) == 0 ? 0 : 1;
-
+  return pthread_mutex_trylock ((pthread_mutex_t*)mutex) == 0 ? 0 : 1;
 }
 
-
-void urpc_mutex_unlock( uRpcMutex *mutex )
+void
+urpc_mutex_unlock (uRpcMutex *mutex)
 {
-
-  while( pthread_mutex_unlock( (pthread_mutex_t*)mutex ) != 0 );
-
+  while (pthread_mutex_unlock ((pthread_mutex_t*)mutex) != 0);
 }

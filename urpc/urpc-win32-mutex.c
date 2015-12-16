@@ -21,48 +21,38 @@
  * Alternatively, you can license this code under a commercial license.
  * Contact the author in this case.
  *
-*/
+ */
 
 #include "urpc-mutex.h"
 
 #include <windows.h>
 
-
-void urpc_mutex_init( uRpcMutex *mutex )
+void
+urpc_mutex_init (uRpcMutex *mutex)
 {
-
-  InitializeCriticalSection( (LPCRITICAL_SECTION)mutex );
-
+  InitializeCriticalSection ((LPCRITICAL_SECTION)mutex);
 }
 
-
-void urpc_mutex_clear( uRpcMutex *mutex )
+void
+urpc_mutex_clear (uRpcMutex *mutex)
 {
-
-  DeleteCriticalSection( (LPCRITICAL_SECTION)mutex );
-
+  DeleteCriticalSection ((LPCRITICAL_SECTION)mutex);
 }
 
-
-void urpc_mutex_lock( uRpcMutex *mutex )
+void
+urpc_mutex_lock (uRpcMutex *mutex)
 {
-
-  EnterCriticalSection( (LPCRITICAL_SECTION)mutex );
-
+  EnterCriticalSection ((LPCRITICAL_SECTION)mutex);
 }
 
-
-int urpc_mutex_trylock( uRpcMutex *mutex )
+int
+urpc_mutex_trylock (uRpcMutex *mutex)
 {
-
-  return TryEnterCriticalSection( (LPCRITICAL_SECTION)mutex ) ? 0 : -1;
-
+  return TryEnterCriticalSection ((LPCRITICAL_SECTION)mutex) ? 0 : -1;
 }
 
-
-void urpc_mutex_unlock( uRpcMutex *mutex )
+void
+urpc_mutex_unlock (uRpcMutex *mutex)
 {
-
-  LeaveCriticalSection( (LPCRITICAL_SECTION)mutex );
-
+  LeaveCriticalSection ((LPCRITICAL_SECTION)mutex);
 }
