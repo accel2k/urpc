@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include "urpc-mem-chunk.h"
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 #define N_DATA 250000
 
@@ -62,14 +62,14 @@ main (int    argc,
       if (data[i]->id != i)
         {
           printf ("error in id %u != %u\n", data[i]->id, i);
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
       for (j = 0; j < 16; j++)
         {
           if (data[i]->data[j] != i * j)
             {
               printf ("error in data[%u] %u != %u\n", j, data[i]->data[j], i * j);
-              exit (ERROR);
+              exit (ERROR_CODE);
             }
         }
     }
@@ -83,14 +83,14 @@ main (int    argc,
       if (data[i]->id != i)
         {
           printf ("realloc error in id %u != %u\n", data[i]->id, i);
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
       for (j = 0; j < 16; j++)
         {
           if (data[i]->data[j] != i * j)
             {
               printf ("realloc error in data[%u] %u != %u\n", j, data[i]->data[j], i * j);
-              exit (ERROR);
+              exit (ERROR_CODE);
             }
         }
     }

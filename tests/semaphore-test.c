@@ -23,7 +23,7 @@
  *
  */
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +47,7 @@ server_thread (void *data)
   if (sem_start == NULL || sem_stop == NULL)
     {
       printf ("can't create semaphores\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   server_ready = 1;
@@ -85,7 +85,7 @@ client_thread (void *data)
   if (sem_start == NULL || sem_stop == NULL)
     {
       printf ("can't open semaphores\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   while (start == 0);
@@ -122,7 +122,7 @@ main (int    argc,
   if (sum != counts)
     {
       printf ("semaphore error");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   printf ("All done\n");

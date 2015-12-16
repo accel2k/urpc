@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 #define BUFFER_SIZE   1024*1024
 #define HEADER_SIZE   16
@@ -166,33 +166,33 @@ main (int    argc,
           if (sparam_length != iparam)
             {
             printf ("Parameter %d size mismatch %u != %u\n", i, sparam_length, iparam);
-            exit (ERROR);
+            exit (ERROR_CODE);
             }
           if (strcmp (sparam, sparams[i]))
             {
             printf ("Parameter %d string mismatch\n", i);
-            exit (ERROR);
+            exit (ERROR_CODE);
             }
 
           iparam = urpc_data_get_uint32 (urpc_data, 5 * i + 2);
           if (iparams[i] != iparam)
             {
             printf ("Parameter %d int mismatch\n", i);
-            exit (ERROR);
+            exit (ERROR_CODE);
             }
 
           fparam = urpc_data_get_float (urpc_data, 5 * i + 3);
           if (fparams[i] != fparam)
             {
             printf ("Parameter %d float mismatch\n", i);
-            exit (ERROR);
+            exit (ERROR_CODE);
             }
 
           dparam = urpc_data_get_double (urpc_data, 5 * i + 4);
           if (dparams[i] != dparam)
             {
             printf ("Parameter %d double mismatch\n", i);
-            exit (ERROR);
+            exit (ERROR_CODE);
             }
         }
     }

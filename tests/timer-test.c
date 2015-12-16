@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include "urpc-timer.h"
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 #if defined( _WIN32 )
 #include <Windows.h>
@@ -59,7 +59,7 @@ main (int argc, char **argv)
     if (delta < 0.95 || delta > 1.05)
       {
         printf ("sleep error, requested %.3lfms, real %.3lfms\n", 1000.0 * delay, 1000.0 * elapsed);
-        exit (ERROR);
+        exit (ERROR_CODE);
       }
     }
 

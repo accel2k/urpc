@@ -28,7 +28,7 @@
 #include "urpc-rwmutex.h"
 #include "urpc-thread.h"
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 volatile int start = 0;
 
@@ -48,7 +48,7 @@ reader_thread_func (void *data)
       if (prev_i != cur_i - 1)
         {
           printf ("index error %d <=> %d\n", prev_i, cur_i);
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
       urpc_rwmutex_reader_unlock (&mutex);
     }
@@ -97,7 +97,7 @@ main (int argc, char **argv)
   if (cur_i != counts)
     {
       printf ("rwmutex error in threads");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   printf ("All done\n");

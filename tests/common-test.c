@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include "urpc-common.h"
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 int
 main (int    argc,
@@ -58,7 +58,7 @@ main (int    argc,
       if (addr == NULL)
         {
         printf ("error resolving %s\n", uri[i]);
-        exit (ERROR);
+        exit (ERROR_CODE);
         }
       freeaddrinfo (addr);
       i += 1;

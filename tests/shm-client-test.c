@@ -28,7 +28,7 @@
 #include "urpc-shm.h"
 #include "urpc-semaphore.h"
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 #define SHM_NAME "urpc-server-test"
 #define SEM_START_NAME "urpc-server-test-start"
@@ -58,7 +58,7 @@ main (int    argc,
   if (io[1] != 1.23456 * 1.23456)
     {
       printf ("communication error io[0] = %lf, io[1] = %lf, local = %lf\n", io[0], io[1], 1.23456 * 1.23456);
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   printf ("All done\n");

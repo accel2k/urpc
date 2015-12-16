@@ -28,7 +28,7 @@
 #include "urpc-mutex.h"
 #include "urpc-thread.h"
 
-#define ERROR -1
+#define ERROR_CODE_CODE -1
 
 volatile int start = 0;
 
@@ -74,7 +74,7 @@ main (int argc, char **argv)
   if ( sum != 2 * counts )
     {
       printf ("mutex error in threads");
-      exit (ERROR);
+      exit (ERROR_CODE_CODE);
     }
 
   printf ("All done");

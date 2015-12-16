@@ -45,6 +45,7 @@ if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_C_COMPILER_ID} STREQUAL "Cl
     set (PLATFORM "posix")
   endif ()
   if (WIN32)
+    add_definitions (-D_WIN32_WINNT=0x0600)
     set (COMPILER_FLAGS "${COMPILER_FLAGS} -mthreads")
     set (PLATFORM "win32")
   endif ()

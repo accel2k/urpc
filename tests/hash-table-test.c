@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include "urpc-hash-table.h"
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 void
 remove_callback (uint32_t key,
@@ -40,7 +40,7 @@ remove_callback (uint32_t key,
       if (urpc_hash_table_remove (data, key) != 0)
         {
           printf ("error removing key %d\n", key);
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
     }
 }
@@ -64,7 +64,7 @@ main (int    argc,
       if (urpc_hash_table_insert (uhash, key, value) != 0)
         {
           printf ("error inserting key %d\n", key);
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
     }
 
@@ -73,7 +73,7 @@ main (int    argc,
       if (urpc_hash_table_insert_uint32 (uhash, key, key) <= 0)
         {
           printf ("error inserting duplicated key %d\n", key);
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
     }
 
@@ -87,12 +87,12 @@ main (int    argc,
           if ((value == NULL || *value != key) && (key % 10000 != 0))
             {
               printf ("error finding key %d\n", key);
-              exit (ERROR);
+              exit (ERROR_CODE);
             }
           else if (value != NULL && key % 10000 == 0)
             {
               printf ("error finding key %d\n", key);
-              exit (ERROR);
+              exit (ERROR_CODE);
             }
         }
     }
@@ -104,7 +104,7 @@ main (int    argc,
           if (key % 10000 != 0)
             {
               printf ("error removing key %d\n", key);
-              exit (ERROR);
+              exit (ERROR_CODE);
             }
         }
     }

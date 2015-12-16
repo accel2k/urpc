@@ -29,7 +29,7 @@
 #include "urpc-thread.h"
 #include "urpc-common.h"
 
-#define ERROR -1
+#define ERROR_CODE -1
 
 #define SERVER_MESSAGE "server say hello"
 #define CLIENT_MESSAGE "client say hello"
@@ -62,25 +62,25 @@ server_thread (void *data)
   if ((addr = urpc_get_sockaddr (uri)) == NULL)
     {
       printf ("can't get address info for %s\n", uri);
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if ((listener = socket (addr->ai_family, proto_style, addr->ai_protocol)) == INVALID_SOCKET)
     {
       printf ("can't create listener socket\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if (urpc_network_set_reuse (listener) != 0)
     {
       printf ("can't reuse address at %s\n", uri);
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if (bind (listener, addr->ai_addr, (socklen_t) addr->ai_addrlen) != 0)
     {
       printf ("can't bind listener socket %d\n", errno);
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   client_addr = malloc (addr->ai_addrlen);
@@ -91,7 +91,7 @@ server_thread (void *data)
     if (listen (listener, 1) != 0)
       {
         printf ("can't listen on socket\n");
-        exit (ERROR);
+        exit (ERROR_CODE);
       }
 
   start = 1;
@@ -105,13 +105,13 @@ server_thread (void *data)
   if (recvfrom (client, buffer, sizeof (buffer), 0, client_addr, &client_addr_len) < 0)
     {
       printf ("server failed to receive data %d\n", errno);
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if (strncmp (CLIENT_MESSAGE, buffer, sizeof (CLIENT_MESSAGE)) != 0)
     {
       printf ("error in client data\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if (urpc_type == URPC_TCP)
@@ -119,7 +119,7 @@ server_thread (void *data)
       if (send (client, SERVER_MESSAGE, sizeof (SERVER_MESSAGE), 0) < 0)
         {
           printf ("server failed to send data\n");
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
     }
 
@@ -128,7 +128,7 @@ server_thread (void *data)
       if (sendto (client, SERVER_MESSAGE, sizeof (SERVER_MESSAGE), 0, client_addr, client_addr_len) < 0)
         {
           printf ("server failed to send data %d\n", errno);
-          exit (ERROR);
+          exit (ERROR_CODE);
         }
     }
 
@@ -160,13 +160,13 @@ client_thread (void *data)
   if ((addr = urpc_get_sockaddr (uri)) == NULL)
     {
       printf ("can't get address info for %s\n", uri);
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if ((client = socket (addr->ai_family, proto_style, addr->ai_protocol)) == INVALID_SOCKET)
     {
       printf ("can't create client socket\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   while (start == 0);
@@ -174,26 +174,26 @@ client_thread (void *data)
   if (connect (client, addr->ai_addr, (socklen_t) addr->ai_addrlen) < 0)
     {
       printf ("can't connect to server socket\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if (send (client, CLIENT_MESSAGE, sizeof (CLIENT_MESSAGE), 0) < 0)
     {
       printf ("client failed to send data \n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   memset (buffer, 0, sizeof (buffer));
   if (recv (client, buffer, sizeof (buffer), 0) < 0)
     {
       printf ("client failed to receive data\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   if (strncmp (SERVER_MESSAGE, buffer, sizeof (SERVER_MESSAGE)) != 0)
     {
       printf ("error in server data\n");
-      exit (ERROR);
+      exit (ERROR_CODE);
     }
 
   closesocket (client);
