@@ -37,6 +37,8 @@
 #ifndef __URCP_TYPES_H__
 #define __URCP_TYPES_H__
 
+#include <urpc-exports.h>
+
 /* Значения по умолчанию. */
 #define URPC_DEFAULT_DATA_TIMEOUT              5.0             /**< Интервал времени в течение которого должна
                                                                     завершиться процедура обмена данными. */
@@ -78,5 +80,17 @@ typedef enum
   URPC_SECURITY_PRIVKEY_ENCRYPT              = 103,
   URPC_SECURITY_PUBKEY_ENCRYPT               = 104
 } uRpcSecurity;
+
+/**
+ *
+ * Функция возвращает тип протокола передачи данных для указанного RPC адреса.
+ *
+ * \param uri RPC адрес.
+ *
+ * \return Тип протокола передачи данных.
+ *
+ */
+URPC_EXPORT
+uRpcType               urpc_get_type           (const char            *uri);
 
 #endif /* __URCP_TYPES_H__ */
