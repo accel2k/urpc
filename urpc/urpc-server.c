@@ -429,6 +429,7 @@ urpc_server_create (const char *uri,
   urpc_server->sessions_chunks = NULL;
   urpc_server->last_session_id = 0;
   urpc_server->session_timeout = session_timeout;
+  urpc_server->session_check = NULL;
   urpc_server->transport = NULL;
   urpc_server->servers = NULL;
   urpc_server->threads_num = threads_num;
@@ -508,7 +509,8 @@ urpc_server_destroy (uRpcServer *urpc_server)
         }
     }
 
-  urpc_thread_destroy (urpc_server->session_check);
+  if (urpc_server->session_check != NULL)
+    urpc_thread_destroy (urpc_server->session_check);
 
   /* Удаляем объект обмена данными. */
   if (urpc_server->transport != NULL)
