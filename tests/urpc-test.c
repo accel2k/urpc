@@ -37,9 +37,10 @@
 #define URPC_TEST_PARAM_ARRAY              URPC_PARAM_USER + 1
 
 char *uri = NULL;
-unsigned int payload_size = 0;
-unsigned int threads_num = 0;
-unsigned int requests_num = 0;
+double timeout = URPC_DEFAULT_SESSION_TIMEOUT;
+unsigned int payload_size = 1024;
+unsigned int threads_num = 1;
+unsigned int requests_num = 1000;
 unsigned int iterations_num = 0;
 unsigned int servers_num = 0;
 unsigned int run_server = 0;
@@ -58,6 +59,7 @@ help (char *prog_name)
   printf ("\nUsage:\n");
   printf ("  %s: [OPTION...] URI\n\n", prog_name);
   printf ("Options:\n");
+  printf ("  -w, --timeout     RPC timeout (default: 5.0)\n");
   printf ("  -s, --size        RPC payload size (default: 1024)\n");
   printf ("  -t, --threads     Number of working client threads (default: 1)\n");
   printf ("  -r, --requests    Number of RPC requests per thread (default: 1000)\n");
@@ -112,7 +114,7 @@ urpc_test_client_proc (void *data)
   uint32_t array_size;
   unsigned int i, j;
 
-  client = urpc_client_create (uri, payload_size + 128, URPC_DEFAULT_DATA_TIMEOUT);
+  client = urpc_client_create (uri, payload_size + 128, timeout);
   if (client == NULL)
     {
       printf ("error creating uRPC client\n");
@@ -282,6 +284,13 @@ main (int    argc,
             continue;
           }
 
+        if ((strcmp (argv[i], "-w") == 0) || strcmp (argv[i], "--timeout") == 0)
+          {
+            i += 1;
+            timeout = atof (argv[i]);
+            continue;
+          }
+
         if ((strcmp (argv[i], "-r") == 0) || strcmp (argv[i], "--requests") == 0)
           {
             i += 1;
@@ -314,16 +323,10 @@ main (int    argc,
         run_clients = 1;
       }
 
-    if (payload_size == 0)
-      payload_size = 1024;
     if (payload_size < 4)
       payload_size = 4;
     if (payload_size % 2 != 0)
       payload_size -= 1;
-    if (threads_num == 0)
-      threads_num = 1;
-    if (requests_num == 0)
-      requests_num = 1000;
     if (iterations_num == 0)
       iterations_num = 1;
     if (servers_num == 0)
@@ -347,7 +350,7 @@ main (int    argc,
   if (run_server)
     {
       server = urpc_server_create (uri, servers_num, FD_SETSIZE, URPC_DEFAULT_SESSION_TIMEOUT,
-                                   payload_size + 128, URPC_DEFAULT_DATA_TIMEOUT);
+                                   payload_size + 128, timeout);
       if (server == NULL)
         {
           printf ("error creating uRPC server\n");
