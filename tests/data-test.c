@@ -170,6 +170,11 @@ main (int    argc,
 
       for (i = 0; i < MAX_PARAMS; i++)
         {
+          if (urpc_data_get_strings_length (urpc_data, 5 * i) != MAX_PARAMS - 1)
+            {
+            printf ("Parameter %d number mismatch\n", i);
+            exit (ERROR_CODE);
+            }
           for (j = 1; j < MAX_PARAMS - 1; j++)
             {
               char *string = urpc_data_dup_string (urpc_data, 5 * i, j);

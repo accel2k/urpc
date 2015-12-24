@@ -66,6 +66,8 @@
  * возвращает указатель на копию строки из буфера. После использования этой строки
  * необходимо освободить память функцией #urpc_data_free_string.
  *
+ * Число строк в массиве можно узнать функцией #urpc_data_get_strings_length.
+ *
  * При использовании этих функций будет автоматически происходить преобразование данных
  * в зависимости от архитектуры.
  *
@@ -543,7 +545,7 @@ int            urpc_data_set_strings           (uRpcData              *urpc_data
  *
  * \param urpc_data указатель на RPC буфер;
  * \param id идентификатор переменной;
- * \param index номер строки
+ * \param index номер строки.
  *
  * \return Указатель на строку в буфере или NULL если переменная не зарегистрирована.
  *
@@ -559,7 +561,8 @@ const char    *urpc_data_get_string            (uRpcData              *urpc_data
  * Пользователь должен самостоятельно освободить память функцией #urpc_data_free_string.
  *
  * \param urpc_data указатель на RPC буфер;
- * \param id идентификатор переменной.
+ * \param id идентификатор переменной;
+ * \param index номер строки.
  *
  * \return Указатель на новую строку или NULL если переменная не зарегистрирована.
  *
@@ -568,6 +571,20 @@ URPC_EXPORT
 char          *urpc_data_dup_string            (uRpcData              *urpc_data,
                                                 uint32_t               id,
                                                 uint32_t               index);
+
+/**
+ *
+ * Функция возвращает число строк в массиве.
+ *
+ * \param urpc_data указатель на RPC буфер;
+ * \param id идентификатор переменной.
+ *
+ * \return Число строк или 0 если переменная не зарегистрирована.
+ *
+ */
+URPC_EXPORT
+uint32_t       urpc_data_get_strings_length    (uRpcData              *urpc_data,
+                                                uint32_t               id);
 
 /**
  *

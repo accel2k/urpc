@@ -815,6 +815,34 @@ urpc_data_dup_string (uRpcData *urpc_data,
   return dup_string;
 }
 
+uint32_t
+urpc_data_get_strings_length (uRpcData *urpc_data,
+                              uint32_t  id)
+{
+  uint32_t size;
+  const char *buffer;
+  int offset;
+  int i;
+
+  if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
+    return 0;
+
+  buffer = (const char *) urpc_data_get_param (&urpc_data->input, id, &size);
+  if (buffer == NULL)
+    return 0;
+
+  i = 0;
+  offset = 0;
+  do
+    {
+      offset += strlen (buffer + offset) + 1;
+      i += 1;
+    }
+  while (offset < size);
+
+  return i;
+}
+
 void
 urpc_data_free_string (char *string)
 {
