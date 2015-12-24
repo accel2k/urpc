@@ -730,38 +730,84 @@ urpc_data_set_string (uRpcData   *urpc_data,
   return urpc_data_set_param (&urpc_data->output, id, string, (uint32_t) length) == NULL ? -1 : 0;
 }
 
+int
+urpc_data_set_strings (uRpcData     *urpc_data,
+                       uint32_t      id,
+                       char * const *strings)
+{
+  size_t size;
+  char *buffer;
+  int i;
+
+  if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
+    return -1;
+
+  size = 0;
+  for (i = 0; strings[i] != NULL; i++)
+      size += strlen (strings[i]) + 1;
+
+  if (size > (urpc_data->output.buffer_size - urpc_data->output.data_size))
+    return -1;
+
+  buffer = urpc_data_set_param (&urpc_data->output, id, NULL, (uint32_t) size);
+  if (buffer == NULL)
+    return -1;
+
+  for (i = 0; strings[i] != NULL; i++)
+    {
+      size = strlen (strings[i]) + 1;
+      memcpy (buffer, strings[i], size);
+      buffer += size;
+    }
+
+  return 0;
+}
+
 const char *
 urpc_data_get_string (uRpcData *urpc_data,
-                      uint32_t  id)
+                      uint32_t  id,
+                      uint32_t  index)
 {
   uint32_t size;
-  const char *string;
+  const char *buffer;
+  int offset;
+  int i;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
     return NULL;
 
-  string = (const char *) urpc_data_get_param (&urpc_data->input, id, &size);
-  if (!string || string[size - 1] != 0)
+  buffer = (const char *) urpc_data_get_param (&urpc_data->input, id, &size);
+  if (buffer == NULL)
     return NULL;
 
-  return string;
+  i = 0;
+  offset = 0;
+  do
+    {
+      if (index == i)
+        return buffer + offset;
+      offset += strlen (buffer + offset) + 1;
+      i += 1;
+    }
+  while (offset < size);
+
+  return NULL;
 }
 
 char *
 urpc_data_dup_string (uRpcData *urpc_data,
-                      uint32_t  id)
+                      uint32_t  id,
+                      uint32_t  index)
 {
   uint32_t size;
   const char *string;
   char *dup_string;
 
-  if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
+  string = urpc_data_get_string (urpc_data, id, index);
+  if (string == NULL)
     return NULL;
 
-  string = (const char *) urpc_data_get_param (&urpc_data->input, id, &size);
-  if (!string || string[size - 1] != 0)
-    return NULL;
-
+  size = (int)strlen (string) + 1;
   dup_string = malloc (size);
   if (dup_string != NULL)
     memcpy (dup_string, string, size);

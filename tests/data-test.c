@@ -31,7 +31,7 @@
 
 #define ERROR_CODE -1
 
-#define BUFFER_SIZE   1024*1024
+#define BUFFER_SIZE   32*1024*1024
 #define HEADER_SIZE   16
 #define MAX_PARAMS    1024
 
@@ -63,11 +63,12 @@ main (int    argc,
   const char *sparam;
   char *sparams[MAX_PARAMS];
   int sparam_length;
+  char **strings;
 
   FILE *fio;
   char *fio_name = NULL;
 
-  int i;
+  int i, j;
 
   if (argc == 1)
     {
@@ -105,6 +106,7 @@ main (int    argc,
   urpc_data = urpc_data_create (BUFFER_SIZE, HEADER_SIZE, NULL, NULL, 1);
 
   /* Подготавливаем набор тестовых данных. */
+  strings = malloc (MAX_PARAMS * sizeof (char*));
   for (i = 0; i < MAX_PARAMS; i++)
     {
       iparams[i] = 251 * i;
@@ -113,6 +115,16 @@ main (int    argc,
 
       sparams[i] = malloc (128);
       snprintf (sparams[i], 128, "Test string %10u, %+8.6f, %+8.6lf", iparams[i], fparams[i], dparams[i]);
+
+      if (i == 0 || i == MAX_PARAMS - 1)
+        {
+          strings[i] = NULL;
+        }
+      else
+        {
+          strings[i] = malloc (128);
+          snprintf (strings[i], 128, "Test string %d", i);
+        }
     }
 
   /* Размещаем тестовые данные в буффере. */
@@ -120,14 +132,13 @@ main (int    argc,
     {
       for (i = 0; i < MAX_PARAMS; i++)
         {
-
-          sparam_length = (int) strlen (sparams[i]) + 1;
-          urpc_data_set (urpc_data, 5 * i, sparams[i], sparam_length);
+          strings[0] = sparams[i];
+          sparam_length = (int)strlen (sparams[i]) + 1;
+          urpc_data_set_strings (urpc_data, 5 * i, strings);
           urpc_data_set_uint32 (urpc_data, 5 * i + 1, sparam_length);
           urpc_data_set_uint32 (urpc_data, 5 * i + 2, iparams[i]);
           urpc_data_set_float (urpc_data, 5 * i + 3, fparams[i]);
           urpc_data_set_double (urpc_data, 5 * i + 4, dparams[i]);
-
         }
 
       data = urpc_data_get_data (urpc_data, URPC_DATA_OUTPUT);
@@ -159,16 +170,26 @@ main (int    argc,
 
       for (i = 0; i < MAX_PARAMS; i++)
         {
-          sparam = urpc_data_get_string (urpc_data, 5 * i);
+          for (j = 1; j < MAX_PARAMS - 1; j++)
+            {
+              char *string = urpc_data_dup_string (urpc_data, 5 * i, j);
+              if (strcmp (string, strings[j]) != 0)
+                {
+                printf ("Parameter %d, %d string mismatch\n", i, j);
+                exit (ERROR_CODE);
+                }
+              urpc_data_free_string (string);
+            }
+          sparam = urpc_data_get_string (urpc_data, 5 * i, 0);
           iparam = urpc_data_get_uint32 (urpc_data, 5 * i + 1);
 
-          sparam_length = (int) strlen (sparam) + 1;
+          sparam_length = (int)strlen (sparam) + 1;
           if (sparam_length != iparam)
             {
             printf ("Parameter %d size mismatch %u != %u\n", i, sparam_length, iparam);
             exit (ERROR_CODE);
             }
-          if (strcmp (sparam, sparams[i]))
+          if (strcmp (sparam, sparams[i]) != 0)
             {
             printf ("Parameter %d string mismatch\n", i);
             exit (ERROR_CODE);
