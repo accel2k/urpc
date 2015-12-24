@@ -146,6 +146,7 @@ urpc_test_client_proc (void *data)
   urpc_mutex_lock (&lock);
   client_id = running_clients += 1;
   printf ("uRPC client %d is connected to server\n", client_id);
+  fflush (stdout);
   urpc_mutex_unlock (&lock);
 
   while (!start);
@@ -343,13 +344,6 @@ main (int    argc,
       payload_size = URPC_MAX_DATA_SIZE - 128;
     }
 
-  clients = malloc (threads_num * sizeof (uRpcThread *));
-  if (clients == NULL)
-    {
-      printf ("error allocating memory for clients\n");
-      return -1;
-    }
-
   if (run_server)
     {
       server = urpc_server_create (uri, servers_num, FD_SETSIZE, URPC_DEFAULT_SESSION_TIMEOUT,
@@ -374,44 +368,62 @@ main (int    argc,
 
   urpc_mutex_init (&lock);
 
-  for (i = 0; i < threads_num; i++)
+  if (run_clients)
     {
-      clients[i] = urpc_thread_create (urpc_test_client_proc, NULL);
-      if (clients[i] == NULL)
+      clients = malloc (threads_num * sizeof (uRpcThread *));
+      if (clients == NULL)
         {
-          printf ("error starting uRPC client thread\n");
+          printf ("error allocating memory for clients\n");
           return -1;
         }
+
+      for (i = 0; i < threads_num; i++)
+        {
+          clients[i] = urpc_thread_create (urpc_test_client_proc, NULL);
+          if (clients[i] == NULL)
+            {
+              printf ("error starting uRPC client thread\n");
+              return -1;
+            }
+        }
+
+      do
+        {
+          urpc_mutex_lock (&lock);
+          local_running_clients = running_clients;
+          urpc_mutex_unlock (&lock);
+          urpc_timer_sleep (0.1);
+        }
+      while (local_running_clients != threads_num && !fail);
+
+      urpc_timer_sleep (2.0);
+      if (!fail)
+        start = 1;
+
+      do
+        {
+          urpc_mutex_lock (&lock);
+          local_running_clients = running_clients;
+          urpc_mutex_unlock (&lock);
+          urpc_timer_sleep (0.1);
+        }
+      while (local_running_clients != 0);
+
+      for (i = 0; i < threads_num; i++)
+        urpc_thread_destroy (clients[i]);
+      free (clients);
     }
-
-  do
-    {
-      urpc_mutex_lock (&lock);
-      local_running_clients = running_clients;
-      urpc_mutex_unlock (&lock);
-      urpc_timer_sleep (0.1);
-    }
-  while (local_running_clients != threads_num && !fail);
-
-  urpc_timer_sleep (2.0);
-  if (!fail)
-    start = 1;
-
-  do
-    {
-      urpc_mutex_lock (&lock);
-      local_running_clients = running_clients;
-      urpc_mutex_unlock (&lock);
-      urpc_timer_sleep (0.1);
-    }
-  while (local_running_clients != 0);
-
-  for (i = 0; i < threads_num; i++)
-    urpc_thread_destroy (clients[i]);
-  free (clients);
 
   if (run_server)
-    urpc_server_destroy (server);
+    {
+      if (!run_clients)
+        {
+          printf ("Press [Enter] to terminate server...\n");
+          fflush (stdout);
+          getchar ();
+        }
+      urpc_server_destroy (server);
+    }
 
   return 0;
 }
