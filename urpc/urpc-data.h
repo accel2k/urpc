@@ -345,14 +345,16 @@ int            urpc_data_set_int32             (uRpcData              *urpc_data
  * Функция возвращает значение переменной типа int32 из буфера приема.
  *
  * \param urpc_data указатель на RPC буфер;
- * \param id идентификатор переменной.
+ * \param id идентификатор переменной;
+ * \param value адрес для сохранения значения переменной.
  *
- * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
+ * \return 0 в случае успешного чтения, отрицательное число в случае ошибки.
  *
  */
 URPC_EXPORT
-int32_t        urpc_data_get_int32             (uRpcData              *urpc_data,
-                                                uint32_t               id);
+int            urpc_data_get_int32             (uRpcData              *urpc_data,
+                                                uint32_t               id,
+                                                int32_t               *value);
 
 /**
  *
@@ -375,14 +377,16 @@ int            urpc_data_set_uint32            (uRpcData              *urpc_data
  * Функция возвращает значение переменной типа uint32 из буфера приема.
  *
  * \param urpc_data указатель на RPC буфер;
- * \param id идентификатор переменной.
+ * \param id идентификатор переменной;
+ * \param value адрес для сохранения значения переменной.
  *
- * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
+ * \return 0 в случае успешного чтения, отрицательное число в случае ошибки.
  *
  */
 URPC_EXPORT
-uint32_t       urpc_data_get_uint32            (uRpcData              *urpc_data,
-                                                uint32_t               id);
+int            urpc_data_get_uint32            (uRpcData              *urpc_data,
+                                                uint32_t               id,
+                                                uint32_t              *value);
 
 /**
  *
@@ -405,14 +409,16 @@ int            urpc_data_set_int64             (uRpcData              *urpc_data
  * Функция возвращает значение переменной типа int64 из буфера приема.
  *
  * \param urpc_data указатель на RPC буфер;
- * \param id идентификатор переменной.
+ * \param id идентификатор переменной;
+ * \param value адрес для сохранения значения переменной.
  *
- * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
+ * \return 0 в случае успешного чтения, отрицательное число в случае ошибки.
  *
  */
 URPC_EXPORT
-int64_t        urpc_data_get_int64             (uRpcData              *urpc_data,
-                                                uint32_t               id);
+int            urpc_data_get_int64             (uRpcData              *urpc_data,
+                                                uint32_t               id,
+                                                int64_t               *value);
 
 /**
  *
@@ -435,14 +441,16 @@ int            urpc_data_set_uint64            (uRpcData              *urpc_data
  * Функция возвращает значение переменной типа uint64 из буфера приема.
  *
  * \param urpc_data указатель на RPC буфер;
- * \param id идентификатор переменной.
+ * \param id идентификатор переменной;
+ * \param value адрес для сохранения значения переменной.
  *
- * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
+ * \return 0 в случае успешного чтения, отрицательное число в случае ошибки.
  *
  */
 URPC_EXPORT
-uint64_t       urpc_data_get_uint64            (uRpcData              *urpc_data,
-                                                uint32_t               id);
+int            urpc_data_get_uint64            (uRpcData              *urpc_data,
+                                                uint32_t               id,
+                                                uint64_t              *value);
 
 /**
  *
@@ -465,14 +473,16 @@ int            urpc_data_set_float             (uRpcData              *urpc_data
  * Функция возвращает значение переменной типа float из буфера приема.
  *
  * \param urpc_data указатель на RPC буфер;
- * \param id идентификатор переменной.
+ * \param id идентификатор переменной;
+ * \param value адрес для сохранения значения переменной.
  *
- * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
+ * \return 0 в случае успешного чтения, отрицательное число в случае ошибки.
  *
  */
 URPC_EXPORT
-float          urpc_data_get_float             (uRpcData              *urpc_data,
-                                                uint32_t               id);
+int            urpc_data_get_float             (uRpcData              *urpc_data,
+                                                uint32_t               id,
+                                                float                 *value);
 
 /**
  *
@@ -495,14 +505,16 @@ int            urpc_data_set_double            (uRpcData              *urpc_data
  * Функция возвращает значение переменной типа double из буфера приема.
  *
  * \param urpc_data указатель на RPC буфер;
- * \param id идентификатор переменной.
+ * \param id идентификатор переменной;
+ * \param value адрес для сохранения значения переменной.
  *
- * \return Значение переменной. Если переменная не зарегистрирована возвращается 0.
+ * \return 0 в случае успешного чтения, отрицательное число в случае ошибки.
  *
 */
 URPC_EXPORT
-double         urpc_data_get_double            (uRpcData              *urpc_data,
-                                                uint32_t               id);
+int            urpc_data_get_double            (uRpcData              *urpc_data,
+                                                uint32_t               id,
+                                                double                *value);
 
 /**
  *

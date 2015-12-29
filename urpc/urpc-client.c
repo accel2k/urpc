@@ -270,7 +270,8 @@ urpc_client_exec (uRpcClient *urpc_client,
   if (urpc_client->state == URPC_STATE_NOT_CONNECTED
       && proc_id == URPC_PROC_LOGIN)
     {
-      if (urpc_data_get_uint32 (urpc_client->urpc_data, URPC_PARAM_STATUS) != URPC_STATUS_OK)
+      urpc_data_get_uint32 (urpc_client->urpc_data, URPC_PARAM_STATUS, &status);
+      if (status != URPC_STATUS_OK)
         return URPC_STATUS_AUTH_ERROR;
       urpc_client->session_id = UINT32_FROM_BE (iheader->session);
       urpc_client->state = URPC_STATE_CONNECTED;

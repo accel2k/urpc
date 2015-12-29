@@ -186,7 +186,7 @@ main (int    argc,
               urpc_data_free_string (string);
             }
           sparam = urpc_data_get_string (urpc_data, 5 * i, 0);
-          iparam = urpc_data_get_uint32 (urpc_data, 5 * i + 1);
+          urpc_data_get_uint32 (urpc_data, 5 * i + 1, &iparam);
 
           sparam_length = (int)strlen (sparam) + 1;
           if (sparam_length != iparam)
@@ -200,21 +200,21 @@ main (int    argc,
             exit (ERROR_CODE);
             }
 
-          iparam = urpc_data_get_uint32 (urpc_data, 5 * i + 2);
+          urpc_data_get_uint32 (urpc_data, 5 * i + 2, &iparam);
           if (iparams[i] != iparam)
             {
             printf ("Parameter %d int mismatch\n", i);
             exit (ERROR_CODE);
             }
 
-          fparam = urpc_data_get_float (urpc_data, 5 * i + 3);
+          urpc_data_get_float (urpc_data, 5 * i + 3, &fparam);
           if (fparams[i] != fparam)
             {
             printf ("Parameter %d float mismatch\n", i);
             exit (ERROR_CODE);
             }
 
-          dparam = urpc_data_get_double (urpc_data, 5 * i + 4);
+          urpc_data_get_double (urpc_data, 5 * i + 4, &dparam);
           if (dparams[i] != dparam)
             {
             printf ("Parameter %d double mismatch\n", i);

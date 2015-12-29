@@ -225,7 +225,7 @@ urpc_server_func (void *data)
 
       /* Запрашиваемая функция. */
       if (session_id == 0)
-        proc_id = urpc_data_get_uint32 (urpc_data, URPC_PARAM_PROC);
+        urpc_data_get_uint32 (urpc_data, URPC_PARAM_PROC, &proc_id);
 
       /* Запрос возможностей сервера. */
       if (session_id == 0 && proc_id == URPC_PROC_GET_CAP)
@@ -312,7 +312,7 @@ urpc_server_func (void *data)
         session->state = URPC_STATE_CONNECTED;
 
       /* Запрашиваемая функция. */
-      proc_id = urpc_data_get_uint32 (urpc_data, URPC_PARAM_PROC);
+      urpc_data_get_uint32 (urpc_data, URPC_PARAM_PROC, &proc_id);
 
       if (proc_id == URPC_PROC_LOGOUT && session->state == URPC_STATE_CONNECTED)
         {

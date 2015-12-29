@@ -567,21 +567,23 @@ urpc_data_set_int32 (uRpcData *urpc_data,
   return urpc_data_set_param (&urpc_data->output, id, &value, sizeof (int32_t)) == NULL ? -1 : 0;
 }
 
-int32_t
+int
 urpc_data_get_int32 (uRpcData *urpc_data,
-                     uint32_t  id)
+                     uint32_t  id,
+                     int32_t  *value)
 {
-  int32_t *value;
+  int32_t *value_addr;
   uint32_t value_size;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
-    return 0;
+    return -1;
 
-  value = (int32_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
-  if (value == NULL || value_size != sizeof (int32_t))
-    return 0;
+  value_addr = (int32_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
+  if (value_addr == NULL || value_size != sizeof (int32_t))
+    return -1;
 
-  return INT32_FROM_BE (*value);
+  *value = INT32_FROM_BE (*value_addr);
+  return 0;
 }
 
 int
@@ -596,21 +598,23 @@ urpc_data_set_uint32 (uRpcData *urpc_data,
   return urpc_data_set_param (&urpc_data->output, id, &value, sizeof (int32_t)) == NULL ? -1 : 0;
 }
 
-uint32_t
+int
 urpc_data_get_uint32 (uRpcData *urpc_data,
-                      uint32_t  id)
+                      uint32_t  id,
+                      uint32_t *value)
 {
-  uint32_t *value;
+  uint32_t *value_addr;
   uint32_t value_size;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
-    return 0;
+    return -1;
 
-  value = (uint32_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
-  if (value == NULL || value_size != sizeof (uint32_t))
-    return 0;
+  value_addr = (uint32_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
+  if (value_addr == NULL || value_size != sizeof (uint32_t))
+    return -1;
 
-  return UINT32_FROM_BE (*value);
+  *value = UINT32_FROM_BE (*value_addr);
+  return 0;
 }
 
 int
@@ -625,21 +629,23 @@ urpc_data_set_int64 (uRpcData *urpc_data,
   return urpc_data_set_param (&urpc_data->output, id, &value, sizeof (int64_t)) == NULL ? -1 : 0;
 }
 
-int64_t
+int
 urpc_data_get_int64 (uRpcData *urpc_data,
-                     uint32_t  id)
+                     uint32_t  id,
+                     int64_t  *value)
 {
-  int64_t *value;
+  int64_t *value_addr;
   uint32_t value_size;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
-    return 0;
+    return -1;
 
-  value = (int64_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
-  if (value == NULL || value_size != sizeof (int64_t))
-    return 0;
+  value_addr = (int64_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
+  if (value_addr == NULL || value_size != sizeof (int64_t))
+    return -1;
 
-  return INT64_FROM_BE (*value);
+  *value = INT64_FROM_BE (*value_addr);
+  return 0;
 }
 
 int
@@ -654,21 +660,23 @@ urpc_data_set_uint64 (uRpcData *urpc_data,
   return urpc_data_set_param (&urpc_data->output, id, &value, sizeof (uint64_t)) == NULL ? -1 : 0;
 }
 
-uint64_t
+int
 urpc_data_get_uint64 (uRpcData *urpc_data,
-                      uint32_t  id)
+                      uint32_t  id,
+                      uint64_t *value)
 {
-  uint64_t *value;
+  uint64_t *value_addr;
   uint32_t value_size;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
-    return 0;
+    return -1;
 
-  value = (uint64_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
-  if (value == NULL || value_size != sizeof (uint64_t))
-    return 0;
+  value_addr = (uint64_t *) urpc_data_get_param (&urpc_data->input, id, &value_size);
+  if (value_addr == NULL || value_size != sizeof (uint64_t))
+    return -1;
 
-  return UINT64_FROM_BE (*value);
+  *value = UINT64_FROM_BE (*value_addr);
+  return 0;
 }
 
 int
@@ -682,14 +690,19 @@ urpc_data_set_float (uRpcData *urpc_data,
   return urpc_data_set_uint32 (urpc_data, id, uvalue);
 }
 
-float
+int
 urpc_data_get_float (uRpcData *urpc_data,
-                     uint32_t  id)
+                     uint32_t  id,
+                     float    *value)
 {
-  uint32_t uvalue = urpc_data_get_uint32 (urpc_data, id);
+  uint32_t uvalue;
   void *pvalue = &uvalue;
 
-  return *(float *) pvalue;
+  if (urpc_data_get_uint32 (urpc_data, id, &uvalue) != 0)
+    return -1;
+
+  *value = *(float *) pvalue;
+  return 0;
 }
 
 int
@@ -703,14 +716,19 @@ urpc_data_set_double (uRpcData *urpc_data,
   return urpc_data_set_uint64 (urpc_data, id, uvalue);
 }
 
-double
+int
 urpc_data_get_double (uRpcData *urpc_data,
-                      uint32_t  id)
+                      uint32_t  id,
+                      double   *value)
 {
-  uint64_t uvalue = urpc_data_get_uint64 (urpc_data, id);
+  uint64_t uvalue;
   void *pvalue = &uvalue;
 
-  return *(double *) pvalue;
+  if (urpc_data_get_uint64 (urpc_data, id, &uvalue) != 0)
+    return -1;
+
+  *value = *(double *) pvalue;
+  return 0;
 }
 
 int
