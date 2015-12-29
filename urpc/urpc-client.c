@@ -194,19 +194,22 @@ urpc_client_lock (uRpcClient *urpc_client)
   urpc_mutex_lock (&urpc_client->lock);
   urpc_client->urpc_data = NULL;
 
-  switch (urpc_client->type)
+  if (urpc_client->transport != NULL)
     {
-    case URPC_UDP:
-      urpc_client->urpc_data = urpc_udp_client_lock (urpc_client->transport);
-      break;
-    case URPC_TCP:
-      urpc_client->urpc_data = urpc_tcp_client_lock (urpc_client->transport);
-      break;
-    case URPC_SHM:
-      urpc_client->urpc_data = urpc_shm_client_lock (urpc_client->transport);
-      break;
-    case URPC_UNKNOWN:
-      break;
+      switch (urpc_client->type)
+        {
+        case URPC_UDP:
+          urpc_client->urpc_data = urpc_udp_client_lock (urpc_client->transport);
+          break;
+        case URPC_TCP:
+          urpc_client->urpc_data = urpc_tcp_client_lock (urpc_client->transport);
+          break;
+        case URPC_SHM:
+          urpc_client->urpc_data = urpc_shm_client_lock (urpc_client->transport);
+          break;
+        case URPC_UNKNOWN:
+          break;
+        }
     }
 
   if (urpc_client->urpc_data == NULL)
