@@ -446,7 +446,7 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       if (sr_size <= 0)
         {
           int recv_error = urpc_network_last_error ();
-          if (sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
             continue;
           urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
           return NULL;
@@ -504,7 +504,7 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       if (sr_size <= 0)
         {
           int recv_error = urpc_network_last_error ();
-          if (sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
             continue;
           urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
           return NULL;
@@ -592,7 +592,7 @@ urpc_tcp_server_send (uRpcTCPServer *urpc_tcp_server,
       if (sr_size <= 0)
         {
           int send_error = urpc_network_last_error ();
-          if (sr_size == 0 || send_error == URPC_EINTR || send_error == URPC_EAGAIN)
+          if (send_error == URPC_EINTR || send_error == URPC_EAGAIN)
             continue;
           urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
           return -1;

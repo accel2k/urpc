@@ -201,12 +201,11 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
         continue;
 
       /* Отправляем данные. */
-      sr_size =
-        send (urpc_tcp_client->socket, (char *) oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL);
+      sr_size = send (urpc_tcp_client->socket, (char *) oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
           int send_error = urpc_network_last_error ();
-          if (sr_size == 0 || send_error == URPC_EINTR || send_error == URPC_EAGAIN)
+          if (send_error == URPC_EINTR || send_error == URPC_EAGAIN)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
@@ -250,13 +249,13 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
       if (selected == 0)
         continue;
 
-      /* Отправляем данные. */
+      /* Считываем данные. */
       sr_size =  recv (urpc_tcp_client->socket, (char *) iheader + received, 
                        recv_size - received, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
           int recv_error = urpc_network_last_error ();
-          if (sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
@@ -309,13 +308,13 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
       if (selected == 0)
         continue;
 
-      /* Отправляем данные. */
+      /* Считываем данные. */
       sr_size = recv (urpc_tcp_client->socket, (char *) iheader + received,
                       recv_size - received, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
           int recv_error = urpc_network_last_error ();
-          if (sr_size == 0 || recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
