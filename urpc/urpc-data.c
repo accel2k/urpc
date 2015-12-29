@@ -788,7 +788,7 @@ urpc_data_get_string (uRpcData *urpc_data,
 {
   uint32_t size;
   const char *buffer;
-  int offset;
+  size_t offset;
   int i;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
@@ -839,7 +839,7 @@ urpc_data_get_strings_length (uRpcData *urpc_data,
 {
   uint32_t size;
   const char *buffer;
-  int offset;
+  size_t offset;
   int i;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
