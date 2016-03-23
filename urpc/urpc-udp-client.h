@@ -40,17 +40,23 @@ typedef struct _uRpcUDPClient uRpcUDPClient;
 
 /* Функция создаёт RPC клиента и подключается к серверу по протоколу UDP.
    Параметры функции аналогичны urpc_server_create. */
-uRpcUDPClient *urpc_udp_client_create          (const char            *uri,
-                                                double                 timeout);
+uRpcUDPClient *urpc_udp_client_create                  (const char            *uri,
+                                                        double                 timeout);
 
 /* Функция удаляет клиента. */
-void urpc_udp_client_destroy                   (uRpcUDPClient         *urpc_udp_client);
+void           urpc_udp_client_destroy                 (uRpcUDPClient         *urpc_udp_client);
 
 /* Функция блокирует канал связи. */
-uRpcData *urpc_udp_client_lock                 (uRpcUDPClient         *urpc_udp_client);
+uRpcData      *urpc_udp_client_lock                    (uRpcUDPClient         *urpc_udp_client);
 
 /* Функция производит отправку запроса серверу и приём от него ответа. */
-uint32_t urpc_udp_client_exchange              (uRpcUDPClient         *urpc_udp_client);
+uint32_t       urpc_udp_client_exchange                (uRpcUDPClient         *urpc_udp_client);
+
+/* Функция возвращает указатель на строку с локальным адресом в формате URI. */
+const char    *urpc_udp_client_get_self_address        (uRpcUDPClient         *urpc_udp_client);
+
+/* Функция возвращает указатель на строку с адресом сервера в формате URI. */
+const char    *urpc_udp_client_get_peer_address        (uRpcUDPClient         *urpc_udp_client);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -239,6 +239,36 @@ uint32_t       urpc_client_exec                (uRpcClient            *urpc_clie
 URPC_EXPORT
 void           urpc_client_unlock              (uRpcClient            *urpc_client);
 
+/**
+ *
+ * Функция возвращает указатель на строку с локальным адресом, к которому подключен RPC объект,
+ * в формате URI. Получить адрес можно только после подключения к серверу.
+ *
+ * Возвращаемая строка принадлежит объекту uRpcClient и не должна модифицироваться пользователем.
+ *
+ * \param urpc_client указатель на uRpcClient объект.
+ *
+ * \return Строка с локальным адресом.
+ *
+ */
+URPC_EXPORT
+const char    *urpc_client_get_self_address    (uRpcClient            *urpc_client);
+
+/**
+ *
+ * Функция возвращает указатель на строку с адресом сервера, к которому подключен RPC объект,
+ * в формате URI. Получить адрес можно только после подключения к серверу.
+ *
+ * Возвращаемая строка принадлежит объекту uRpcClient и не должна модифицироваться пользователем.
+ *
+ * \param urpc_client указатель на uRpcClient объект.
+ *
+ * \return Строка с адресом сервера.
+ *
+ */
+URPC_EXPORT
+const char    *urpc_client_get_peer_address    (uRpcClient            *urpc_client);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

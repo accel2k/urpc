@@ -51,6 +51,8 @@ struct _uRpcSHMClient
 {
   uint32_t             urpc_shm_client_type;   /* Тип объекта uRpcSHMClient. */
 
+  char                *uri;                    /* Адрес сервера/клиента. */
+
   uRpcSem             *access;                 /* Семафор доступа к SHM серверу. */
   uRpcShm             *transport_shm;          /* Сегмент разделяемой области памяти RPC данных. */
 
@@ -85,6 +87,7 @@ urpc_shm_client_create (const char *uri)
     return NULL;
 
   urpc_shm_client->urpc_shm_client_type = URPC_SHM_CLIENT_TYPE;
+  urpc_shm_client->uri = NULL;
   urpc_shm_client->access = NULL;
   urpc_shm_client->transport_shm = NULL;
   urpc_shm_client->transport = NULL;
@@ -160,6 +163,13 @@ urpc_shm_client_create (const char *uri)
         goto urpc_shm_client_create_fail;
     }
 
+  /* Адрес сервера/клиента. */
+  urpc_shm_client->uri = malloc (MAX_HOST_LEN);
+  if (urpc_shm_client->uri == NULL)
+    goto urpc_shm_client_create_fail;
+
+  snprintf (urpc_shm_client->uri, MAX_HOST_LEN, "shm://%s", uri);
+
   return urpc_shm_client;
 
 urpc_shm_client_create_fail:
@@ -199,6 +209,9 @@ urpc_shm_client_destroy (uRpcSHMClient *urpc_shm_client)
     urpc_shm_destroy (urpc_shm_client->transport_shm);
   if (urpc_shm_client->access != NULL)
     urpc_sem_destroy (urpc_shm_client->access);
+
+  if (urpc_shm_client->uri != NULL)
+    free (urpc_shm_client->uri);
 
   free (urpc_shm_client);
 }
@@ -263,4 +276,22 @@ urpc_shm_client_unlock (uRpcSHMClient *urpc_shm_client)
   urpc_sem_unlock (urpc_shm_client->transport->used);
   urpc_sem_unlock (urpc_shm_client->access);
   urpc_shm_client->transport = NULL;
+}
+
+const char *
+urpc_shm_client_get_self_address (uRpcSHMClient *urpc_shm_client)
+{
+  if (urpc_shm_client->urpc_shm_client_type != URPC_SHM_CLIENT_TYPE)
+    return NULL;
+
+  return urpc_shm_client->uri;
+}
+
+const char *
+urpc_shm_client_get_peer_address (uRpcSHMClient *urpc_shm_client)
+{
+  if (urpc_shm_client->urpc_shm_client_type != URPC_SHM_CLIENT_TYPE)
+    return NULL;
+
+  return urpc_shm_client->uri;
 }

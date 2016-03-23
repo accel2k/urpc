@@ -146,7 +146,6 @@ urpc_client_destroy (uRpcClient *urpc_client)
   free (urpc_client);
 }
 
-
 int
 urpc_client_connect (uRpcClient *urpc_client)
 {
@@ -184,7 +183,6 @@ urpc_client_connect (uRpcClient *urpc_client)
   return exec_status == URPC_STATUS_OK ? 0 : -1;
 }
 
-
 uRpcData *
 urpc_client_lock (uRpcClient *urpc_client)
 {
@@ -219,7 +217,6 @@ urpc_client_lock (uRpcClient *urpc_client)
 
   return urpc_client->urpc_data;
 }
-
 
 uint32_t
 urpc_client_exec (uRpcClient *urpc_client,
@@ -292,7 +289,6 @@ urpc_client_exec (uRpcClient *urpc_client,
   return URPC_STATUS_OK;
 }
 
-
 void
 urpc_client_unlock (uRpcClient *urpc_client)
 {
@@ -310,4 +306,52 @@ urpc_client_unlock (uRpcClient *urpc_client)
 
   urpc_client->urpc_data = NULL;
   urpc_mutex_unlock (&urpc_client->lock);
+}
+
+const char *
+urpc_client_get_self_address (uRpcClient *urpc_client)
+{
+  if (urpc_client->urpc_client_type != URPC_CLIENT_TYPE)
+    return NULL;
+
+  switch (urpc_client->type)
+    {
+    case URPC_UDP:
+      return urpc_udp_client_get_self_address (urpc_client->transport);
+      break;
+    case URPC_TCP:
+      return urpc_tcp_client_get_self_address (urpc_client->transport);
+      break;
+    case URPC_SHM:
+      return urpc_shm_client_get_self_address (urpc_client->transport);
+      break;
+    default:
+      break;
+    }
+
+  return NULL;
+}
+
+const char *
+urpc_client_get_peer_address (uRpcClient *urpc_client)
+{
+  if (urpc_client->urpc_client_type != URPC_CLIENT_TYPE)
+    return NULL;
+
+  switch (urpc_client->type)
+    {
+    case URPC_UDP:
+      return urpc_udp_client_get_peer_address (urpc_client->transport);
+      break;
+    case URPC_TCP:
+      return urpc_tcp_client_get_peer_address (urpc_client->transport);
+      break;
+    case URPC_SHM:
+      return urpc_shm_client_get_peer_address (urpc_client->transport);
+      break;
+    default:
+      break;
+    }
+
+  return NULL;
 }

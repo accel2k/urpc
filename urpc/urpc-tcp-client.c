@@ -29,7 +29,12 @@
 #include "urpc-timer.h"
 #include "urpc-endian.h"
 
+#include <stdio.h>
 #include <stdlib.h>
+
+#if defined _MSVC_COMPILER
+#define snprintf sprintf_s
+#endif
 
 #define URPC_TCP_CLIENT_TYPE 0x43504354
 
@@ -44,6 +49,9 @@ struct _uRpcTCPClient
   uRpcTimer           *timer;                  /* Таймаут таймер. */
   double               timeout;                /* Интервал таймаута. */
 
+  char                *self_address;           /* Локальный адрес. */
+  char                *peer_address;           /* Адрес сервера. */
+
   volatile uint32_t    fail;                   /* Признак ошибки. */
 };
 
@@ -54,6 +62,12 @@ urpc_tcp_client_create (const char *uri,
 {
   uRpcTCPClient *urpc_tcp_client = NULL;
   struct addrinfo *addr = NULL;
+
+  struct sockaddr self_addr;
+  socklen_t self_addr_size;
+
+  char ips[1024];
+  char ports[64];
 
   /* Проверка ограничений. */
   if (max_data_size > URPC_MAX_DATA_SIZE)
@@ -77,6 +91,8 @@ urpc_tcp_client_create (const char *uri,
   urpc_tcp_client->urpc_data = NULL;
   urpc_tcp_client->timer = NULL;
   urpc_tcp_client->timeout = timeout;
+  urpc_tcp_client->self_address = NULL;
+  urpc_tcp_client->peer_address = NULL;
   urpc_tcp_client->fail = 0;
 
   /* Буферы приёма-передачи. */
@@ -97,6 +113,69 @@ urpc_tcp_client_create (const char *uri,
     goto urpc_tcp_client_create_fail;
   urpc_network_set_tcp_nodelay (urpc_tcp_client->socket);
   urpc_network_set_non_block (urpc_tcp_client->socket);
+  /* Локальный адрес. */
+  urpc_tcp_client->self_address = malloc (sizeof (ips) + sizeof (ports));
+  if (urpc_tcp_client->self_address == NULL)
+    goto urpc_tcp_client_create_fail;
+
+  self_addr_size = sizeof (self_addr);
+  if (getsockname (urpc_tcp_client->socket, &self_addr, &self_addr_size) != 0)
+    goto urpc_tcp_client_create_fail;
+
+  if (getnameinfo (&self_addr, self_addr_size,
+                   ips, sizeof (ips),
+                   ports, sizeof (ports),
+                   NI_NUMERICHOST | NI_NUMERICSERV) != 0)
+    {
+      goto urpc_tcp_client_create_fail;
+    }
+
+  if (self_addr.sa_family == AF_INET)
+    {
+      snprintf (urpc_tcp_client->self_address, sizeof (ips) + sizeof (ports),
+                "tcp://%s:%s",
+                ips, ports);
+    }
+  else if (self_addr.sa_family == AF_INET6)
+    {
+      snprintf (urpc_tcp_client->self_address, sizeof (ips) + sizeof (ports),
+                "tcp://[%s]:%s",
+                ips, ports);
+    }
+  else
+    {
+      goto urpc_tcp_client_create_fail;
+    }
+
+  /* Адрес сервера. */
+  urpc_tcp_client->peer_address = malloc (sizeof (ips) + sizeof (ports));
+  if (urpc_tcp_client->peer_address == NULL)
+    goto urpc_tcp_client_create_fail;
+
+  if (getnameinfo (addr->ai_addr, (socklen_t) addr->ai_addrlen,
+                   ips, sizeof (ips),
+                   ports, sizeof (ports),
+                   NI_NUMERICHOST | NI_NUMERICSERV) != 0)
+    {
+      goto urpc_tcp_client_create_fail;
+    }
+
+  if (addr->ai_addr->sa_family == AF_INET)
+    {
+      snprintf (urpc_tcp_client->peer_address, sizeof (ips) + sizeof (ports),
+                "tcp://%s:%s",
+                ips, ports);
+    }
+  else if (addr->ai_addr->sa_family == AF_INET6)
+    {
+      snprintf (urpc_tcp_client->peer_address, sizeof (ips) + sizeof (ports),
+                "tcp://[%s]:%s",
+                ips, ports);
+    }
+  else
+    {
+      goto urpc_tcp_client_create_fail;
+    }
 
   /* Таймер передачи. */
   urpc_tcp_client->timer = urpc_timer_create ();
@@ -127,6 +206,11 @@ urpc_tcp_client_destroy (uRpcTCPClient *urpc_tcp_client)
     urpc_timer_destroy (urpc_tcp_client->timer);
   if (urpc_tcp_client->urpc_data != NULL)
     urpc_data_destroy (urpc_tcp_client->urpc_data);
+
+  if (urpc_tcp_client->self_address != NULL)
+    free (urpc_tcp_client->self_address);
+  if (urpc_tcp_client->peer_address != NULL)
+    free (urpc_tcp_client->peer_address);
 
   free (urpc_tcp_client);
 }
@@ -329,4 +413,26 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
   urpc_data_set_data_size (urpc_tcp_client->urpc_data, URPC_DATA_INPUT, recv_size - URPC_HEADER_SIZE);
 
   return URPC_STATUS_OK;
+}
+
+const char *
+urpc_tcp_client_get_self_address (uRpcTCPClient *urpc_tcp_client)
+{
+  if (urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE)
+    return NULL;
+  if (urpc_tcp_client->fail)
+    return NULL;
+
+  return urpc_tcp_client->self_address;
+}
+
+const char *
+urpc_tcp_client_get_peer_address (uRpcTCPClient *urpc_tcp_client)
+{
+  if (urpc_tcp_client->urpc_tcp_client_type != URPC_TCP_CLIENT_TYPE)
+    return NULL;
+  if (urpc_tcp_client->fail)
+    return NULL;
+
+  return urpc_tcp_client->peer_address;
 }

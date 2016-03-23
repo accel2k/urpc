@@ -40,18 +40,24 @@ typedef struct _uRpcTCPClient uRpcTCPClient;
 
 /* Функция создаёт RPC клиента и подключается к серверу по протоколу TCP.
    Параметры функции аналогичны urpc_server_create. */
-uRpcTCPClient *urpc_tcp_client_create          (const char            *uri,
-                                                uint32_t               max_data_size,
-                                                double                 exec_timeout);
+uRpcTCPClient *urpc_tcp_client_create                  (const char            *uri,
+                                                        uint32_t               max_data_size,
+                                                        double                 exec_timeout);
 
 /* Функция удаляет клиента. */
-void urpc_tcp_client_destroy                   (uRpcTCPClient         *urpc_tcp_client);
+void           urpc_tcp_client_destroy                 (uRpcTCPClient         *urpc_tcp_client);
 
 /* Функция блокирует канал связи. */
-uRpcData *urpc_tcp_client_lock                 (uRpcTCPClient         *urpc_tcp_client);
+uRpcData      *urpc_tcp_client_lock                    (uRpcTCPClient         *urpc_tcp_client);
 
 /* Функция производит отправку запроса серверу и приём от него ответа. */
-uint32_t urpc_tcp_client_exchange              (uRpcTCPClient         *urpc_tcp_client);
+uint32_t       urpc_tcp_client_exchange                (uRpcTCPClient         *urpc_tcp_client);
+
+/* Функция возвращает указатель на строку с локальным адресом в формате URI. */
+const char    *urpc_tcp_client_get_self_address        (uRpcTCPClient         *urpc_tcp_client);
+
+/* Функция возвращает указатель на строку с адресом сервера в формате URI. */
+const char    *urpc_tcp_client_get_peer_address        (uRpcTCPClient         *urpc_tcp_client);
 
 #ifdef __cplusplus
 }

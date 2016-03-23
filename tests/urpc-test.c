@@ -104,6 +104,9 @@ urpc_test_client_proc (void *data)
   uRpcClient *client;
   uint32_t client_id;
 
+  const char *self_address;
+  const char *peer_address;
+
   uRpcData *urpc_data = NULL;
 
   uRpcTimer *timer;
@@ -129,6 +132,9 @@ urpc_test_client_proc (void *data)
       return NULL;
     }
 
+  self_address = urpc_client_get_self_address (client);
+  peer_address = urpc_client_get_peer_address (client);
+
   timer = urpc_timer_create ();
   if (timer == NULL)
     {
@@ -147,7 +153,7 @@ urpc_test_client_proc (void *data)
 
   urpc_mutex_lock (&lock);
   client_id = running_clients += 1;
-  printf ("uRPC client %d is connected to server\n", client_id);
+  printf ("uRPC client %d (%s) is connected to server (%s)\n", client_id, self_address, peer_address);
   fflush (stdout);
   urpc_mutex_unlock (&lock);
 
