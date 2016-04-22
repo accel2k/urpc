@@ -292,43 +292,6 @@ urpc_data_destroy (uRpcData *urpc_data)
   free (urpc_data);
 }
 
-uint32_t
-urpc_data_get_header_size (uRpcData *urpc_data)
-{
-  if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
-    return -1;
-
-  return urpc_data->header_size;
-}
-
-int
-urpc_data_set_header_size (uRpcData *urpc_data,
-                           uint32_t  header_size)
-{
-  if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
-    return -1;
-  if (header_size >= urpc_data->buffer_size)
-    return -1;
-
-  urpc_data->header_size = header_size;
-
-  urpc_data->input.data = urpc_data->ibuffer + urpc_data->header_size;
-  urpc_data->input.data_size = 0;
-  urpc_data->input.buffer_size = urpc_data->buffer_size - urpc_data->header_size;
-
-  urpc_data->output.data = urpc_data->obuffer + urpc_data->header_size;
-  urpc_data->output.data_size = 0;
-  urpc_data->output.buffer_size = urpc_data->buffer_size - urpc_data->header_size;
-
-  if (urpc_data->clean)
-    {
-      memset (urpc_data->ibuffer, 0, urpc_data->buffer_size);
-      memset (urpc_data->obuffer, 0, urpc_data->buffer_size);
-    }
-
-  return 0;
-}
-
 void *
 urpc_data_get_header (uRpcData         *urpc_data,
                       uRpcDataDirection direction)
@@ -342,27 +305,6 @@ urpc_data_get_header (uRpcData         *urpc_data,
     return urpc_data->obuffer;
 
   return NULL;
-}
-
-int
-urpc_data_set_header (uRpcData         *urpc_data,
-                      uRpcDataDirection direction,
-                      void             *header,
-                      uint32_t          header_size)
-{
-  if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
-    return -1;
-  if (header_size != urpc_data->header_size)
-    return -1;
-
-  if (direction == URPC_DATA_INPUT)
-    memcpy (urpc_data->ibuffer, header, urpc_data->header_size);
-  else if (direction == URPC_DATA_OUTPUT)
-    memcpy (urpc_data->obuffer, header, urpc_data->header_size);
-  else
-    return -1;
-
-  return 0;
 }
 
 uint32_t

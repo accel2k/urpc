@@ -140,32 +140,6 @@ void           urpc_data_destroy               (uRpcData              *urpc_data
 
 /**
  *
- * Функция возвращает размер заголовка в начале буфера.
- *
- * \param urpc_data указатель на RPC буфер.
- *
- * \return Размер заголовка в байтах.
- *
- */
-URPC_EXPORT
-uint32_t       urpc_data_get_header_size       (uRpcData              *urpc_data);
-
-/**
- *
- * Функция изменяет размер заголовка в начале буфера.
- *
- * \param urpc_data указатель на RPC буфер;
- * \param header_size новый размер заголовка в байтах.
- *
- * \return 0 если размер заголовка изменен, отрицательное число в случае ошибки.
- *
- */
-URPC_EXPORT
-int            urpc_data_set_header_size       (uRpcData              *urpc_data,
-                                                uint32_t               header_size);
-
-/**
- *
  * Функция возвращает указатель на заголовок в начале буфера.
  *
  * \param urpc_data указатель на RPC буфер;
@@ -177,24 +151,6 @@ int            urpc_data_set_header_size       (uRpcData              *urpc_data
 URPC_EXPORT
 void          *urpc_data_get_header            (uRpcData              *urpc_data,
                                                 uRpcDataDirection      direction);
-
-/**
- *
- * Функция записывает данные в заголовок в начале буфера.
- *
- * \param urpc_data указатель на RPC буфер;
- * \param direction тип буфера принимаемых - URPC_DATA_INPUT или отправляемых - URPC_DATA_OUTPUT данных;
- * \param header указатель на данные для записи в заголовок;
- * \param header_size размер данных для записи в заголовок.
- *
- * \return 0 если данные были записаны, отрицательное число в случае ошибки.
- *
- */
-URPC_EXPORT
-int            urpc_data_set_header            (uRpcData              *urpc_data,
-                                                uRpcDataDirection      direction,
-                                                void                  *header,
-                                                uint32_t               header_size);
 
 /**
  *
