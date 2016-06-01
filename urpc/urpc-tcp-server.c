@@ -210,7 +210,7 @@ urpc_tcp_server_create (const char *uri,
     urpc_tcp_server->wsockets[i] = INVALID_SOCKET;
 
   /* Массив сокетов подключенных клиентов. */
-  urpc_tcp_server->wsockets_per_threads = malloc (threads_num * sizeof (int32_t));
+  urpc_tcp_server->wsockets_per_threads = malloc (threads_num * sizeof (SOCKET));
   if (urpc_tcp_server->wsockets_per_threads == NULL)
     goto urpc_tcp_server_create_fail;
   for (i = 0; i < threads_num; i++)
