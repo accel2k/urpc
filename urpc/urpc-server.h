@@ -48,6 +48,8 @@
  * - #urpc_server_set_security - выбор механизма аутентификации (и шифрования) данных;
  * - #urpc_server_set_server_key - задание секретного ключа цифровой подписи (шифрования) сервера;
  * - #urpc_server_add_client_key - добавление публичного ключа цифровой подписи (шифрования) клиента;
+ * - #urpc_server_add_connect_proc - добавление callback функции вызываемой при подключении клиента;
+ * - #urpc_server_add_disconnect_proc - добавление callback функции вызываемой при отключении клиента;
  * - #urpc_server_add_proc - добаление callback функции исполняемой процедуры.
  *
  * Подробнее механизмы безопасности описаны в разделе \link uRpcSecurity \endlink.
@@ -85,6 +87,21 @@ extern "C" {
 #endif
 
 typedef struct _uRpcServer uRpcServer;
+
+/**
+ *
+ * Тип callback функции вызываемой при подключении или отключении клиента.
+ *
+ * \param session идентификатор сессии клиента;
+ * \param proc_data указатель на данные связанные с вызываемой процедурой;
+ * \param key_data указатель на данные связанные с публичным ключом клиента.
+ *
+ * \return Нет.
+ *
+ */
+typedef void (*urpc_client_callback)           (uint32_t               session,
+                                                void                  *proc_data,
+                                                void                  *key_data);
 
 /**
  *
@@ -195,6 +212,40 @@ URPC_EXPORT
 int urpc_server_add_client_key                 (uRpcServer            *urpc_server,
                                                 const unsigned char   *pub_key,
                                                 void                  *key_data);
+
+/**
+ *
+ * Функция регистрирует callback функцию вызываемую при подключении клиента.
+ *
+ * \param urpc_server указатель на uRpcServer объект;
+ * \param proc_id идентификатор callback функции;
+ * \param proc callback функция;
+ * \param proc_data указатель на данные связанные с вызываемой процедурой.
+ *
+ * \return 0 в случае успешного завершения, иначе отрицательное значение.
+ *
+ */
+URPC_EXPORT
+int urpc_server_add_connect_proc               (uRpcServer            *urpc_server,
+                                                urpc_client_callback   proc,
+                                                void                  *proc_data);
+
+/**
+ *
+ * Функция регистрирует callback функцию вызываемую при отключении клиента.
+ *
+ * \param urpc_server указатель на uRpcServer объект;
+ * \param proc_id идентификатор callback функции;
+ * \param proc callback функция;
+ * \param proc_data указатель на данные связанные с вызываемой процедурой.
+ *
+ * \return 0 в случае успешного завершения, иначе отрицательное значение.
+ *
+ */
+URPC_EXPORT
+int urpc_server_add_disconnect_proc            (uRpcServer            *urpc_server,
+                                                urpc_client_callback   proc,
+                                                void                  *proc_data);
 
 /**
  *

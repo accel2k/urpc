@@ -72,6 +72,22 @@ help (char *prog_name)
   exit (0);
 }
 
+void urpc_connect_proc (uint32_t  session,
+                        void     *proc_data,
+                        void     *key_data)
+{
+  printf ("uRPC session %d registered\n", session);
+  fflush (stdout);
+}
+
+void urpc_disconnect_proc (uint32_t  session,
+                           void     *proc_data,
+                           void     *key_data)
+{
+  printf ("uRPC session %d unregistered\n", session);
+  fflush (stdout);
+}
+
 int
 urpc_test_proc (uint32_t  session,
                 uRpcData *urpc_data,
@@ -362,6 +378,9 @@ main (int    argc,
           printf ("error creating uRPC server\n");
           return -1;
         }
+
+      urpc_server_add_connect_proc (server, urpc_connect_proc, NULL);
+      urpc_server_add_disconnect_proc (server, urpc_disconnect_proc, NULL);
 
       urpc_server_add_proc (server, URPC_TEST_PROC, urpc_test_proc, NULL);
 
