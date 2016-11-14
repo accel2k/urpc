@@ -249,7 +249,7 @@ main (int    argc,
 
   uRpcServer *server = NULL;
   uRpcThread **clients;
-  int local_running_clients;
+  unsigned int local_running_clients;
   unsigned int i;
 
   /* Разбор командной строки. */
@@ -422,7 +422,7 @@ main (int    argc,
           urpc_mutex_unlock (&lock);
           urpc_timer_sleep (0.1);
         }
-      while (local_running_clients != threads_num && !fail);
+      while ((local_running_clients != threads_num) && !fail);
 
       urpc_timer_sleep (2.0);
       if (!fail)

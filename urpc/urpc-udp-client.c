@@ -255,7 +255,6 @@ urpc_udp_client_exchange (uRpcUDPClient *urpc_udp_client)
   /* Ожидание ответа в течение времени urpc_udp_client->timeout. */
   while (urpc_timer_elapsed (urpc_udp_client->timer) < urpc_udp_client->timeout)
     {
-
       /* Проверяем приход ответа с интервалом в 100мс. */
       FD_ZERO (&sock_set);
       FD_SET (urpc_udp_client->socket, &sock_set);
@@ -285,7 +284,7 @@ urpc_udp_client_exchange (uRpcUDPClient *urpc_udp_client)
         }
 
       /* Проверяем заголовок ответа. */
-      if (UINT32_FROM_BE (iheader->size) != recv_size)
+      if (UINT32_FROM_BE (iheader->size) != (uint32_t)recv_size)
         continue;
       if (UINT32_FROM_BE (iheader->magic) != URPC_MAGIC)
         continue;

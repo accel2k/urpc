@@ -43,7 +43,7 @@ urpc_get_type (const char *uri)
 {
   uRpcType urpc_type = URPC_UNKNOWN;
   char uri_prefix[6];
-  int i;
+  size_t i;
 
   if (strlen (uri) < sizeof ("ttt://*"))
     return URPC_UNKNOWN;

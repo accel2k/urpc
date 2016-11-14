@@ -208,7 +208,7 @@ urpc_udp_server_recv (uRpcUDPServer *urpc_udp_server,
     return NULL;
 
   /* Проверяем заголовок запроса. */
-  if (UINT32_FROM_BE (iheader->size) != recv_size)
+  if (UINT32_FROM_BE (iheader->size) != (uint32_t)recv_size)
     return NULL;
   if (UINT32_FROM_BE (iheader->magic) != URPC_MAGIC)
     return NULL;

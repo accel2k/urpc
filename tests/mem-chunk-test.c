@@ -44,7 +44,7 @@ main (int    argc,
 {
 
   TestData **data;
-  int i, j;
+  unsigned int i, j;
 
   uRpcMemChunk *umem_chunk = urpc_mem_chunk_create (sizeof (TestData) + 1);
   data = malloc (N_DATA * sizeof (TestData *));

@@ -49,4 +49,5 @@ install (FILES urpc-exports.h
                urpc-thread.h
                urpc-timer.h
                urpc-types.h
-               DESTINATION include/urpc PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+         DESTINATION include/urpc
+         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)

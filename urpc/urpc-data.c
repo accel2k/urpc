@@ -728,10 +728,10 @@ urpc_data_get_string (uRpcData *urpc_data,
                       uint32_t  id,
                       uint32_t  index)
 {
-  uint32_t size;
   const char *buffer;
   size_t offset;
-  int i;
+  uint32_t size;
+  uint32_t i;
 
   if (urpc_data->urpc_data_type != URPC_DATA_TYPE)
     return NULL;

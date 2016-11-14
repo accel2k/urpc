@@ -62,7 +62,7 @@ main (int    argc,
   double dparams[MAX_PARAMS];
   const char *sparam;
   char *sparams[MAX_PARAMS];
-  int sparam_length;
+  unsigned int sparam_length;
   char **strings;
 
   FILE *fio;
@@ -188,7 +188,7 @@ main (int    argc,
           sparam = urpc_data_get_string (urpc_data, 5 * i, 0);
           urpc_data_get_uint32 (urpc_data, 5 * i + 1, &iparam);
 
-          sparam_length = (int)strlen (sparam) + 1;
+          sparam_length = strlen (sparam) + 1;
           if (sparam_length != iparam)
             {
             printf ("Parameter %d size mismatch %u != %u\n", i, sparam_length, iparam);
