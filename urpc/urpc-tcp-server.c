@@ -382,6 +382,10 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
   for (i = 0; i < urpc_tcp_server->max_clients; i++)
     {
       wsocket = urpc_tcp_server->wsockets[i];
+
+      if (urpc_tcp_server->wsockets[i] == INVALID_SOCKET)
+        continue;
+
       if (FD_ISSET (wsocket, &sock_set))
         {
           /* Проверяем, что этот сокет не обслуживается в другом потоке. */
@@ -395,7 +399,6 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
               urpc_tcp_server->wsockets_per_threads[thread_id] = wsocket;
               break;
             }
-          continue;
         }
     }
   urpc_rwmutex_writer_unlock (&urpc_tcp_server->lock);
