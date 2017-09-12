@@ -29,10 +29,20 @@ if (UNIX)
   target_link_libraries (urpc rt)
 endif ()
 
-install (TARGETS urpc EXPORT urpc
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/urpc.pc.in
+                ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/urpc.pc
+                @ONLY)
+
+install (TARGETS urpc
+         COMPONENT runtime
          RUNTIME DESTINATION bin
          LIBRARY DESTINATION lib
          ARCHIVE DESTINATION lib
+         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+
+install (FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/urpc.pc
+         COMPONENT development
+         DESTINATION lib/pkgconfig
          PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 install (FILES urpc-exports.h
@@ -49,5 +59,6 @@ install (FILES urpc-exports.h
                urpc-thread.h
                urpc-timer.h
                urpc-types.h
+         COMPONENT development
          DESTINATION include/urpc
          PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
