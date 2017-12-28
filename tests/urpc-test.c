@@ -48,6 +48,7 @@ unsigned int run_clients = 0;
 unsigned int dry_run = 0;
 unsigned int show_help = 0;
 
+volatile int thread_id = 0;
 volatile int running_clients = 0;
 volatile int start = 0;
 volatile int fail = 0;
@@ -72,27 +73,58 @@ help (char *prog_name)
   exit (0);
 }
 
-void urpc_connect_proc (uint32_t  session,
-                        void     *proc_data,
-                        void     *key_data)
+void * test_thread_start_proc (void *user_data)
 {
-  printf ("uRPC session %d registered\n", session);
+  uint32_t *id = malloc (sizeof (uint32_t));
+
+  *id = ++thread_id;
+  printf ("uRPC thread %d started\n", *id);
   fflush (stdout);
+
+  return id;
 }
 
-void urpc_disconnect_proc (uint32_t  session,
-                           void     *proc_data,
-                           void     *key_data)
+void test_thread_stop_proc (void *thread_data,
+                            void *user_data)
 {
-  printf ("uRPC session %d unregistered\n", session);
+  uint32_t *id = thread_data;
+
+  printf ("uRPC thread %d stopped\n", *id);
   fflush (stdout);
+
+  free (thread_data);
+}
+
+void * test_connect_proc (uint32_t  session,
+                          void     *key_data,
+                          void     *user_data)
+{
+  uint32_t *id = malloc (sizeof (uint32_t));
+
+  printf ("uRPC session %d registered\n", session);
+  fflush (stdout);
+
+  *id = session;
+
+  return id;
+}
+
+void test_disconnect_proc (void *session_data,
+                           void *user_data)
+{
+  uint32_t *id = session_data;
+
+  printf ("uRPC session %d unregistered\n", *id);
+  fflush (stdout);
+
+  free (session_data);
 }
 
 int
-urpc_test_proc (uint32_t  session,
-                uRpcData *urpc_data,
-                void     *proc_data,
-                void     *key_data)
+test_proc (uRpcData *urpc_data,
+           void     *thread_data,
+           void     *session_data,
+           void     *user_data)
 {
   uint8_t *array1;
   uint8_t *array2;
@@ -379,10 +411,13 @@ main (int    argc,
           return -1;
         }
 
-      urpc_server_add_connect_proc (server, urpc_connect_proc, NULL);
-      urpc_server_add_disconnect_proc (server, urpc_disconnect_proc, NULL);
+      urpc_server_add_thread_start_callback (server, test_thread_start_proc, NULL);
+      urpc_server_add_thread_stop_callback (server, test_thread_stop_proc, NULL);
 
-      urpc_server_add_proc (server, URPC_TEST_PROC, urpc_test_proc, NULL);
+      urpc_server_add_connect_callback (server, test_connect_proc, NULL);
+      urpc_server_add_disconnect_callback (server, test_disconnect_proc, NULL);
+
+      urpc_server_add_callback (server, URPC_TEST_PROC, test_proc, NULL);
 
       if (urpc_server_bind (server) < 0)
         {

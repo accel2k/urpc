@@ -51,6 +51,8 @@ typedef struct uRpcServerSession
   uRpcTimer           *activity;               /* Время последней активности. */
   SOCKET               socket;                 /* Для TCP/IP соединения сокет подключения клиекнта. */
 
+  void                *user_data;              /* Пользовательскте данные сессии. */
+
   uRpcMemChunk        *sessions_chunks;        /* Аллокатор данных сессий. */
 } uRpcServerSession;
 
@@ -61,14 +63,20 @@ struct _uRpcServer
   char                *uri;                    /* Адрес сервера. */
   uRpcType             type;                   /* Тип протокола RPC. */
 
-  urpc_client_callback connect_proc;           /* Функция вызываемая при подключении клиента. */
+  urpc_thread_proc     thread_start_proc;      /* Функция вызываемая при запуске рабочего потока. */
+  void                *thread_start_proc_data; /* Пользовательские данные. */
+
+  urpc_free_proc       thread_stop_proc;       /* Функция вызываемая при остановке рабочего потока. */
+  void                *thread_stop_proc_data;  /* Пользовательские данные. */
+
+  urpc_connect_proc    connect_proc;           /* Функция вызываемая при подключении клиента. */
   void                *connect_proc_data;      /* Пользовательские данные. */
 
-  urpc_client_callback disconnect_proc;        /* Функция вызываемая при отключении клиента. */
+  urpc_free_proc       disconnect_proc;        /* Функция вызываемая при отключении клиента. */
   void                *disconnect_proc_data;   /* Пользовательские данные. */
 
   uRpcHashTable       *procs;                  /* Пользовательские функции. */
-  uRpcHashTable       *pdata;                  /* Данные для пользовательских функций. */
+  uRpcHashTable       *procs_data;             /* Данные для пользовательских функций. */
 
   uRpcHashTable       *sessions;               /* Пользовательские сессии. */
   uRpcMemChunk        *sessions_chunks;        /* Аллокатор данных сессий. */
@@ -108,11 +116,10 @@ urpc_server_check_session (uint32_t           session_id,
   if (urpc_timer_elapsed (session->activity) > urpc_server->session_timeout)
     {
       if (urpc_server->disconnect_proc != NULL)
-        urpc_server->disconnect_proc (session_id, urpc_server->disconnect_proc_data, NULL);
+        urpc_server->disconnect_proc (session->user_data, urpc_server->disconnect_proc_data);
       urpc_hash_table_remove (urpc_server->sessions, session_id);
       if (urpc_server->type == URPC_TCP)
         urpc_tcp_server_disconnect_client (urpc_server->transport, session->socket);
-      urpc_server_session_remove_func (session);
     }
 }
 
@@ -162,6 +169,7 @@ urpc_server_func (void *data)
   uRpcServer *urpc_server = data;
 
   uint32_t thread_id;
+  void *thread_data;
   uint32_t status;
 
   uRpcData *urpc_data;
@@ -174,8 +182,14 @@ urpc_server_func (void *data)
   SOCKET csocket;
 
   uint32_t proc_id;
-  urpc_server_callback proc;
+  urpc_proc proc;
   void *proc_data;
+
+  /* Пользовательская функция запуска рабочего потока. */
+  if (urpc_server->thread_start_proc != NULL)
+    thread_data = urpc_server->thread_start_proc (urpc_server->thread_start_proc_data);
+  else
+    thread_data = NULL;
 
   /* Сигнализация о запуске потока. */
   urpc_mutex_lock (&urpc_server->lock);
@@ -300,7 +314,7 @@ urpc_server_func (void *data)
 
           /* Вызываем функцию при подключении клиента. */
           if (urpc_server->connect_proc != NULL)
-            urpc_server->connect_proc (session_id, urpc_server->connect_proc_data, NULL);
+            session->user_data = urpc_server->connect_proc (session_id, urpc_server->connect_proc_data, NULL);
 
           urpc_rwmutex_writer_unlock (&urpc_server->sessions_lock);
 
@@ -331,7 +345,7 @@ urpc_server_func (void *data)
       if (proc_id == URPC_PROC_LOGOUT && session->state == URPC_STATE_CONNECTED)
         {
           if (urpc_server->disconnect_proc != NULL)
-            urpc_server->disconnect_proc (session_id, urpc_server->disconnect_proc_data, NULL);
+            urpc_server->disconnect_proc (session->user_data, urpc_server->disconnect_proc_data);
           urpc_hash_table_remove (urpc_server->sessions, session_id);
           status = URPC_STATUS_OK;
           goto urpc_server_send_reply;
@@ -339,10 +353,10 @@ urpc_server_func (void *data)
 
       /* Вызов пользовательской функциии. */
       proc = urpc_hash_table_find (urpc_server->procs, proc_id);
-      proc_data = urpc_hash_table_find (urpc_server->pdata, proc_id);
+      proc_data = urpc_hash_table_find (urpc_server->procs_data, proc_id);
       if (proc != NULL)
         {
-          if (proc (session_id, urpc_data, proc_data, NULL) == 0)
+          if (proc (urpc_data, thread_data, session->user_data, proc_data) == 0)
             status = URPC_STATUS_OK;
         }
 
@@ -399,6 +413,10 @@ urpc_server_send_reply:
       urpc_data_set_data_size (urpc_data, URPC_DATA_OUTPUT, 0);
     }
 
+  /* Пользовательская функция остановки рабочего потока. */
+  if (urpc_server->thread_stop_proc != NULL)
+    urpc_server->thread_stop_proc (thread_data, urpc_server->thread_start_proc_data);
+
   /* Сигнализация о завершении потока. */
   urpc_mutex_lock (&urpc_server->lock);
   urpc_server->started_servers--;
@@ -445,7 +463,7 @@ urpc_server_create (const char *uri,
   urpc_server->disconnect_proc = NULL;
   urpc_server->disconnect_proc_data = NULL;
   urpc_server->procs = NULL;
-  urpc_server->pdata = NULL;
+  urpc_server->procs_data = NULL;
   urpc_server->sessions = NULL;
   urpc_server->sessions_chunks = NULL;
   urpc_server->last_session_id = 0;
@@ -471,8 +489,8 @@ urpc_server_create (const char *uri,
   if (urpc_server->procs == NULL)
     goto urpc_server_create_fail;
 
-  urpc_server->pdata = urpc_hash_table_create (NULL);
-  if (urpc_server->pdata == NULL)
+  urpc_server->procs_data = urpc_hash_table_create (NULL);
+  if (urpc_server->procs_data == NULL)
     goto urpc_server_create_fail;
 
   urpc_server->sessions = 
@@ -558,8 +576,8 @@ urpc_server_destroy (uRpcServer *urpc_server)
   /* Удаляем объект. */
   if (urpc_server->servers != NULL)
     free (urpc_server->servers);
-  if (urpc_server->pdata != NULL)
-    urpc_hash_table_destroy (urpc_server->pdata);
+  if (urpc_server->procs_data != NULL)
+    urpc_hash_table_destroy (urpc_server->procs_data);
   if (urpc_server->procs != NULL)
     urpc_hash_table_destroy (urpc_server->procs);
   if (urpc_server->sessions != NULL)
@@ -576,9 +594,41 @@ urpc_server_destroy (uRpcServer *urpc_server)
 }
 
 int
-urpc_server_add_connect_proc (uRpcServer           *urpc_server,
-                              urpc_client_callback  proc,
-                              void                 *proc_data)
+urpc_server_add_thread_start_callback (uRpcServer       *urpc_server,
+                                       urpc_thread_proc  proc,
+                                       void             *data)
+{
+  if (urpc_server->urpc_server_type != URPC_SERVER_TYPE)
+    return -1;
+  if (urpc_server->transport != NULL)
+    return -1;
+
+  urpc_server->thread_start_proc = proc;
+  urpc_server->thread_start_proc_data = data;
+
+  return 0;
+}
+
+int
+urpc_server_add_thread_stop_callback (uRpcServer       *urpc_server,
+                                      urpc_free_proc    proc,
+                                      void             *data)
+{
+  if (urpc_server->urpc_server_type != URPC_SERVER_TYPE)
+    return -1;
+  if (urpc_server->transport != NULL)
+    return -1;
+
+  urpc_server->thread_stop_proc = proc;
+  urpc_server->thread_stop_proc_data = data;
+
+  return 0;
+}
+
+int
+urpc_server_add_connect_callback (uRpcServer        *urpc_server,
+                                  urpc_connect_proc  proc,
+                                  void              *data)
 {
   if (urpc_server->urpc_server_type != URPC_SERVER_TYPE)
     return -1;
@@ -586,15 +636,15 @@ urpc_server_add_connect_proc (uRpcServer           *urpc_server,
     return -1;
 
   urpc_server->connect_proc = proc;
-  urpc_server->connect_proc_data = proc_data;
+  urpc_server->connect_proc_data = data;
 
   return 0;
 }
 
 int
-urpc_server_add_disconnect_proc (uRpcServer           *urpc_server,
-                                 urpc_client_callback  proc,
-                                 void                 *proc_data)
+urpc_server_add_disconnect_callback (uRpcServer     *urpc_server,
+                                     urpc_free_proc  proc,
+                                     void           *data)
 {
   if (urpc_server->urpc_server_type != URPC_SERVER_TYPE)
     return -1;
@@ -602,16 +652,16 @@ urpc_server_add_disconnect_proc (uRpcServer           *urpc_server,
     return -1;
 
   urpc_server->disconnect_proc = proc;
-  urpc_server->disconnect_proc_data = proc_data;
+  urpc_server->disconnect_proc_data = data;
 
   return 0;
 }
 
 int
-urpc_server_add_proc (uRpcServer          *urpc_server,
-                      uint32_t             proc_id,
-                      urpc_server_callback proc,
-                      void                *proc_data)
+urpc_server_add_callback (uRpcServer *urpc_server,
+                          uint32_t    proc_id,
+                          urpc_proc   func,
+                          void       *data)
 {
   if (urpc_server->urpc_server_type != URPC_SERVER_TYPE)
     return -1;
@@ -620,9 +670,9 @@ urpc_server_add_proc (uRpcServer          *urpc_server,
 
   if (urpc_hash_table_find (urpc_server->procs, proc_id) != NULL)
     return -1;
-  if (urpc_hash_table_insert (urpc_server->procs, proc_id, proc) != 0)
+  if (urpc_hash_table_insert (urpc_server->procs, proc_id, func) != 0)
     return -1;
-  if (urpc_hash_table_insert (urpc_server->pdata, proc_id, proc_data) != 0)
+  if (urpc_hash_table_insert (urpc_server->procs_data, proc_id, data) != 0)
     return -1;
 
   return 0;

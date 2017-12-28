@@ -48,9 +48,11 @@
  * - #urpc_server_set_security - выбор механизма аутентификации (и шифрования) данных;
  * - #urpc_server_set_server_key - задание секретного ключа цифровой подписи (шифрования) сервера;
  * - #urpc_server_add_client_key - добавление публичного ключа цифровой подписи (шифрования) клиента;
- * - #urpc_server_add_connect_proc - добавление callback функции вызываемой при подключении клиента;
- * - #urpc_server_add_disconnect_proc - добавление callback функции вызываемой при отключении клиента;
- * - #urpc_server_add_proc - добаление callback функции исполняемой процедуры.
+ * - #urpc_server_add_thread_start_callback - добавление callback функции вызываемой при запуске потока обработки;
+ * - #urpc_server_add_thread_stop_callback - добавление callback функции вызываемой при остановке потока обработки;
+ * - #urpc_server_add_connect_callback - добавление callback функции вызываемой при подключении клиента;
+ * - #urpc_server_add_disconnect_callback - добавление callback функции вызываемой при отключении клиента;
+ * - #urpc_server_add_callback - добаление callback функции исполняемой процедуры.
  *
  * Подробнее механизмы безопасности описаны в разделе \link uRpcSecurity \endlink.
  *
@@ -90,45 +92,83 @@ typedef struct _uRpcServer uRpcServer;
 
 /**
  *
- * Тип callback функции вызываемой при подключении или отключении клиента.
+ * Тип функции вызываемой при отключении клиента или остановки потока обработки.
+ * В неё передаётся указатель на область памяти выделенный при подключении
+ * клиента или запуска потока обработки. Функция должна освободить эту
+ * память.
  *
- * \param session идентификатор сессии клиента;
- * \param proc_data указатель на данные связанные с вызываемой процедурой;
- * \param key_data указатель на данные связанные с публичным ключом клиента.
+ * \param urpc_data данные (#urpc_server_add_thread_start_callback, urpc_server_add_connect_callback);
+ * \param user_data пользовательские данные (#urpc_server_add_thread_stop_callback, #urpc_server_add_disconnect_callback).
  *
  * \return Нет.
  *
  */
-typedef void (*urpc_client_callback)           (uint32_t               session,
-                                                void                  *proc_data,
-                                                void                  *key_data);
+typedef void (*urpc_free_proc)                 (void                  *urpc_data,
+                                                void                  *user_data);
 
 /**
  *
- * Тип callback функции вызываемой при получении запроса на выполнение.
- * Данные запроса клиента доступны для чтения через объект \link uRpcData \endlink. Данные ответа
- * должны быть записаны через этот же объект. Если серверная процедура успешно выполнена функция
- * должна вернуть значение ноль. Отрицательное значение возвращается в случае ошибок при вызове
- * процедуры, например если переданы не все параметры.
+ * Тип функции вызываемой при создании потока обработки запросов клиентов.
+ * В этой функции можно выделить область памяти и сохранить в ней данные
+ * необходимые для потоков обработки запросов.
+ *
+ * При заврешении потока вызывается функция #urpc_free_proc, в которую
+ * передаётся указатель на данные из этой функции.
+ *
+ * \param user_data пользовательские данные (#urpc_server_add_thread_start_callback).
+ *
+ * \return Данные потока обработки запросов.
+ *
+ */
+typedef void * (*urpc_thread_proc)             (void                  *user_data);
+
+/**
+ *
+ * Тип функции вызываемой при подключении клиента. В этой функции можно
+ * выделить область памяти и сохранить в ней параметры подключения, необходимые
+ * пользователю для работы.
+ *
+ * При отключении пользователя вызывается функция #urpc_free_proc, в которую
+ * передаётся указатель на данные из этой функции.
  *
  * \param session идентификатор сессии клиента;
+ * \param key_data указатель на данные связанные с публичным ключом клиента;
+ * \param user_data пользовательские данные (#urpc_server_add_connect_callback).
+ *
+ * \return Данные сессии клиента.
+ *
+ */
+typedef void * (*urpc_connect_proc)            (uint32_t               session,
+                                                void                  *key_data,
+                                                void                  *user_data);
+
+/**
+ *
+ * Тип функции вызываемой при получении запроса на выполнение. Данные запроса
+ * клиента доступны для чтения через объект \link uRpcData \endlink. Данные
+ * ответа должны быть записаны через этот же объект. Если серверная процедура
+ * успешно выполнена функция должна вернуть значение ноль. Отрицательное
+ * значение возвращается в случае ошибок при вызове процедуры, например если
+ * переданы не все параметры.
+ *
  * \param urpc_data указатель на объект \link uRpcData \endlink;
- * \param proc_data указатель на данные связанные с вызываемой процедурой;
- * \param key_data указатель на данные связанные с публичным ключом клиента.
+ * \param thread_data указатель на данные связанные с потоком испольнения;
+ * \param session_data указатель на данные связанные с сессией клиента;
+ * \param user_data пользовательские данные (#urpc_server_add_callback).
  *
  * \return 0 если RPC запрос был выполнен, иначе отрицательное число.
  *
  */
-typedef int (*urpc_server_callback)            (uint32_t               session,
-                                                uRpcData              *urpc_data,
-                                                void                  *proc_data,
-                                                void                  *key_data);
+typedef int (*urpc_proc)                       (uRpcData              *urpc_data,
+                                                void                  *thread_data,
+                                                void                  *session_data,
+                                                void                  *user_data);
 
 /**
  *
  * Функция создает RPC сервер по адресу uri. Адрес задается в виде строки:
  * "<type>://name:port", где:
- * - &lt;type&gt; - тип RPC ( udp, tcp, shm );
+ * - &lt;type&gt; - тип RPC (udp, tcp, shm);
  * - name - имя или ip адрес системы;
  * - port - номер udp или tcp порта.
  *
@@ -167,9 +207,9 @@ void urpc_server_destroy                       (uRpcServer            *urpc_serv
 
 /**
  *
- * Функция определяет механизм безопасности используемый для взаимодействия с сервером. По
- * умолчанию для взаимодействия с сервером не используется никаких механизмов аутентификации
- * и шифрования.
+ * Функция определяет механизм безопасности используемый для взаимодействия с
+ * сервером. По умолчанию для взаимодействия с сервером не используется никаких
+ * механизмов аутентификации и шифрования.
  *
  * \param urpc_server указатель на uRpcServer объект;
  * \param mode режим безопасности.
@@ -197,9 +237,10 @@ int urpc_server_set_server_key                 (uRpcServer            *urpc_serv
 
 /**
  *
- * Функция добавляет ключ используемый для аутентификации клиента сервером. Сервер может хранить
- * несколько ключей аутентификации. При вызове процедуры клиентом аутентифицированном этим
- * ключом в callback функцию будет передан указатель на данные key_data.
+ * Функция добавляет ключ используемый для аутентификации клиента сервером. Сервер
+ * может хранить несколько ключей аутентификации. При вызове процедуры клиентом
+ * аутентифицированном этим ключом в callback функцию будет передан указатель на
+ * данные key_data.
  *
  * \param urpc_server указатель на uRpcServer объект;
  * \param pub_key указатель на публичный клиентский ключ;
@@ -215,63 +256,96 @@ int urpc_server_add_client_key                 (uRpcServer            *urpc_serv
 
 /**
  *
- * Функция регистрирует callback функцию вызываемую при подключении клиента.
+ * Функция регистрирует callback функцию вызываемую при запуске потока обработки
+ * запросов клиентов.
  *
  * \param urpc_server указатель на uRpcServer объект;
- * \param proc_id идентификатор callback функции;
  * \param proc callback функция;
- * \param proc_data указатель на данные связанные с вызываемой процедурой.
+ * \param data пользовательские данные.
  *
  * \return 0 в случае успешного завершения, иначе отрицательное значение.
  *
  */
 URPC_EXPORT
-int urpc_server_add_connect_proc               (uRpcServer            *urpc_server,
-                                                urpc_client_callback   proc,
-                                                void                  *proc_data);
+int urpc_server_add_thread_start_callback      (uRpcServer            *urpc_server,
+                                                urpc_thread_proc       proc,
+                                                void                  *data);
+
+/**
+ *
+ * Функция регистрирует callback функцию вызываемую при остановке потока обработки
+ * запросов клиентов.
+ *
+ * \param urpc_server указатель на uRpcServer объект;
+ * \param proc callback функция;
+ * \param data пользовательские данные.
+ *
+ * \return 0 в случае успешного завершения, иначе отрицательное значение.
+ *
+ */
+URPC_EXPORT
+int urpc_server_add_thread_stop_callback       (uRpcServer            *urpc_server,
+                                                urpc_free_proc         proc,
+                                                void                  *data);
+
+/**
+ *
+ * Функция регистрирует callback функцию вызываемую при подключении клиента.
+ *
+ * \param urpc_server указатель на uRpcServer объект;
+ * \param proc callback функция;
+ * \param data пользовательские данные.
+ *
+ * \return 0 в случае успешного завершения, иначе отрицательное значение.
+ *
+ */
+URPC_EXPORT
+int urpc_server_add_connect_callback           (uRpcServer            *urpc_server,
+                                                urpc_connect_proc      proc,
+                                                void                  *data);
 
 /**
  *
  * Функция регистрирует callback функцию вызываемую при отключении клиента.
  *
  * \param urpc_server указатель на uRpcServer объект;
- * \param proc_id идентификатор callback функции;
  * \param proc callback функция;
- * \param proc_data указатель на данные связанные с вызываемой процедурой.
+ * \param data пользовательские данные.
  *
  * \return 0 в случае успешного завершения, иначе отрицательное значение.
  *
  */
 URPC_EXPORT
-int urpc_server_add_disconnect_proc            (uRpcServer            *urpc_server,
-                                                urpc_client_callback   proc,
-                                                void                  *proc_data);
+int urpc_server_add_disconnect_callback        (uRpcServer            *urpc_server,
+                                                urpc_free_proc         proc,
+                                                void                  *data);
 
 /**
  *
- * Функция регистрирует callback функцию с идентификатором proc_id. Эта функция будет вызвана
- * когда клиент вызовет #urpc_client_exec с соответствующим proc_id. Все переданные
- * параметры доступны в callback функции через объект \link uRpcData \endlink. Результат
- * работы должен быть передан обратно регистрацией переменных через объект \link uRpcData \endlink.
+ * Функция регистрирует callback функцию с идентификатором id. Эта функция будет
+ * вызвана когда клиент вызовет #urpc_client_exec с соответствующим id. Все
+ * переданные параметры доступны в callback функции через объект
+ * \link uRpcData \endlink. Результат работы должен быть передан обратно
+ * регистрацией переменных через объект \link uRpcData \endlink.
  *
  * \param urpc_server указатель на uRpcServer объект;
  * \param proc_id идентификатор callback функции;
  * \param proc callback функция;
- * \param proc_data указатель на данные связанные с вызываемой процедурой.
+ * \param data пользовательские данные.
  *
  * \return 0 в случае успешного завершения, иначе отрицательное значение.
  *
  */
 URPC_EXPORT
-int urpc_server_add_proc                       (uRpcServer            *urpc_server,
+int urpc_server_add_callback                   (uRpcServer            *urpc_server,
                                                 uint32_t               proc_id,
-                                                urpc_server_callback   proc,
-                                                void                  *proc_data);
+                                                urpc_proc              proc,
+                                                void                  *data);
 
 /**
  *
- * Функция производит запуск сервера с использованием выбранного механизма безопасности и
- * зарегистрированными процедурами.
+ * Функция производит запуск сервера с использованием выбранного механизма
+ * безопасности и зарегистрированными процедурами.
  *
  * \param urpc_server указатель на uRpcServer объект;
  *
