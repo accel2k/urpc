@@ -119,7 +119,10 @@ urpc_server_check_session (uint32_t           session_id,
         urpc_server->disconnect_proc (session->user_data, urpc_server->disconnect_proc_data);
       urpc_hash_table_remove (urpc_server->sessions, session_id);
       if (urpc_server->type == URPC_TCP)
-        urpc_tcp_server_disconnect_client (urpc_server->transport, session->socket);
+        {
+          urpc_tcp_server_remove_client (urpc_server->transport, session->socket);
+          closesocket (session->socket);
+        }
     }
 }
 
@@ -136,14 +139,13 @@ urpc_server_session_timeout_check (void *data)
   urpc_server->started_servers++;
   urpc_mutex_unlock (&urpc_server->lock);
 
+  /* Раз в три секунды проверяются сессии. */
   while (!urpc_server->shutdown)
     {
-      /* Поток раз в секунду проверяет необходимость завершения работы. */
+      urpc_timer_sleep (0.1);
       step += 1;
-      urpc_timer_sleep (1.0);
 
-      /* Раз в три секунды проверяются сессии. */
-      if (step < 3)
+      if (step < 30)
         continue;
       step = 0;
 
@@ -171,6 +173,7 @@ urpc_server_func (void *data)
   uint32_t thread_id;
   void *thread_data;
   uint32_t status;
+  uint32_t disconnect;
 
   uRpcData *urpc_data;
   uRpcHeader *iheader;
@@ -198,6 +201,8 @@ urpc_server_func (void *data)
 
   while (!urpc_server->shutdown)
     {
+      status = URPC_STATUS_FAIL;
+      disconnect = URPC_FALSE;
       csocket = INVALID_SOCKET;
       session = NULL;
       proc_id = 0;
@@ -235,9 +240,6 @@ urpc_server_func (void *data)
       oheader = urpc_data_get_header (urpc_data, URPC_DATA_OUTPUT);
       session_id = UINT32_FROM_BE (iheader->session);
 
-      status = URPC_STATUS_FAIL;
-      urpc_data_set_uint32 (urpc_data, URPC_PARAM_STATUS, status);
-
       /* Проверяем версию клиента. */
       if ((UINT32_FROM_BE (iheader->version) >> 8) != (URPC_VERSION >> 8))
         {
@@ -246,8 +248,7 @@ urpc_server_func (void *data)
         }
 
       /* Запрашиваемая функция. */
-      if (session_id == 0)
-        urpc_data_get_uint32 (urpc_data, URPC_PARAM_PROC, &proc_id);
+      urpc_data_get_uint32 (urpc_data, URPC_PARAM_PROC, &proc_id);
 
       /* Запрос возможностей сервера. */
       if (session_id == 0 && proc_id == URPC_PROC_GET_CAP)
@@ -338,16 +339,11 @@ urpc_server_func (void *data)
       if (session->state == URPC_STATE_GOT_SESSION_ID)
         session->state = URPC_STATE_CONNECTED;
 
-      /* Запрашиваемая функция. */
-      urpc_data_get_uint32 (urpc_data, URPC_PARAM_PROC, &proc_id);
-
       /* Отключение клиента. */
       if (proc_id == URPC_PROC_LOGOUT && session->state == URPC_STATE_CONNECTED)
         {
-          if (urpc_server->disconnect_proc != NULL)
-            urpc_server->disconnect_proc (session->user_data, urpc_server->disconnect_proc_data);
-          urpc_hash_table_remove (urpc_server->sessions, session_id);
           status = URPC_STATUS_OK;
+          disconnect = URPC_TRUE;
           goto urpc_server_send_reply;
         }
 
@@ -360,12 +356,14 @@ urpc_server_func (void *data)
             status = URPC_STATUS_OK;
         }
 
+      /* Ошибка при вызове пользовательской функции, отключаем клиента. */
+      if (status != URPC_STATUS_OK)
+        disconnect = URPC_TRUE;
+
 #pragma message( "Add authentication and encryption here!!!" )
 
       /* Отправка ответа. */
-
 urpc_server_send_reply:
-
       urpc_data_set_uint32 (urpc_data, URPC_PARAM_STATUS, status);
 
       /* Заголовок отправляемого пакета. */
@@ -394,18 +392,21 @@ urpc_server_send_reply:
           break;
         }
 
-      /* Отключаем TCP/IP клиента в случае ошибки. */
-      if (urpc_server->type == URPC_TCP)
+      /* Произошла ошибка или штатное отключение - удаляем сессию. */
+      if (disconnect)
         {
-          if (status != URPC_STATUS_OK)
-            urpc_tcp_server_disconnect_client (urpc_server->transport, csocket);
-        }
+          if (urpc_server->disconnect_proc != NULL)
+            urpc_server->disconnect_proc (session->user_data, urpc_server->disconnect_proc_data);
+          urpc_rwmutex_writer_lock (&urpc_server->sessions_lock);
+          urpc_hash_table_remove (urpc_server->sessions, session_id);
+          urpc_rwmutex_writer_unlock (&urpc_server->sessions_lock);
 
-      /* Отключаем TCP/IP клиента после выполнения функции LOGOUT. */
-      if (urpc_server->type == URPC_TCP)
-        {
-          if (proc_id == URPC_PROC_LOGOUT && status == URPC_STATUS_OK)
-            urpc_tcp_server_disconnect_client (urpc_server->transport, csocket);
+          /* Отключаем TCP/IP клиента. */
+          if (urpc_server->type == URPC_TCP)
+            {
+              urpc_tcp_server_remove_client (urpc_server->transport, csocket);
+              closesocket (csocket);
+            }
         }
 
       /* Очищаем буферы приёма-передачи. */

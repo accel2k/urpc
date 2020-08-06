@@ -79,7 +79,7 @@ urpc_tcp_server_func (void *data)
       /* Ожидаем новых подключений клиентов в течение 100мс. */
       FD_ZERO (&sock_set);
       sock_tv.tv_sec = 0;
-      sock_tv.tv_usec = 500000;
+      sock_tv.tv_usec = 100000;
       FD_SET (urpc_tcp_server->lsocket, &sock_set);
 
       selected = select ((int) (urpc_tcp_server->lsocket + 1), &sock_set, NULL, NULL, &sock_tv);
@@ -339,10 +339,10 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
   if (thread_id > urpc_tcp_server->threads_num - 1)
     return NULL;
 
-  /* Ожидаем запрос от клиента в течение 500мс. */
+  /* Ожидаем запрос от клиента в течение 100мс. */
   FD_ZERO (&sock_set);
   sock_tv.tv_sec = 0;
-  sock_tv.tv_usec = 500000;
+  sock_tv.tv_usec = 100000;
 
   /* Список рабочих сокетов. */
   urpc_rwmutex_reader_lock (&urpc_tcp_server->lock);
@@ -367,13 +367,7 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
 
   /* Ожидаем запрос. */
   selected = select ((int) (max_fd + 1), &sock_set, NULL, NULL, &sock_tv);
-  if (selected < 0)
-    {
-      if (urpc_network_last_error () == URPC_EINTR)
-        return NULL;
-      return NULL;
-    }
-  if (selected == 0)
+  if (selected <= 0)
     return NULL;
 
   /* Смотрим какой из клиентов прислал запрос. */
@@ -422,7 +416,7 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       /* Проверка таймаута при приёме данных. */
       if (urpc_timer_elapsed (timer) > urpc_tcp_server->timeout)
         {
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return NULL;
         }
 
@@ -435,9 +429,10 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       selected = select ((int) (wsocket + 1), &sock_set, NULL, NULL, &sock_tv);
       if (selected < 0)
         {
-          if (urpc_network_last_error () == URPC_EINTR)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR)
             continue;
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return NULL;
         }
 
@@ -448,10 +443,10 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       sr_size = recv (wsocket, (char *) iheader + received, recv_size - received, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
-          int recv_error = urpc_network_last_error ();
-          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR || error == URPC_EAGAIN)
             continue;
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return NULL;
         }
 
@@ -464,13 +459,13 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
   /* Проверяем заголовок запроса. */
   if (UINT32_FROM_BE (iheader->magic) != URPC_MAGIC)
     {
-      urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+      urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
       return NULL;
     }
   recv_size = UINT32_FROM_BE (iheader->size);
   if (recv_size > urpc_tcp_server->buffer_size)
     {
-      urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+      urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
       return NULL;
     }
 
@@ -480,7 +475,7 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       /* Проверка таймаута при приёме данных. */
       if (urpc_timer_elapsed (timer) > urpc_tcp_server->timeout)
         {
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return NULL;
         }
 
@@ -493,9 +488,10 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       selected = select ((int) (wsocket + 1), &sock_set, NULL, NULL, &sock_tv);
       if (selected < 0)
         {
-          if (urpc_network_last_error () == URPC_EINTR)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR)
             continue;
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return NULL;
         }
 
@@ -506,10 +502,10 @@ urpc_tcp_server_recv (uRpcTCPServer *urpc_tcp_server,
       sr_size = recv (wsocket, (char *) iheader + received, recv_size - received, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
-          int recv_error = urpc_network_last_error ();
-          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR || error == URPC_EAGAIN)
             continue;
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return NULL;
         }
 
@@ -568,7 +564,7 @@ urpc_tcp_server_send (uRpcTCPServer *urpc_tcp_server,
       /* Проверка таймаута при передаче данных. */
       if (urpc_timer_elapsed (timer) > urpc_tcp_server->timeout)
         {
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return -1;
         }
 
@@ -581,9 +577,10 @@ urpc_tcp_server_send (uRpcTCPServer *urpc_tcp_server,
       selected = select ((int) (wsocket + 1), NULL, &sock_set, NULL, &sock_tv);
       if (selected < 0)
         {
-          if (urpc_network_last_error () == URPC_EINTR)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR)
             continue;
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return -1;
         }
 
@@ -594,10 +591,10 @@ urpc_tcp_server_send (uRpcTCPServer *urpc_tcp_server,
       sr_size = send (wsocket, (char *) oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
-          int send_error = urpc_network_last_error ();
-          if (send_error == URPC_EINTR || send_error == URPC_EAGAIN)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR || error == URPC_EAGAIN)
             continue;
-          urpc_tcp_server_disconnect_client (urpc_tcp_server, wsocket);
+          urpc_tcp_server_remove_client (urpc_tcp_server, wsocket);
           return -1;
         }
 
@@ -624,7 +621,7 @@ urpc_tcp_server_get_client_socket (uRpcTCPServer *urpc_tcp_server,
 }
 
 int
-urpc_tcp_server_disconnect_client (uRpcTCPServer *urpc_tcp_server,
+urpc_tcp_server_remove_client (uRpcTCPServer *urpc_tcp_server,
                                    SOCKET         wsocket)
 {
   unsigned int i;
@@ -638,7 +635,6 @@ urpc_tcp_server_disconnect_client (uRpcTCPServer *urpc_tcp_server,
     {
       if (urpc_tcp_server->wsockets[i] == wsocket)
         {
-          closesocket (urpc_tcp_server->wsockets[i]);
           urpc_tcp_server->wsockets[i] = INVALID_SOCKET;
           urpc_tcp_server->cur_clients -= 1;
           break;

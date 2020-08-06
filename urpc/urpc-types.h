@@ -39,6 +39,9 @@
 
 #include <urpc-exports.h>
 
+#define URPC_FALSE                             0               /**< Ложное значение. */
+#define URPC_TRUE                              !URPC_FALSE     /**< Истинное значение. */
+
 /* Значения по умолчанию. */
 #define URPC_DEFAULT_DATA_TIMEOUT              5.0             /**< Интервал времени в течение которого должна
                                                                     завершиться процедура обмена данными. */

@@ -38,6 +38,11 @@
 
 #define URPC_UDP_CLIENT_TYPE 0x43504455
 
+#define UDP_ADDRESS_SIZE     1024
+#define UDP_PORT_SIZE        64
+#define UDP_PAD_SIZE         64
+#define UDP_INFO_SIZE        UDP_ADDRESS_SIZE + UDP_PORT_SIZE + UDP_PAD_SIZE
+
 struct _uRpcUDPClient
 {
   uint32_t             urpc_udp_client_type;   /* Тип объекта uRpcUDPClient. */
@@ -64,8 +69,8 @@ urpc_udp_client_create (const char *uri,
   struct sockaddr self_addr;
   socklen_t self_addr_size;
 
-  char ips[1024];
-  char ports[64];
+  char ips[UDP_ADDRESS_SIZE];
+  char ports[UDP_PORT_SIZE];
 
   /* Проверка ограничений. */
   if (timeout < URPC_MIN_TIMEOUT)
@@ -109,7 +114,7 @@ urpc_udp_client_create (const char *uri,
   urpc_network_set_non_block (urpc_udp_client->socket);
 
   /* Локальный адрес. */
-  urpc_udp_client->self_address = malloc (sizeof (ips) + sizeof (ports));
+  urpc_udp_client->self_address = malloc (UDP_INFO_SIZE);
   if (urpc_udp_client->self_address == NULL)
     goto urpc_udp_client_create_fail;
 
@@ -127,13 +132,13 @@ urpc_udp_client_create (const char *uri,
 
   if (self_addr.sa_family == AF_INET)
     {
-      snprintf (urpc_udp_client->self_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_udp_client->self_address, UDP_INFO_SIZE,
                 "udp://%s:%s",
                 ips, ports);
     }
   else if (self_addr.sa_family == AF_INET6)
     {
-      snprintf (urpc_udp_client->self_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_udp_client->self_address, UDP_INFO_SIZE,
                 "udp://[%s]:%s",
                 ips, ports);
     }
@@ -157,13 +162,13 @@ urpc_udp_client_create (const char *uri,
 
   if (addr->ai_addr->sa_family == AF_INET)
     {
-      snprintf (urpc_udp_client->peer_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_udp_client->peer_address, UDP_INFO_SIZE,
                 "udp://%s:%s",
                 ips, ports);
     }
   else if (addr->ai_addr->sa_family == AF_INET6)
     {
-      snprintf (urpc_udp_client->peer_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_udp_client->peer_address, UDP_INFO_SIZE,
                 "udp://[%s]:%s",
                 ips, ports);
     }

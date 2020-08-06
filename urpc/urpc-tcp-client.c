@@ -38,6 +38,11 @@
 
 #define URPC_TCP_CLIENT_TYPE 0x43504354
 
+#define TCP_ADDRESS_SIZE     1024
+#define TCP_PORT_SIZE        64
+#define TCP_PAD_SIZE         64
+#define TCP_INFO_SIZE        TCP_ADDRESS_SIZE + TCP_PORT_SIZE + TCP_PAD_SIZE
+
 struct _uRpcTCPClient
 {
   uint32_t             urpc_tcp_client_type;   /* Тип объекта uRpcTCPClient. */
@@ -66,8 +71,8 @@ urpc_tcp_client_create (const char *uri,
   struct sockaddr self_addr;
   socklen_t self_addr_size;
 
-  char ips[1024];
-  char ports[64];
+  char ips[TCP_ADDRESS_SIZE];
+  char ports[TCP_PORT_SIZE];
 
   /* Проверка ограничений. */
   if (max_data_size > URPC_MAX_DATA_SIZE)
@@ -132,13 +137,13 @@ urpc_tcp_client_create (const char *uri,
 
   if (self_addr.sa_family == AF_INET)
     {
-      snprintf (urpc_tcp_client->self_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_tcp_client->self_address, TCP_INFO_SIZE,
                 "tcp://%s:%s",
                 ips, ports);
     }
   else if (self_addr.sa_family == AF_INET6)
     {
-      snprintf (urpc_tcp_client->self_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_tcp_client->self_address, TCP_INFO_SIZE,
                 "tcp://[%s]:%s",
                 ips, ports);
     }
@@ -162,13 +167,13 @@ urpc_tcp_client_create (const char *uri,
 
   if (addr->ai_addr->sa_family == AF_INET)
     {
-      snprintf (urpc_tcp_client->peer_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_tcp_client->peer_address, TCP_INFO_SIZE,
                 "tcp://%s:%s",
                 ips, ports);
     }
   else if (addr->ai_addr->sa_family == AF_INET6)
     {
-      snprintf (urpc_tcp_client->peer_address, sizeof (ips) + sizeof (ports),
+      snprintf (urpc_tcp_client->peer_address, TCP_INFO_SIZE,
                 "tcp://[%s]:%s",
                 ips, ports);
     }
@@ -275,7 +280,8 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
       selected = select ((int) (urpc_tcp_client->socket + 1), NULL, &sock_set, NULL, &sock_tv);
       if (selected < 0)
         {
-          if (urpc_network_last_error () == URPC_EINTR)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
@@ -288,8 +294,8 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
       sr_size = send (urpc_tcp_client->socket, (char *) oheader + sended, send_size - sended, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
-          int send_error = urpc_network_last_error ();
-          if (send_error == URPC_EINTR || send_error == URPC_EAGAIN)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR || error == URPC_EAGAIN)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
@@ -324,7 +330,8 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
       selected = select ((int) (urpc_tcp_client->socket + 1), &sock_set, NULL, NULL, &sock_tv);
       if (selected < 0)
         {
-          if (urpc_network_last_error () == URPC_EINTR)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
@@ -338,8 +345,8 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
                        recv_size - received, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
-          int recv_error = urpc_network_last_error ();
-          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR || error == URPC_EAGAIN)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
@@ -383,7 +390,8 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
       selected = select ((int) (urpc_tcp_client->socket + 1), &sock_set, NULL, NULL, &sock_tv);
       if (selected < 0)
         {
-          if (urpc_network_last_error () == URPC_EINTR)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;
@@ -397,8 +405,8 @@ urpc_tcp_client_exchange (uRpcTCPClient *urpc_tcp_client)
                       recv_size - received, URPC_MSG_NOSIGNAL);
       if (sr_size <= 0)
         {
-          int recv_error = urpc_network_last_error ();
-          if (recv_error == URPC_EINTR || recv_error == URPC_EAGAIN)
+          int error = urpc_network_last_error ();
+          if (error == URPC_EINTR || error == URPC_EAGAIN)
             continue;
           urpc_tcp_client->fail = 1;
           return URPC_STATUS_TRANSPORT_ERROR;

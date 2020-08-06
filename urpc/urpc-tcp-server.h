@@ -65,8 +65,8 @@ int urpc_tcp_server_send                       (uRpcTCPServer         *urpc_tcp_
 SOCKET urpc_tcp_server_get_client_socket       (uRpcTCPServer         *urpc_tcp_server,
                                                 uint32_t               thread_id);
 
-/* Функция закрывает указанный сокет связи с клиентом. */
-int urpc_tcp_server_disconnect_client          (uRpcTCPServer         *urpc_tcp_server,
+/* Функция удаляет указанный сокет связи с клиентом из списка обслуживаемых. */
+int urpc_tcp_server_remove_client              (uRpcTCPServer         *urpc_tcp_server,
                                                 SOCKET                 wsocket);
 
 #ifdef __cplusplus
