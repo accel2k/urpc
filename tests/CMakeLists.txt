@@ -31,6 +31,17 @@ if (WIN32)
   target_link_libraries (timer-test wsock32 winmm)
 endif ()
 
+add_test (NAME DataExportTest COMMAND data-test -e data.dat
+          WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+add_test (NAME DataImportTest COMMAND data-test -i data.dat
+          WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+add_test (NAME URpcSHMTest COMMAND urpc-test shm://localhost
+          WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+add_test (NAME URpcUDPTest COMMAND urpc-test udp://localhost:12345
+          WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+add_test (NAME URpcTCPTest COMMAND urpc-test tcp://localhost:12345
+          WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+
 install (TARGETS urpc-test
          COMPONENT test
          RUNTIME DESTINATION bin

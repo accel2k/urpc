@@ -35,29 +35,19 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/urpc.pc.in
 
 install (TARGETS urpc
          COMPONENT runtime
-         RUNTIME DESTINATION bin
-         LIBRARY DESTINATION lib
-         ARCHIVE DESTINATION lib
+         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
          PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 install (FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/urpc.pc
          COMPONENT development
-         DESTINATION lib/pkgconfig
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
          PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 install (FILES urpc-exports.h
                urpc-client.h
                urpc-server.h
                urpc-data.h
-               urpc-hash-table.h
-               urpc-mem-chunk.h
-               urpc-mutex.h
-               urpc-network.h
-               urpc-rwmutex.h
-               urpc-semaphore.h
-               urpc-shm.h
-               urpc-thread.h
-               urpc-timer.h
                urpc-types.h
          COMPONENT development
          DESTINATION include/urpc

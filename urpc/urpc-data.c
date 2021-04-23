@@ -128,9 +128,9 @@ urpc_data_set_param (DataBuffer *buffer,
                      const void *object,
                      uint32_t    size)
 {
-  uint32_t param_id;
-  uint32_t param_size;
-  uint32_t param_next;
+  uint32_t param_id = 0;
+  uint32_t param_size = 0;
+  uint32_t param_next = 0;
 
   DataParam *param = urpc_data_find_param (buffer, id);
 
@@ -704,7 +704,7 @@ urpc_data_set_strings (uRpcData     *urpc_data,
 
   size = 0;
   for (i = 0; strings[i] != NULL; i++)
-      size += strlen (strings[i]) + 1;
+    size += strlen (strings[i]) + 1;
 
   if (size > (urpc_data->output.buffer_size - urpc_data->output.data_size))
     return -1;

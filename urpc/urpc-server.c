@@ -335,7 +335,6 @@ urpc_server_func (void *data)
       urpc_timer_start (session->activity);
       urpc_rwmutex_reader_unlock (&urpc_server->sessions_lock);
 
-#pragma message( "Add authentication and decryption here!!!" )
       if (session->state == URPC_STATE_GOT_SESSION_ID)
         session->state = URPC_STATE_CONNECTED;
 
@@ -359,8 +358,6 @@ urpc_server_func (void *data)
       /* Ошибка при вызове пользовательской функции, отключаем клиента. */
       if (status != URPC_STATUS_OK)
         disconnect = URPC_TRUE;
-
-#pragma message( "Add authentication and encryption here!!!" )
 
       /* Отправка ответа. */
 urpc_server_send_reply:

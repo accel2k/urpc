@@ -242,8 +242,6 @@ urpc_client_exec (uRpcClient *urpc_client,
 
   urpc_data_set_uint32 (urpc_client->urpc_data, URPC_PARAM_PROC, proc_id);
 
-#pragma message( "Add authentication and encryption here!!!" )
-
   /* Обмен данными с сервером. Перед обменом должен быть заполнен заголовок отправляемых данных!!! */
   switch (urpc_client->type)
     {
@@ -276,8 +274,6 @@ urpc_client_exec (uRpcClient *urpc_client,
       urpc_client->session_id = UINT32_FROM_BE (iheader->session);
       urpc_client->state = URPC_STATE_CONNECTED;
     }
-
-#pragma message( "Add authentication and decryption here!!!" )
 
   if (UINT32_FROM_BE (iheader->session) != urpc_client->session_id)
     return URPC_STATUS_AUTH_ERROR;
